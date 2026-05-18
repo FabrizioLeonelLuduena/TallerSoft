@@ -1,0 +1,4 @@
+package com.tallersoft.mapper;
+
+// MapStruct Mapper interfaces
+// This package contains @Mapper interfaces for entity-DTO conversions

@@ -1,0 +1,264 @@
+<div class="dashboard-container">
+  <!-- Top Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-icon-wrapper" style="--accent-color: var(--color-info)">
+        <mat-icon>assignment</mat-icon>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Órdenes Hoy</p>
+        <p class="stat-value">12</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrapper" style="--accent-color: var(--color-warning)">
+        <mat-icon>hourglass_empty</mat-icon>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Órdenes Pendientes</p>
+        <p class="stat-value">24</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrapper" style="--accent-color: var(--color-accent)">
+        <mat-icon>build</mat-icon>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">En Proceso</p>
+        <p class="stat-value">8</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrapper" style="--accent-color: var(--color-success)">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Listas para Entregar</p>
+        <p class="stat-value">5</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrapper" style="--accent-color: var(--color-accent)">
+        <mat-icon>monetization_on</mat-icon>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Ingresos del Día</p>
+        <p class="stat-value">$4,280</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrapper" style="--accent-color: var(--color-danger)">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Repuestos Críticos</p>
+        <p class="stat-value">3</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-grid">
+    <!-- Revenue Chart -->
+    <div class="chart-card">
+      <div class="card-header">
+        <h3>Ingresos del Mes</h3>
+        <div class="chart-controls">
+          <button class="btn btn-sm btn-ghost">Mes</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-placeholder">
+          <mat-icon>show_chart</mat-icon>
+          <span>Gráfico de área - Ingresos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders by Status Chart -->
+    <div class="chart-card">
+      <div class="card-header">
+        <h3>Órdenes por Estado</h3>
+      </div>
+      <div class="card-body">
+        <div class="chart-placeholder">
+          <mat-icon>bar_chart</mat-icon>
+          <span>Gráfico de barras - Estados</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Middle Row - Technicians, Recent Tasks, Payment Distribution -->
+  <div class="middle-grid">
+    <!-- Technicians Table -->
+    <div class="data-card">
+      <div class="card-header">
+        <h3>Técnicos</h3>
+      </div>
+      <div class="card-body">
+        <div class="table-simple">
+          <div class="table-row header-row">
+            <div class="col col-avatar"></div>
+            <div class="col col-name">Nombre</div>
+            <div class="col col-role">Rol</div>
+            <div class="col col-count">Órdenes</div>
+            <div class="col col-actions"></div>
+          </div>
+          <div class="table-row">
+            <div class="col col-avatar">
+              <div class="avatar-circle">JM</div>
+            </div>
+            <div class="col col-name">Juan Martínez</div>
+            <div class="col col-role"><span class="badge badge-info">Técnico</span></div>
+            <div class="col col-count">12</div>
+            <div class="col col-actions">
+              <button mat-icon-button class="btn-icon-small">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="col col-avatar">
+              <div class="avatar-circle">CR</div>
+            </div>
+            <div class="col col-name">Carlos Rodríguez</div>
+            <div class="col col-role"><span class="badge badge-info">Técnico</span></div>
+            <div class="col col-count">10</div>
+            <div class="col col-actions">
+              <button mat-icon-button class="btn-icon-small">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="data-card">
+      <div class="card-header">
+        <h3>Órdenes Recientes</h3>
+      </div>
+      <div class="card-body">
+        <div class="task-list">
+          <div class="task-item">
+            <div class="task-checkbox">
+              <mat-checkbox></mat-checkbox>
+            </div>
+            <div class="task-content">
+              <p class="task-name">Cliente: Ana García - iPhone XS</p>
+              <span class="task-status">En Proceso</span>
+            </div>
+            <div class="task-drag">
+              <mat-icon>drag_handle</mat-icon>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox">
+              <mat-checkbox></mat-checkbox>
+            </div>
+            <div class="task-content">
+              <p class="task-name">Cliente: Pedro López - Laptop Dell</p>
+              <span class="task-status">Listo</span>
+            </div>
+            <div class="task-drag">
+              <mat-icon>drag_handle</mat-icon>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox">
+              <mat-checkbox></mat-checkbox>
+            </div>
+            <div class="task-content">
+              <p class="task-name">Cliente: María Fernández - Refrigerador</p>
+              <span class="task-status">Pendiente</span>
+            </div>
+            <div class="task-drag">
+              <mat-icon>drag_handle</mat-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Distribution Pie Chart -->
+    <div class="data-card">
+      <div class="card-header">
+        <h3>Distribución de Cobros</h3>
+      </div>
+      <div class="card-body">
+        <div class="chart-placeholder">
+          <mat-icon>pie_chart</mat-icon>
+          <span>Gráfico circular</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Width - Weekly Orders Table -->
+  <div class="full-width-card">
+    <div class="card-header">
+      <h3>Órdenes de la Semana</h3>
+      <button class="btn btn-sm btn-secondary">
+        <mat-icon>filter_list</mat-icon>
+        Filtros
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table-full">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Estado</th>
+              <th>Técnico</th>
+              <th>Presupuesto</th>
+              <th>Fecha</th>
+              <th>Tiempo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Juan García</strong></td>
+              <td><span class="status-chip pending">Pendiente</span></td>
+              <td>Juan Martínez</td>
+              <td>$1,500</td>
+              <td>18/05/2026</td>
+              <td>2h 30m</td>
+            </tr>
+            <tr>
+              <td><strong>María López</strong></td>
+              <td><span class="status-chip in-process">En Proceso</span></td>
+              <td>Carlos Rodríguez</td>
+              <td>$2,000</td>
+              <td>18/05/2026</td>
+              <td>1h 15m</td>
+            </tr>
+            <tr>
+              <td><strong>Pedro Fernández</strong></td>
+              <td><span class="status-chip ready">Listo</span></td>
+              <td>Juan Martínez</td>
+              <td>$1,200</td>
+              <td>17/05/2026</td>
+              <td>4h 45m</td>
+            </tr>
+            <tr>
+              <td><strong>Ana Martínez</strong></td>
+              <td><span class="status-chip delivered">Entregado</span></td>
+              <td>Carlos Rodríguez</td>
+              <td>$800</td>
+              <td>16/05/2026</td>
+              <td>3h 20m</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

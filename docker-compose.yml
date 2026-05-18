@@ -1,0 +1,142 @@
+services:
+  # PostgreSQL 16 Database
+  db:
+    image: postgres:16-alpine
+    container_name: tallersoft-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: $$DB_USER
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init-db.sql
+      - ./scripts/create-analytics-user.sql:/docker-entrypoint-initdb.d/02-create-analytics-user.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tallersoft-network
+
+  # Spring Boot Core Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tallersoft-backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: $$DB_USER
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      CLAUDE_MODEL: ${CLAUDE_MODEL}
+      CLAUDE_MAX_TOKENS: ${CLAUDE_MAX_TOKENS}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+      BACKEND_PORT: ${BACKEND_PORT}
+    ports:
+      - "${BACKEND_PORT}:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - tallersoft-network
+    restart: unless-stopped
+
+  # Spring Cloud Gateway
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: tallersoft-gateway
+    environment:
+      GATEWAY_PORT: ${GATEWAY_PORT}
+      BACKEND_PORT: ${BACKEND_PORT}
+      ANALYTICS_PORT: ${ANALYTICS_PORT}
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+      analytics:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - tallersoft-network
+    restart: unless-stopped
+
+  # Python Analytics Service
+  analytics:
+    build:
+      context: ./analytics
+      dockerfile: Dockerfile
+    container_name: tallersoft-analytics
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: analytics_reader
+      DB_PASSWORD: analytics_reader_secure_password_change_in_production
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      CLAUDE_MODEL: ${CLAUDE_MODEL}
+      CLAUDE_MAX_TOKENS: ${CLAUDE_MAX_TOKENS}
+      ANALYTICS_PORT: ${ANALYTICS_PORT}
+    ports:
+      - "${ANALYTICS_PORT}:8082"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - tallersoft-network
+    restart: unless-stopped
+
+  # Angular Frontend (nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tallersoft-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - gateway
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - tallersoft-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  tallersoft-network:
+    driver: bridge

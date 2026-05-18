@@ -1,0 +1,19 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 0;
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}

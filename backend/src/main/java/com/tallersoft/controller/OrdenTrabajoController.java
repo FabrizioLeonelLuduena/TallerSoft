@@ -1,0 +1,110 @@
+package com.tallersoft.controller;
+
+import com.tallersoft.dto.*;
+import com.tallersoft.model.EstadoOrden;
+import com.tallersoft.service.OrdenTrabajoService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/ordenes")
+@RequiredArgsConstructor
+@Slf4j
+public class OrdenTrabajoController {
+    
+    private final OrdenTrabajoService ordenTrabajoService;
+    
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
+    public ResponseEntity<List<OrdenTrabajoResponse>> listarOrdenes(
+            @RequestParam(required = false) EstadoOrden estado,
+            @RequestParam(required = false) Long tecnicoId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        log.info("Listando órdenes con filtros: estado={}, tecnicoId={}, desde={}, hasta={}", 
+                estado, tecnicoId, desde, hasta);
+        List<OrdenTrabajoResponse> ordenes = ordenTrabajoService.listarOrdenes(estado, tecnicoId, desde, hasta);
+        return ResponseEntity.ok(ordenes);
+    }
+    
+    @GetMapping("/activas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
+    public ResponseEntity<List<OrdenTrabajoResponse>> listarOrdenesActivas() {
+        log.info("Listando órdenes activas");
+        List<OrdenTrabajoResponse> ordenes = ordenTrabajoService.listarOrdenesActivas();
+        return ResponseEntity.ok(ordenes);
+    }
+    
+    @GetMapping("/mis-ordenes")
+    @PreAuthorize("hasRole('TECNICO')")
+    public ResponseEntity<List<OrdenTrabajoResponse>> misPropias(
+            @RequestParam(required = false) EstadoOrden estado) {
+        log.info("Listando mis órdenes con estado: {}", estado);
+        // TODO: Inyectar currentUser con @CurrentUser
+        List<OrdenTrabajoResponse> ordenes = ordenTrabajoService.listarOrdenes(estado, null, null, null);
+        return ResponseEntity.ok(ordenes);
+    }
+    
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
+    public ResponseEntity<OrdenTrabajoResponse> obtenerOrden(@PathVariable Long id) {
+        log.info("Obteniendo orden {}", id);
+        OrdenTrabajoResponse orden = ordenTrabajoService.obtenerOrden(id);
+        return ResponseEntity.ok(orden);
+    }
+    
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    public ResponseEntity<OrdenTrabajoResponse> crearOrden(@Valid @RequestBody OrdenTrabajoRequest request) {
+        log.info("Creando nueva orden");
+        OrdenTrabajoResponse orden = ordenTrabajoService.crearOrden(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orden);
+    }
+    
+    @PutMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    public ResponseEntity<OrdenTrabajoResponse> cambiarEstado(
+            @PathVariable Long id,
+            @Valid @RequestBody CambiarEstadoRequest request) {
+        log.info("Cambiando estado de orden {} a {}", id, request.getNuevoEstado());
+        OrdenTrabajoResponse orden = ordenTrabajoService.cambiarEstado(id, request.getNuevoEstado());
+        return ResponseEntity.ok(orden);
+    }
+    
+    @PutMapping("/{id}/diagnostico")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    public ResponseEntity<OrdenTrabajoResponse> agregarDiagnostico(
+            @PathVariable Long id,
+            @Valid @RequestBody DiagnosticoRequest request) {
+        log.info("Agregando diagnóstico a orden {}", id);
+        OrdenTrabajoResponse orden = ordenTrabajoService.agregarDiagnostico(id, request.getDiagnostico());
+        return ResponseEntity.ok(orden);
+    }
+    
+    @PostMapping("/{id}/repuestos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    public ResponseEntity<OrdenTrabajoResponse> agregarRepuesto(
+            @PathVariable Long id,
+            @Valid @RequestBody AgregarRepuestoRequest request) {
+        log.info("Agregando repuesto a orden {}", id);
+        OrdenTrabajoResponse orden = ordenTrabajoService.agregarRepuesto(id, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orden);
+    }
+    
+    @GetMapping("/{id}/repuestos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
+    public ResponseEntity<OrdenTrabajoResponse> obtenerRepuestosDeOrden(@PathVariable Long id) {
+        log.info("Obteniendo repuestos de orden {}", id);
+        OrdenTrabajoResponse orden = ordenTrabajoService.obtenerOrden(id);
+        return ResponseEntity.ok(orden);
+    }
+}

@@ -1,0 +1,108 @@
+<div class="layout-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <!-- Logo Section -->
+    <div class="sidebar-header">
+      <div class="logo-container">
+        <div class="logo-icon-wrapper">
+          <mat-icon class="logo-icon">build</mat-icon>
+        </div>
+        <div class="logo-text" *ngIf="!sidebarCollapsed">
+          <span class="logo-name">TallerSoft</span>
+          <span class="logo-version">v1.0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of getVisibleNavItems()"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }"
+         class="nav-item"
+         [matTooltip]="sidebarCollapsed ? item.label : ''"
+         matTooltipPosition="right">
+        <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- User Section (Bottom) -->
+    <div class="sidebar-footer">
+      <div class="user-section">
+        <div class="avatar">
+          {{ getUserInitials() }}
+        </div>
+        <div class="user-info" *ngIf="!sidebarCollapsed && currentUser">
+          <p class="user-name">{{ getUserName() }}</p>
+          <p class="user-role">{{ getRolLabel() }}</p>
+        </div>
+      </div>
+      <button mat-icon-button
+              class="logout-btn"
+              (click)="logout()"
+              [matTooltip]="'Cerrar sesión'"
+              matTooltipPosition="right">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="main-area">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button mat-icon-button
+                class="menu-toggle"
+                (click)="toggleSidebar()"
+                matTooltip="Alternar navegación">
+          <mat-icon>{{ sidebarCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
+        </button>
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">{{ getCurrentModuleName() }}</span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="search-container">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input type="text"
+                 class="search-input"
+                 placeholder="Buscar órdenes, clientes...">
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button mat-icon-button
+                class="notification-btn"
+                matTooltip="Notificaciones">
+          <mat-icon>notifications</mat-icon>
+          <span class="notification-badge">3</span>
+        </button>
+        <button mat-icon-button
+                [matMenuTriggerFor]="userMenu"
+                class="user-menu-btn">
+          <div class="header-avatar">{{ getUserInitials() }}</div>
+        </button>
+        <mat-menu #userMenu="matMenu" class="user-dropdown">
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Mi Perfil</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar Sesión</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="content-area">
+      <ng-content></ng-content>
+    </main>
+  </div>
+</div>

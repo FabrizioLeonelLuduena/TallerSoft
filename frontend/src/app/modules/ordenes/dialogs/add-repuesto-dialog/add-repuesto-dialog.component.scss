@@ -1,0 +1,55 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+.info-card {
+  background-color: #f5f5f5;
+  margin: 8px 0;
+
+  mat-card-content {
+    padding: 16px;
+
+    p {
+      margin: 8px 0;
+      font-size: 14px;
+
+      strong {
+        color: #1e3c72;
+      }
+    }
+  }
+}
+
+.option-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+
+  strong {
+    flex: 1;
+  }
+
+  .stock-info {
+    font-size: 12px;
+    color: #999;
+    margin-left: 8px;
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 0;
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}

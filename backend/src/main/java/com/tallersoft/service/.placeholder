@@ -1,0 +1,4 @@
+package com.tallersoft.service;
+
+// Business logic service classes
+// This package contains @Service classes with application logic

@@ -1,0 +1,178 @@
+<div class="detail-container" *ngIf="!loading">
+  <!-- Header Card with Gradient -->
+  <div class="header-card" *ngIf="orden">
+    <div class="header-gradient"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <div class="orden-number">Orden #{{ orden.id }}</div>
+        <h1 class="client-name">{{ orden.clienteNombre }}</h1>
+        <p class="orden-date">{{ orden.createdAt | date: 'dd/MM/yyyy, HH:mm' }}</p>
+      </div>
+      <div class="header-right">
+        <div class="estado-info">
+          <span class="estado-label">Estado</span>
+          <span class="estado-value" [class]="'status-' + (orden.estado | lowercase)">
+            {{ orden.estado }}
+          </span>
+        </div>
+        <div class="presupuesto-info">
+          <span class="presupuesto-label">Presupuesto</span>
+          <span class="presupuesto-value">{{ orden.presupuesto | currency }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid" *ngIf="orden">
+    <!-- Left Column - Diagnostics & Timeline -->
+    <div class="left-column">
+      <!-- Diagnosis Section -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Diagnóstico</h3>
+          <button mat-icon-button class="btn-edit" (click)="editarDiagnostico()" matTooltip="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+        <div class="section-body">
+          <div class="diagnosis-content">
+            <p class="label-small">Falla Reportada:</p>
+            <p class="text-content">{{ orden.fallaReportada }}</p>
+            
+            <p class="label-small mt-lg">Diagnóstico Técnico:</p>
+            <p class="text-content">{{ orden.diagnostico || 'Sin diagnóstico aún' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Section -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Historial</h3>
+        </div>
+        <div class="section-body">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker pending"></div>
+              <div class="timeline-content">
+                <p class="timeline-label">Creada</p>
+                <span class="timeline-date">{{ orden.createdAt | date: 'dd/MM HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="timeline-item" *ngIf="orden.estado !== 'PENDIENTE'">
+              <div class="timeline-marker in-process"></div>
+              <div class="timeline-content">
+                <p class="timeline-label">En Proceso</p>
+                <span class="timeline-date">{{ orden.updatedAt | date: 'dd/MM HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="timeline-item" *ngIf="orden.estado === 'ENTREGADO'">
+              <div class="timeline-marker delivered"></div>
+              <div class="timeline-content">
+                <p class="timeline-label">Entregada</p>
+                <span class="timeline-date">{{ orden.updatedAt | date: 'dd/MM HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column - Parts & Summary -->
+    <div class="right-column">
+      <!-- Parts Section -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Repuestos Utilizados</h3>
+          <button mat-icon-button color="primary" (click)="agregarRepuesto()" matTooltip="Agregar repuesto">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <div class="section-body">
+          <div class="parts-list" *ngIf="orden.repuestos && orden.repuestos.length > 0">
+            <div class="part-item" *ngFor="let repuesto of orden.repuestos">
+              <div class="part-name">{{ repuesto.nombreRepuesto }}</div>
+              <div class="part-details">
+                <span class="part-qty">{{ repuesto.cantidad }}x</span>
+                <span class="part-price">{{ repuesto.precioUnit | currency }}</span>
+              </div>
+              <div class="part-total">{{ repuesto.total | currency }}</div>
+            </div>
+            <div class="part-summary">
+              <div class="summary-label">Total Repuestos:</div>
+              <div class="summary-value">{{ getPartsTotal() | currency }}</div>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="!orden.repuestos || orden.repuestos.length === 0">
+            <mat-icon>inventory_2</mat-icon>
+            <p>No hay repuestos agregados</p>
+            <button mat-stroked-button color="primary" (click)="agregarRepuesto()">
+              <mat-icon>add</mat-icon>
+              Agregar Repuesto
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Info Card -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Información de la Orden</h3>
+        </div>
+        <div class="section-body">
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">Técnico:</span>
+              <span class="info-value">{{ orden.tecnicoNombre || 'Sin asignar' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Prioridad:</span>
+              <span class="info-value">
+                <span class="priority-badge" [class]="'priority-' + (orden.prioridad | lowercase)">
+                  {{ orden.prioridad }}
+                </span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Equipo:</span>
+              <span class="info-value">{{ orden.equipmentType }} - {{ orden.equipmentBrand }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Tiempo Transcurrido:</span>
+              <span class="info-value">{{ getTimeElapsed() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-card">
+        <button mat-raised-button color="primary" (click)="cambiarEstado()">
+          <mat-icon>check_circle</mat-icon>
+          Cambiar Estado
+        </button>
+        <button mat-stroked-button (click)="descargarPresupuesto()">
+          <mat-icon>download</mat-icon>
+          Descargar Presupuesto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="loading">
+  <div class="skeleton-header"></div>
+  <div class="skeleton-grid">
+    <div class="skeleton-left">
+      <div class="skeleton-section"></div>
+      <div class="skeleton-section"></div>
+    </div>
+    <div class="skeleton-right">
+      <div class="skeleton-section"></div>
+      <div class="skeleton-section"></div>
+    </div>
+  </div>
+</div>
+

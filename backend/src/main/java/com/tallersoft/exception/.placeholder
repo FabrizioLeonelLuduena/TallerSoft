@@ -1,0 +1,4 @@
+package com.tallersoft.exception;
+
+// Exception handling classes
+// This package contains custom exceptions and global exception handlers

@@ -1,0 +1,99 @@
+<div class="ordenes-list-container">
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <button class="filter-chip" [class.active]="selectedStatus === 'all'" (click)="filterByStatus('all')">
+        Todos
+      </button>
+      <button class="filter-chip pending" [class.active]="selectedStatus === 'PENDIENTE'" (click)="filterByStatus('PENDIENTE')">
+        Pendiente
+      </button>
+      <button class="filter-chip in-process" [class.active]="selectedStatus === 'EN_PROCESO'" (click)="filterByStatus('EN_PROCESO')">
+        En Proceso
+      </button>
+      <button class="filter-chip ready" [class.active]="selectedStatus === 'LISTO'" (click)="filterByStatus('LISTO')">
+        Listo
+      </button>
+      <button class="filter-chip delivered" [class.active]="selectedStatus === 'ENTREGADO'" (click)="filterByStatus('ENTREGADO')">
+        Entregado
+      </button>
+    </div>
+
+    <button mat-raised-button color="primary" routerLink="/ordenes/nueva">
+      <mat-icon>add</mat-icon>
+      Nueva Orden
+    </button>
+  </div>
+
+  <!-- Skeleton Loading State -->
+  <div class="skeleton-table" *ngIf="loading">
+    <div *ngFor="let i of [1,2,3,4,5]" class="skeleton-row">
+      <div class="skeleton" style="width: 60px; height: 16px;"></div>
+      <div class="skeleton" style="width: 150px; height: 16px;"></div>
+      <div class="skeleton" style="width: 100px; height: 24px;"></div>
+      <div class="skeleton" style="width: 80px; height: 16px;"></div>
+      <div class="skeleton" style="width: 120px; height: 16px;"></div>
+      <div class="skeleton" style="width: 90px; height: 16px;"></div>
+      <div class="skeleton" style="width: 32px; height: 32px;"></div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-card" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="table-full">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Técnico</th>
+            <th>Presupuesto</th>
+            <th>Fecha</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let orden of filteredOrdenes" class="data-row" [class]="'status-' + (orden.estado | lowercase)">
+            <td class="col-id"><strong>#{{ orden.id }}</strong></td>
+            <td class="col-cliente">{{ orden.clienteNombre }}</td>
+            <td class="col-estado">
+              <span class="status-badge" [class]="'status-' + (orden.estado | lowercase)">
+                {{ orden.estado }}
+              </span>
+            </td>
+            <td class="col-prioridad">
+              <span class="priority-badge" [class]="'priority-' + (orden.prioridad | lowercase)">
+                {{ orden.prioridad }}
+              </span>
+            </td>
+            <td class="col-tecnico">{{ orden.tecnicoNombre || '-' }}</td>
+            <td class="col-presupuesto">{{ orden.presupuesto | currency }}</td>
+            <td class="col-fecha">{{ orden.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td class="col-actions">
+              <button mat-icon-button
+                      [routerLink]="['/ordenes', orden.id]"
+                      class="action-btn"
+                      matTooltip="Ver detalles">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredOrdenes.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <h3>No hay órdenes</h3>
+      <p>No se encontraron órdenes con los filtros seleccionados.</p>
+      <button mat-raised-button color="primary" routerLink="/ordenes/nueva">
+        <mat-icon>add</mat-icon>
+        Crear Primera Orden
+      </button>
+    </div>
+  </div>
+</div>
+

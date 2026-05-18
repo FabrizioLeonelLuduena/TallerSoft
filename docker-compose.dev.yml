@@ -1,0 +1,24 @@
+services:
+  # PostgreSQL 16 Database - Only service for local development
+  db:
+    image: postgres:16-alpine
+    container_name: tallersoft-db-dev
+    environment:
+      POSTGRES_DB: ${DB_NAME:-tallersoft}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init-db.sql
+      - ./scripts/create-analytics-user.sql:/docker-entrypoint-initdb.d/02-create-analytics-user.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data_dev:

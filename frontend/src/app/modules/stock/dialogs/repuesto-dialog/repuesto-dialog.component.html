@@ -1,0 +1,86 @@
+<h2 mat-dialog-title>
+  {{ isEditMode ? 'Editar Repuesto' : 'Nuevo Repuesto' }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="nombre" required>
+      <mat-error *ngIf="form.get('nombre')?.hasError('required')">
+        Nombre es requerido
+      </mat-error>
+      <mat-error *ngIf="form.get('nombre')?.hasError('minlength')">
+        Debe tener al menos 3 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Categoría</mat-label>
+      <input matInput formControlName="categoria" required>
+      <mat-error *ngIf="form.get('categoria')?.hasError('required')">
+        Categoría es requerida
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Precio</mat-label>
+      <input matInput 
+        type="number" 
+        formControlName="precio" 
+        required
+        step="0.01"
+        min="0">
+      <mat-error *ngIf="form.get('precio')?.hasError('required')">
+        Precio es requerido
+      </mat-error>
+      <mat-error *ngIf="form.get('precio')?.hasError('min')">
+        Precio debe ser mayor a 0
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Stock Actual</mat-label>
+      <input matInput 
+        type="number" 
+        formControlName="stockActual" 
+        required
+        min="0">
+      <mat-error *ngIf="form.get('stockActual')?.hasError('required')">
+        Stock actual es requerido
+      </mat-error>
+      <mat-error *ngIf="form.get('stockActual')?.hasError('min')">
+        Stock no puede ser negativo
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Stock Mínimo</mat-label>
+      <input matInput 
+        type="number" 
+        formControlName="stockMinimo" 
+        required
+        min="0">
+      <mat-error *ngIf="form.get('stockMinimo')?.hasError('required')">
+        Stock mínimo es requerido
+      </mat-error>
+      <mat-error *ngIf="form.get('stockMinimo')?.hasError('min')">
+        Stock mínimo no puede ser negativo
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()" [disabled]="loading">
+    Cancelar
+  </button>
+  <button mat-raised-button 
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="loading">
+    <mat-icon *ngIf="!loading">{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+    {{ loading ? 'Guardando...' : (isEditMode ? 'Guardar' : 'Crear') }}
+  </button>
+</mat-dialog-actions>

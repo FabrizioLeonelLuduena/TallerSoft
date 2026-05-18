@@ -1,0 +1,61 @@
+.create-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+
+  .form-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    mat-card-header {
+      margin-bottom: 24px;
+    }
+
+    mat-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e3c72;
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .full-width {
+      width: 100%;
+    }
+
+    .priority-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      label {
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+      }
+
+      .radio-group {
+        display: flex;
+        gap: 16px;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 8px;
+  }
+}

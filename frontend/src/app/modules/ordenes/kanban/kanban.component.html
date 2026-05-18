@@ -1,0 +1,197 @@
+<div class="kanban-container">
+  <!-- Loading Skeleton -->
+  <div class="skeleton-board" *ngIf="loading">
+    <div *ngFor="let i of [1,2,3,4]" class="skeleton-column">
+      <div class="skeleton skeleton-title"></div>
+      <div *ngFor="let j of [1,2,3]" class="skeleton-card">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line" style="width: 80%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kanban Board -->
+  <div class="kanban-board" *ngIf="!loading">
+    <!-- PENDIENTE Column -->
+    <div class="kanban-column">
+      <div class="column-header">
+        <div class="column-title">
+          <div class="status-indicator pending"></div>
+          <h3>Pendiente</h3>
+          <span class="column-count">12</span>
+        </div>
+      </div>
+
+      <div cdkDropList
+           #pendientList="cdkDropList"
+           id="PENDIENTE"
+           [cdkDropListData]="pendientes"
+           class="kanban-cards"
+           (cdkDropListDropped)="drop($event)">
+        
+        <div cdkDrag
+             *ngFor="let orden of pendientes"
+             class="kanban-card"
+             [routerLink]="['/ordenes', orden.id]">
+          <div class="card-left-border pending"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h4 class="client-name">{{ orden.clienteNombre }}</h4>
+              <span class="priority-chip" [class]="'priority-' + (orden.prioridad | lowercase)">
+                {{ orden.prioridad }}
+              </span>
+            </div>
+            <p class="equipment-info">{{ orden.equipmentType || 'Equipo' }} - {{ orden.equipmentBrand || 'Marca' }}</p>
+            <div class="card-footer">
+              <div class="tech-avatar">{{ orden.tecnicianInitials || 'TS' }}</div>
+              <span class="time-badge">{{ orden.timeElapsed || '0h' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-column" *ngIf="!pendientes || pendientes.length === 0">
+          <mat-icon>inbox</mat-icon>
+          <p>Sin órdenes pendientes</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EN PROCESO Column -->
+    <div class="kanban-column">
+      <div class="column-header">
+        <div class="column-title">
+          <div class="status-indicator in-process"></div>
+          <h3>En Proceso</h3>
+          <span class="column-count">8</span>
+        </div>
+      </div>
+
+      <div cdkDropList
+           #enProcesoList="cdkDropList"
+           id="EN_PROCESO"
+           [cdkDropListData]="enProceso"
+           class="kanban-cards"
+           (cdkDropListDropped)="drop($event)">
+        
+        <div cdkDrag
+             *ngFor="let orden of enProceso"
+             class="kanban-card"
+             [routerLink]="['/ordenes', orden.id]">
+          <div class="card-left-border in-process"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h4 class="client-name">{{ orden.clienteNombre }}</h4>
+              <span class="priority-chip" [class]="'priority-' + (orden.prioridad | lowercase)">
+                {{ orden.prioridad }}
+              </span>
+            </div>
+            <p class="equipment-info">{{ orden.equipmentType || 'Equipo' }} - {{ orden.equipmentBrand || 'Marca' }}</p>
+            <div class="card-footer">
+              <div class="tech-avatar">{{ orden.tecnicianInitials || 'TS' }}</div>
+              <span class="time-badge">{{ orden.timeElapsed || '0h' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-column" *ngIf="!enProceso || enProceso.length === 0">
+          <mat-icon>inbox</mat-icon>
+          <p>Sin órdenes en proceso</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTO Column -->
+    <div class="kanban-column">
+      <div class="column-header">
+        <div class="column-title">
+          <div class="status-indicator ready"></div>
+          <h3>Listo</h3>
+          <span class="column-count">5</span>
+        </div>
+      </div>
+
+      <div cdkDropList
+           #listoList="cdkDropList"
+           id="LISTO"
+           [cdkDropListData]="listo"
+           class="kanban-cards"
+           (cdkDropListDropped)="drop($event)">
+        
+        <div cdkDrag
+             *ngFor="let orden of listo"
+             class="kanban-card"
+             [routerLink]="['/ordenes', orden.id]">
+          <div class="card-left-border ready"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h4 class="client-name">{{ orden.clienteNombre }}</h4>
+              <span class="priority-chip" [class]="'priority-' + (orden.prioridad | lowercase)">
+                {{ orden.prioridad }}
+              </span>
+            </div>
+            <p class="equipment-info">{{ orden.equipmentType || 'Equipo' }} - {{ orden.equipmentBrand || 'Marca' }}</p>
+            <div class="card-footer">
+              <div class="tech-avatar">{{ orden.tecnicianInitials || 'TS' }}</div>
+              <span class="time-badge">{{ orden.timeElapsed || '0h' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-column" *ngIf="!listo || listo.length === 0">
+          <mat-icon>inbox</mat-icon>
+          <p>Sin órdenes listas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTREGADO Column -->
+    <div class="kanban-column">
+      <div class="column-header">
+        <div class="column-title">
+          <div class="status-indicator delivered"></div>
+          <h3>Entregado</h3>
+          <span class="column-count">24</span>
+        </div>
+      </div>
+
+      <div cdkDropList
+           #entregadoList="cdkDropList"
+           id="ENTREGADO"
+           [cdkDropListData]="entregado"
+           class="kanban-cards"
+           (cdkDropListDropped)="drop($event)">
+        
+        <div cdkDrag
+             *ngFor="let orden of entregado"
+             class="kanban-card"
+             [routerLink]="['/ordenes', orden.id]">
+          <div class="card-left-border delivered"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h4 class="client-name">{{ orden.clienteNombre }}</h4>
+              <span class="priority-chip" [class]="'priority-' + (orden.prioridad | lowercase)">
+                {{ orden.prioridad }}
+              </span>
+            </div>
+            <p class="equipment-info">{{ orden.equipmentType || 'Equipo' }} - {{ orden.equipmentBrand || 'Marca' }}</p>
+            <div class="card-footer">
+              <div class="tech-avatar">{{ orden.tecnicianInitials || 'TS' }}</div>
+              <span class="time-badge">{{ orden.timeElapsed || '0h' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-column" *ngIf="!entregado || entregado.length === 0">
+          <mat-icon>inbox</mat-icon>
+          <p>Sin órdenes entregadas</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB Button -->
+  <button class="fab-button" (click)="createNewOrder()" matTooltip="Nueva Orden">
+    <mat-icon>add</mat-icon>
+    <span class="fab-label">Nueva Orden</span>
+  </button>
+</div>

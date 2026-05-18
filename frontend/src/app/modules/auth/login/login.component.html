@@ -1,0 +1,58 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>TallerSoft Login</mat-card-title>
+      <mat-card-subtitle>Sistema de Gestión de Taller</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Email Field -->
+        <mat-form-field class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="user@example.com">
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="email?.hasError('required')">
+            El email es requerido
+          </mat-error>
+          <mat-error *ngIf="email?.hasError('email')">
+            Ingrese un email válido
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Password Field -->
+        <mat-form-field class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput
+                 [type]="showPassword ? 'text' : 'password'"
+                 formControlName="password"
+                 placeholder="Ingrese su contraseña">
+          <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
+            <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="password?.hasError('required')">
+            La contraseña es requerida
+          </mat-error>
+          <mat-error *ngIf="password?.hasError('minlength')">
+            La contraseña debe tener al menos 8 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Submit Button -->
+        <button mat-raised-button
+                color="primary"
+                type="submit"
+                class="full-width"
+                [disabled]="loginForm.invalid || loading">
+          <span *ngIf="!loading">Ingresar</span>
+          <span *ngIf="loading">Cargando...</span>
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

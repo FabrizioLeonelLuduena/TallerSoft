@@ -1,0 +1,77 @@
+<div class="create-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>Crear Nueva Orden de Trabajo</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Cliente</mat-label>
+          <mat-select formControlName="clienteId" required>
+            <mat-option value="1">Cliente 1</mat-option>
+            <mat-option value="2">Cliente 2</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('clienteId')?.hasError('required')">
+            Cliente es requerido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Equipo</mat-label>
+          <mat-select formControlName="equipoId" required>
+            <mat-option value="1">Equipo 1</mat-option>
+            <mat-option value="2">Equipo 2</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('equipoId')?.hasError('required')">
+            Equipo es requerido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Técnico (Opcional)</mat-label>
+          <mat-select formControlName="tecnicoId">
+            <mat-option value="">Sin asignar</mat-option>
+            <mat-option value="1">Técnico 1</mat-option>
+            <mat-option value="2">Técnico 2</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Falla Reportada</mat-label>
+          <textarea matInput 
+            formControlName="fallaReportada" 
+            required 
+            minlength="10"
+            rows="4"></textarea>
+          <mat-error *ngIf="form.get('fallaReportada')?.hasError('required')">
+            Falla reportada es requerida
+          </mat-error>
+          <mat-error *ngIf="form.get('fallaReportada')?.hasError('minlength')">
+            Debe tener al menos 10 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <div class="priority-group">
+          <label>Prioridad</label>
+          <mat-radio-group formControlName="prioridad" class="radio-group">
+            <mat-radio-button value="BAJA">Baja</mat-radio-button>
+            <mat-radio-button value="NORMAL">Normal</mat-radio-button>
+            <mat-radio-button value="ALTA">Alta</mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button type="submit" color="primary" [disabled]="loading">
+            <mat-icon *ngIf="!loading">check</mat-icon>
+            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+            {{ loading ? 'Creando...' : 'Crear Orden' }}
+          </button>
+          <button mat-button type="button" routerLink="/ordenes">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
