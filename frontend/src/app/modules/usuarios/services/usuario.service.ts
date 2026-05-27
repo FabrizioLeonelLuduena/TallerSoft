@@ -1,0 +1,46 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
+
+export interface UsuarioRequest {
+  nombre: string;
+  email: string;
+  password: string;
+  rol: string;
+}
+
+export interface UsuarioResponse {
+  id: number;
+  nombre: string;
+  email: string;
+  rol: 'ADMIN' | 'TECNICO' | 'RECEPCION';
+  activo: boolean;
+  createdAt: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class UsuarioService {
+  private apiUrl = `${environment.apiUrl}/api/usuarios`;
+  private authApi = `${environment.apiUrl}/auth`;
+
+  constructor(private http: HttpClient) {}
+
+  /**
+   * Get all users with optional role filter
+   */
+  listarUsuarios(rol?: string): Observable<UsuarioResponse[]> {
+    let params = new HttpParams();
+    if (rol) {
+      params = params.set('rol', rol);
+    }
+    return this.http.get<UsuarioResponse[]>(this.apiUrl, { params });
+  }
+
+  /**
+   * Create a new user via /auth/register endpoint
+   */
+  crearUsuario(data: UsuarioRequest): Observable<UsuarioResponse> {
+    return this.http.post<UsuarioResponse>(`${this.authApi}/register`, data);
+  }
+}

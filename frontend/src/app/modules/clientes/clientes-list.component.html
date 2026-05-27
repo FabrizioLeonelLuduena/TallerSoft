@@ -1,96 +1,93 @@
-<div class="clientes-container">
-  <!-- Header with Search and Add Button -->
-  <div class="clientes-header">
+<div class="clientes-list-container">
+  <!-- Header bar with search and action -->
+  <div class="list-header">
     <div class="search-bar">
       <mat-icon class="search-icon">search</mat-icon>
-      <input type="text"
-             class="search-input"
-             placeholder="Buscar clientes por nombre o teléfono..."
-             [(ngModel)]="searchTerm"
-             (input)="filterClientes()">
+      <input 
+        type="text"
+        class="search-input"
+        placeholder="Buscar cliente por nombre..."
+        [(ngModel)]="searchTerm"
+        (input)="filterClientes()"
+      />
     </div>
-    <button mat-raised-button color="primary" (click)="crearCliente()">
+    <button 
+      mat-raised-button 
+      color="primary" 
+      class="btn-new"
+      *ngIf="canCreateCliente()"
+      (click)="crearCliente()"
+    >
       <mat-icon>add</mat-icon>
       Nuevo Cliente
     </button>
   </div>
 
-  <!-- Skeleton Loading State -->
-  <div class="clientes-grid skeleton-grid" *ngIf="loading">
-    <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card">
+  <!-- Skeleton loader -->
+  <div class="clients-grid" *ngIf="loading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
       <div class="skeleton-avatar"></div>
-      <div class="skeleton skeleton-title"></div>
-      <div class="skeleton skeleton-line"></div>
-      <div class="skeleton skeleton-line" style="width: 80%"></div>
+      <div class="skeleton-name"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-footer"></div>
     </div>
   </div>
 
-  <!-- Clientes Grid -->
-  <div class="clientes-grid" *ngIf="!loading && filteredClientes.length > 0">
-    <div class="cliente-card" *ngFor="let cliente of filteredClientes">
-      <div class="card-header">
-        <div class="cliente-avatar">
-          {{ getInitials(cliente.nombre) }}
-        </div>
-        <button mat-icon-button
-                class="menu-btn"
-                [matMenuTriggerFor]="menu"
-                matTooltip="Opciones">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #menu="matMenu" class="cliente-menu">
-          <button mat-menu-item (click)="verDetalles(cliente)">
-            <mat-icon>visibility</mat-icon>
-            <span>Ver detalles</span>
-          </button>
-          <button mat-menu-item (click)="editarCliente(cliente)">
-            <mat-icon>edit</mat-icon>
-            <span>Editar</span>
-          </button>
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="eliminarCliente(cliente)">
-            <mat-icon>delete</mat-icon>
-            <span>Eliminar</span>
-          </button>
-        </mat-menu>
+  <!-- Clients grid -->
+  <div class="clients-grid" *ngIf="!loading && filteredClientes.length > 0">
+    <div 
+      class="client-card" 
+      *ngFor="let cliente of filteredClientes"
+      (click)="verDetalles(cliente)"
+    >
+      <div class="card-avatar">
+        {{ getInitials(cliente.nombre) }}
       </div>
-
-      <div class="card-body">
-        <h3 class="cliente-name">{{ cliente.nombre }}</h3>
-        <div class="cliente-info">
-          <div class="info-row" *ngIf="cliente.telefono">
-            <mat-icon class="info-icon">phone</mat-icon>
-            <span class="info-text">{{ cliente.telefono }}</span>
-          </div>
-          <div class="info-row" *ngIf="cliente.email">
-            <mat-icon class="info-icon">email</mat-icon>
-            <span class="info-text">{{ cliente.email }}</span>
-          </div>
+      <div class="card-content">
+        <h3 class="client-name">{{ cliente.nombre }}</h3>
+        <div class="client-contact" *ngIf="cliente.email">
+          <mat-icon class="contact-icon">email</mat-icon>
+          <span class="contact-text">{{ cliente.email }}</span>
+        </div>
+        <div class="client-contact" *ngIf="cliente.telefono">
+          <mat-icon class="contact-icon">phone</mat-icon>
+          <span class="contact-text">{{ cliente.telefono }}</span>
         </div>
       </div>
-
       <div class="card-footer">
-        <span class="ordenes-badge">{{ getClienteOrdenesCount(cliente.id) }} órdenes</span>
-        <button mat-stroked-button color="primary" (click)="verDetalles(cliente)">
-          Ver
+        <span class="ordenes-badge" *ngIf="getClienteOrdenesCount(cliente.id) > 0">
+          {{ getClienteOrdenesCount(cliente.id) }} órdenes
+        </span>
+        <button 
+          mat-icon-button 
+          class="btn-navigate"
+          (click)="verDetalles(cliente); $event.stopPropagation()"
+        >
+          <mat-icon>arrow_forward</mat-icon>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Empty State -->
+  <!-- Empty state -->
   <div class="empty-state" *ngIf="!loading && filteredClientes.length === 0">
-    <mat-icon>person_search</mat-icon>
-    <h3>No hay clientes</h3>
-    <p *ngIf="searchTerm">
-      No se encontraron clientes que coincidan con "{{ searchTerm }}"
+    <mat-icon class="empty-icon">people_outline</mat-icon>
+    <h3 class="empty-title">No se encontraron clientes</h3>
+    <p class="empty-text" *ngIf="searchTerm">
+      Intentá con otro nombre
     </p>
-    <p *ngIf="!searchTerm">
+    <p class="empty-text" *ngIf="!searchTerm">
       Comienza agregando tu primer cliente
     </p>
-    <button mat-raised-button color="primary" (click)="crearCliente()">
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="crearCliente()"
+      *ngIf="!searchTerm && canCreateCliente()"
+    >
       <mat-icon>add</mat-icon>
-      Crear Primer Cliente
+      Agregar primer cliente
     </button>
   </div>
 </div>

@@ -22,10 +22,17 @@ export class RoleGuard implements CanActivate {
     const requiredRoles = route.data['roles'] as string[];
     const currentRole = this.authService.getCurrentRole();
 
+    console.log('[RoleGuard] Checking route:', state.url);
+    console.log('[RoleGuard] Required roles:', requiredRoles);
+    console.log('[RoleGuard] Current role:', currentRole);
+
     if (requiredRoles && currentRole && requiredRoles.includes(currentRole)) {
+      console.log('[RoleGuard] ✓ Access GRANTED');
+      console.log('[RoleGuard] Now routing to component...');
       return true;
     }
 
+    console.log('[RoleGuard] ✗ Access DENIED - redirecting to /unauthorized');
     // Redirect to unauthorized
     this.router.navigate(['/unauthorized']);
     return false;

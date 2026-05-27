@@ -1,9 +1,8 @@
 import { Routes } from '@angular/router';
-import { UsuariosComponent } from './usuarios.component';
+import { ListComponent } from './list/list.component';
+import { CreateComponent } from './create/create.component';
 
-export const usuariosRoutes: Routes = [
-  {
-    path: '',
-    component: UsuariosComponent,
-  },
+export const USUARIOS_ROUTES: Routes = [
+  { path: '', component: ListComponent },
+  { path: 'nuevo', component: CreateComponent }
 ];

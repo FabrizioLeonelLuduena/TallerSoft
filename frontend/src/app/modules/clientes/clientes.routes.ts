@@ -1,9 +1,21 @@
 import { Routes } from '@angular/router';
-import { ClientesListComponent } from './clientes-list.component';
+import { ListComponent } from './list/list.component';
+import { CreateComponent } from './create/create.component';
+import { DetailComponent } from './detail/detail.component';
+
+console.log('[clientes.routes] Module loaded');
 
 export const clientesRoutes: Routes = [
   {
     path: '',
-    component: ClientesListComponent,
+    component: ListComponent,
+  },
+  {
+    path: 'nuevo',
+    component: CreateComponent,
+  },
+  {
+    path: ':id',
+    component: DetailComponent,
   },
 ];

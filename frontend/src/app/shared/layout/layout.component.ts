@@ -1,14 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '@core/auth/auth.service';
 import { CurrentUser } from '@core/auth/auth.service';
 import { filter } from 'rxjs/operators';
@@ -29,14 +21,6 @@ interface NavItem {
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatSidenavModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatListModule,
-    MatMenuModule,
-    MatDividerModule,
-    MatTooltipModule,
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
@@ -44,11 +28,10 @@ interface NavItem {
 export class LayoutComponent implements OnInit {
 
   currentUser: CurrentUser | null = null;
-  sidenavOpen = true;
   sidebarCollapsed = false;
   isMobile = false;
-  sidenavMode: 'side' | 'over' = 'side';
-  currentModuleName = 'Dashboard';
+  profileDropdownOpen = false;
+  hasNotifications = true;
 
   navItems: NavItem[] = [
     {
@@ -110,12 +93,6 @@ export class LayoutComponent implements OnInit {
 
   checkScreenSize(): void {
     this.isMobile = window.innerWidth <= 768;
-    this.sidenavMode = this.isMobile ? 'over' : 'side';
-    if (this.isMobile) {
-      this.sidenavOpen = false;
-    } else {
-      this.sidenavOpen = true;
-    }
   }
 
   getVisibleNavItems(): NavItem[] {
@@ -126,12 +103,9 @@ export class LayoutComponent implements OnInit {
   }
 
   logout(): void {
+    this.profileDropdownOpen = false;
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  toggleSidenav(): void {
-    this.sidenavOpen = !this.sidenavOpen;
   }
 
   getRolLabel(): string {
@@ -154,10 +128,6 @@ export class LayoutComponent implements OnInit {
     return this.currentUser.email.split('@')[0];
   }
 
-  getCurrentModuleName(): string {
-    return this.currentModuleName;
-  }
-
   updateModuleName(url: string): void {
     const moduleMap: { [key: string]: string } = {
       '/dashboard': 'Dashboard',
@@ -173,18 +143,31 @@ export class LayoutComponent implements OnInit {
 
     for (const [path, name] of Object.entries(moduleMap)) {
       if (url.startsWith(path)) {
-        this.currentModuleName = name;
         return;
       }
     }
-    this.currentModuleName = 'Dashboard';
   }
 
   toggleSidebar(): void {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
+  toggleProfileDropdown(): void {
+    this.profileDropdownOpen = !this.profileDropdownOpen;
+  }
+
   goToProfile(): void {
+    this.profileDropdownOpen = false;
     this.router.navigate(['/profile']);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const profileElement = document.querySelector('.user-profile');
+    
+    if (profileElement && !profileElement.contains(target)) {
+      this.profileDropdownOpen = false;
+    }
   }
 }

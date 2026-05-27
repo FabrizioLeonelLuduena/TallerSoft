@@ -71,4 +71,19 @@ public class EquipoController {
         EquipoResponse equipo = equipoService.editarEquipo(id, request);
         return ResponseEntity.ok(equipo);
     }
+
+    /**
+     * Delete an equipment
+     * DELETE /api/equipos/{id}
+     *
+     * @param id Equipment ID
+     * @return ResponseEntity with no content
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        log.info("Eliminando equipo: {}", id);
+        equipoService.eliminarEquipo(id);
+        return ResponseEntity.noContent().build();
+    }
 }

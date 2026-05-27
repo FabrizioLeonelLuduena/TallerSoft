@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { UsuariosListComponent } from './list/list.component';
+import { ListComponent } from './list/list.component';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [UsuariosListComponent],
+  imports: [ListComponent],
   template: `
     <app-usuarios-list></app-usuarios-list>
   `

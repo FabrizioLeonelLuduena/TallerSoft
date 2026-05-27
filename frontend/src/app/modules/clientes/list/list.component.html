@@ -1,0 +1,119 @@
+<div class="clientes-container page-enter">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Directorio de Clientes</h1>
+    <p class="page-subtitle">Gestiona tu base de datos de clientes e historial de servicios</p>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="search-filter-bar">
+    <div class="search-input-wrapper">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input 
+        type="text"
+        class="ts-input search-input"
+        placeholder="Buscar clientes, órdenes o contactos..."
+        [value]="searchTerm"
+        (input)="onSearch($event)"
+      />
+    </div>
+    <button 
+      class="btn-filters"
+      (click)="onFilterClick()"
+      type="button"
+      title="Filtros"
+    >
+      <span class="material-symbols-outlined">tune</span>
+      <span>Filtros</span>
+    </button>
+    <button 
+      class="btn-create"
+      (click)="onCreateClick()"
+      type="button"
+      title="Nuevo Cliente"
+    >
+      <span>+</span>
+    </button>
+  </div>
+
+  <!-- Skeleton Loaders -->
+  <div class="clients-grid" *ngIf="isLoading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+      <div class="skeleton-avatar"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-name"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clients Grid -->
+  <div class="clients-grid" *ngIf="!isLoading && clientes.length > 0">
+    <div 
+      class="glass-panel client-card card-enter"
+      *ngFor="let cliente of clientes; let i = index"
+      (click)="navigateToClient(cliente.id)"
+      [style.animation-delay]="(i * 40) + 'ms'"
+    >
+      <div class="card-header">
+        <div class="client-avatar">
+          {{ getInitials(cliente.nombre) }}
+        </div>
+        <div class="client-info">
+          <h3 class="client-name">{{ cliente.nombre }}</h3>
+          <span class="client-status" *ngIf="getClienteOrdenesCount(cliente.id) > 0">
+            {{ getClienteOrdenesCount(cliente.id) }} Orders
+          </span>
+        </div>
+        <span class="client-badge" [ngClass]="{'badge-active': getClienteOrdenesCount(cliente.id) > 0}">
+          {{ getClienteOrdenesCount(cliente.id) }} Orders
+        </span>
+      </div>
+
+      <div class="card-contacts">
+        <div class="contact-item" *ngIf="cliente.telefono">
+          <span class="material-symbols-outlined">call</span>
+          <span>{{ cliente.telefono }}</span>
+        </div>
+        <div class="contact-item" *ngIf="cliente.email">
+          <span class="material-symbols-outlined">mail</span>
+          <span class="truncate">{{ cliente.email }}</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button 
+          class="details-link"
+          [routerLink]="['/clientes', cliente.id]"
+          (click)="$event.stopPropagation()"
+        >
+          Details
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && clientes.length === 0">
+    <div class="empty-icon">
+      <span class="material-symbols-outlined">groups</span>
+    </div>
+    <h3 class="empty-title">No se encontraron clientes</h3>
+    <p class="empty-text" *ngIf="searchTerm">
+      Intentá con otro nombre o filtro
+    </p>
+    <p class="empty-text" *ngIf="!searchTerm">
+      Comienza agregando tu primer cliente
+    </p>
+    <button 
+      class="ts-btn-primary"
+      routerLink="/clientes/nuevo"
+      *ngIf="!searchTerm"
+    >
+      <span class="material-symbols-outlined">person_add</span>
+      <span>Agregar primer cliente</span>
+    </button>
+  </div>
+</div>

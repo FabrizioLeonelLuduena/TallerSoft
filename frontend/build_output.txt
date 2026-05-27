@@ -1,0 +1,169 @@
+
+./src/app/modules/clientes/create/create.component.ts:49:88-106 - Error: export 'takeUntilDestroyed' (imported as 'takeUntilDestroyed') was not found in 'rxjs/operators' (possible exports: audit, auditTime, buffer, bufferCount, bufferTime, bufferToggle, bufferWhen, catchError, combineAll, combineLatest, combineLatestAll, combineLatestWith, concat, concatAll, concatMap, concatMapTo, concatWith, connect, count, debounce, debounceTime, defaultIfEmpty, delay, delayWhen, dematerialize, distinct, distinctUntilChanged, distinctUntilKeyChanged, elementAt, endWith, every, exhaust, exhaustAll, exhaustMap, expand, filter, finalize, find, findIndex, first, flatMap, groupBy, ignoreElements, isEmpty, last, map, mapTo, materialize, max, merge, mergeAll, mergeMap, mergeMapTo, mergeScan, mergeWith, min, multicast, observeOn, onErrorResumeNext, pairwise, partition, pluck, publish, publishBehavior, publishLast, publishReplay, race, raceWith, reduce, refCount, repeat, repeatWhen, retry, retryWhen, sample, sampleTime, scan, sequenceEqual, share, shareReplay, single, skip, skipLast, skipUntil, skipWhile, startWith, subscribeOn, switchAll, switchMap, switchMapTo, switchScan, take, takeLast, takeUntil, takeWhile, tap, throttle, throttleTime, throwIfEmpty, timeInterval, timeout, timeoutWith, timestamp, toArray, window, windowCount, windowTime, windowToggle, windowWhen, withLatestFrom, zip, zipAll, zipWith)
+
+./src/app/modules/clientes/detail/detail.component.ts:414:12-30 - Error: export 'takeUntilDestroyed' (imported as 'takeUntilDestroyed') was not found in 'rxjs/operators' (possible exports: audit, auditTime, buffer, bufferCount, bufferTime, bufferToggle, bufferWhen, catchError, combineAll, combineLatest, combineLatestAll, combineLatestWith, concat, concatAll, concatMap, concatMapTo, concatWith, connect, count, debounce, debounceTime, defaultIfEmpty, delay, delayWhen, dematerialize, distinct, distinctUntilChanged, distinctUntilKeyChanged, elementAt, endWith, every, exhaust, exhaustAll, exhaustMap, expand, filter, finalize, find, findIndex, first, flatMap, groupBy, ignoreElements, isEmpty, last, map, mapTo, materialize, max, merge, mergeAll, mergeMap, mergeMapTo, mergeScan, mergeWith, min, multicast, observeOn, onErrorResumeNext, pairwise, partition, pluck, publish, publishBehavior, publishLast, publishReplay, race, raceWith, reduce, refCount, repeat, repeatWhen, retry, retryWhen, sample, sampleTime, scan, sequenceEqual, share, shareReplay, single, skip, skipLast, skipUntil, skipWhile, startWith, subscribeOn, switchAll, switchMap, switchMapTo, switchScan, take, takeLast, takeUntil, takeWhile, tap, throttle, throttleTime, throwIfEmpty, timeInterval, timeout, timeoutWith, timestamp, toArray, window, windowCount, windowTime, windowToggle, windowWhen, withLatestFrom, zip, zipAll, zipWith)
+
+./src/app/modules/clientes/detail/detail.component.ts:453:81-99 - Error: export 'takeUntilDestroyed' (imported as 'takeUntilDestroyed') was not found in 'rxjs/operators' (possible exports: audit, auditTime, buffer, bufferCount, bufferTime, bufferToggle, bufferWhen, catchError, combineAll, combineLatest, combineLatestAll, combineLatestWith, concat, concatAll, concatMap, concatMapTo, concatWith, connect, count, debounce, debounceTime, defaultIfEmpty, delay, delayWhen, dematerialize, distinct, distinctUntilChanged, distinctUntilKeyChanged, elementAt, endWith, every, exhaust, exhaustAll, exhaustMap, expand, filter, finalize, find, findIndex, first, flatMap, groupBy, ignoreElements, isEmpty, last, map, mapTo, materialize, max, merge, mergeAll, mergeMap, mergeMapTo, mergeScan, mergeWith, min, multicast, observeOn, onErrorResumeNext, pairwise, partition, pluck, publish, publishBehavior, publishLast, publishReplay, race, raceWith, reduce, refCount, repeat, repeatWhen, retry, retryWhen, sample, sampleTime, scan, sequenceEqual, share, shareReplay, single, skip, skipLast, skipUntil, skipWhile, startWith, subscribeOn, switchAll, switchMap, switchMapTo, switchScan, take, takeLast, takeUntil, takeWhile, tap, throttle, throttleTime, throwIfEmpty, timeInterval, timeout, timeoutWith, timestamp, toArray, window, windowCount, windowTime, windowToggle, windowWhen, withLatestFrom, zip, zipAll, zipWith)
+
+./src/app/modules/clientes/detail/detail.component.ts:485:66-84 - Error: export 'takeUntilDestroyed' (imported as 'takeUntilDestroyed') was not found in 'rxjs/operators' (possible exports: audit, auditTime, buffer, bufferCount, bufferTime, bufferToggle, bufferWhen, catchError, combineAll, combineLatest, combineLatestAll, combineLatestWith, concat, concatAll, concatMap, concatMapTo, concatWith, connect, count, debounce, debounceTime, defaultIfEmpty, delay, delayWhen, dematerialize, distinct, distinctUntilChanged, distinctUntilKeyChanged, elementAt, endWith, every, exhaust, exhaustAll, exhaustMap, expand, filter, finalize, find, findIndex, first, flatMap, groupBy, ignoreElements, isEmpty, last, map, mapTo, materialize, max, merge, mergeAll, mergeMap, mergeMapTo, mergeScan, mergeWith, min, multicast, observeOn, onErrorResumeNext, pairwise, partition, pluck, publish, publishBehavior, publishLast, publishReplay, race, raceWith, reduce, refCount, repeat, repeatWhen, retry, retryWhen, sample, sampleTime, scan, sequenceEqual, share, shareReplay, single, skip, skipLast, skipUntil, skipWhile, startWith, subscribeOn, switchAll, switchMap, switchMapTo, switchScan, take, takeLast, takeUntil, takeWhile, tap, throttle, throttleTime, throwIfEmpty, timeInterval, timeout, timeoutWith, timestamp, toArray, window, windowCount, windowTime, windowToggle, windowWhen, withLatestFrom, zip, zipAll, zipWith)
+
+./src/app/modules/clientes/list/list.component.ts:210:8-26 - Error: export 'takeUntilDestroyed' (imported as 'takeUntilDestroyed') was not found in 'rxjs/operators' (possible exports: audit, auditTime, buffer, bufferCount, bufferTime, bufferToggle, bufferWhen, catchError, combineAll, combineLatest, combineLatestAll, combineLatestWith, concat, concatAll, concatMap, concatMapTo, concatWith, connect, count, debounce, debounceTime, defaultIfEmpty, delay, delayWhen, dematerialize, distinct, distinctUntilChanged, distinctUntilKeyChanged, elementAt, endWith, every, exhaust, exhaustAll, exhaustMap, expand, filter, finalize, find, findIndex, first, flatMap, groupBy, ignoreElements, isEmpty, last, map, mapTo, materialize, max, merge, mergeAll, mergeMap, mergeMapTo, mergeScan, mergeWith, min, multicast, observeOn, onErrorResumeNext, pairwise, partition, pluck, publish, publishBehavior, publishLast, publishReplay, race, raceWith, reduce, refCount, repeat, repeatWhen, retry, retryWhen, sample, sampleTime, scan, sequenceEqual, share, shareReplay, single, skip, skipLast, skipUntil, skipWhile, startWith, subscribeOn, switchAll, switchMap, switchMapTo, switchScan, take, takeLast, takeUntil, takeWhile, tap, throttle, throttleTime, throwIfEmpty, timeInterval, timeout, timeoutWith, timestamp, toArray, window, windowCount, windowTime, windowToggle, windowWhen, withLatestFrom, zip, zipAll, zipWith)
+
+./src/app/modules/clientes/list/list.component.ts:243:100-118 - Error: export 'takeUntilDestroyed' (imported as 'takeUntilDestroyed') was not found in 'rxjs/operators' (possible exports: audit, auditTime, buffer, bufferCount, bufferTime, bufferToggle, bufferWhen, catchError, combineAll, combineLatest, combineLatestAll, combineLatestWith, concat, concatAll, concatMap, concatMapTo, concatWith, connect, count, debounce, debounceTime, defaultIfEmpty, delay, delayWhen, dematerialize, distinct, distinctUntilChanged, distinctUntilKeyChanged, elementAt, endWith, every, exhaust, exhaustAll, exhaustMap, expand, filter, finalize, find, findIndex, first, flatMap, groupBy, ignoreElements, isEmpty, last, map, mapTo, materialize, max, merge, mergeAll, mergeMap, mergeMapTo, mergeScan, mergeWith, min, multicast, observeOn, onErrorResumeNext, pairwise, partition, pluck, publish, publishBehavior, publishLast, publishReplay, race, raceWith, reduce, refCount, repeat, repeatWhen, retry, retryWhen, sample, sampleTime, scan, sequenceEqual, share, shareReplay, single, skip, skipLast, skipUntil, skipWhile, startWith, subscribeOn, switchAll, switchMap, switchMapTo, switchScan, take, takeLast, takeUntil, takeWhile, tap, throttle, throttleTime, throwIfEmpty, timeInterval, timeout, timeoutWith, timestamp, toArray, window, windowCount, windowTime, windowToggle, windowWhen, withLatestFrom, zip, zipAll, zipWith)
+
+Error: src/app/modules/clientes/create/create.component.html:111:11 - error NG5002: Unexpected closing tag "span". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags
+
+111           </span>
+              ~~~~~~~
+
+  src/app/modules/clientes/create/create.component.ts:22:16
+    22   templateUrl: './create.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component CreateComponent.
+
+
+Error: src/app/modules/clientes/create/create.component.html:112:9 - error NG5002: Unexpected closing tag "button". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags
+
+112         </button>
+            ~~~~~~~~~
+
+  src/app/modules/clientes/create/create.component.ts:22:16
+    22   templateUrl: './create.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component CreateComponent.
+
+
+Error: src/app/modules/clientes/create/create.component.html:113:7 - error NG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags
+
+113       </div>
+          ~~~~~~
+
+  src/app/modules/clientes/create/create.component.ts:22:16
+    22   templateUrl: './create.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component CreateComponent.
+
+
+Error: src/app/modules/clientes/create/create.component.html:114:5 - error NG5002: Unexpected closing tag "form". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags
+
+114     </form>
+        ~~~~~~~
+
+  src/app/modules/clientes/create/create.component.ts:22:16
+    22   templateUrl: './create.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component CreateComponent.
+
+
+Error: src/app/modules/clientes/create/create.component.html:115:3 - error NG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags
+
+115   </div>
+      ~~~~~~
+
+  src/app/modules/clientes/create/create.component.ts:22:16
+    22   templateUrl: './create.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component CreateComponent.
+
+
+Error: src/app/modules/clientes/create/create.component.html:116:1 - error NG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags
+
+116 </div>
+    ~~~~~~
+
+  src/app/modules/clientes/create/create.component.ts:22:16
+    22   templateUrl: './create.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component CreateComponent.
+
+
+Error: src/app/modules/clientes/create/create.component.ts:8:10 - error TS2305: Module '"rxjs/operators"' has no exported member 'takeUntilDestroyed'.
+
+8 import { takeUntilDestroyed, finalize } from 'rxjs/operators';
+           ~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/modules/clientes/create/create.component.ts:82:44 - error TS18046: 'response' is of type 'unknown'.
+
+82         this.router.navigate(['/clientes', response.id]);
+                                              ~~~~~~~~
+
+
+Error: src/app/modules/clientes/detail/detail.component.html:3:37 - error TS2551: Property 'loading' does not exist on type 'DetailComponent'. Did you mean 'isLoading'?
+
+3   <div class="loading-state" *ngIf="loading">
+                                      ~~~~~~~
+
+  src/app/modules/clientes/detail/detail.component.ts:33:16
+    33   templateUrl: './detail.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component DetailComponent.
+
+
+Error: src/app/modules/clientes/detail/detail.component.ts:13:10 - error TS2305: Module '"rxjs/operators"' has no exported member 'takeUntilDestroyed'.
+
+13 import { takeUntilDestroyed, finalize } from 'rxjs/operators';
+            ~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/modules/clientes/detail/detail.component.ts:88:7 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(observerOrNext?: Partial<Observer<unknown>> | ((value: unknown) => void) | undefined): Subscription', gave the following error.
+    Type '({ cliente, equipos }: { cliente: any; equipos: any; }) => void' is not assignable to type '(value: unknown) => void'.
+      Types of parameters '__0' and 'value' are incompatible.
+        Type 'unknown' is not assignable to type '{ cliente: any; equipos: any; }'.
+  Overload 2 of 2, '(next?: ((value: unknown) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): Subscription', gave the following error.
+    Argument of type '{ next: ({ cliente, equipos }: { cliente: any; equipos: any; }) => void; error: (err: any) => void; }' is not assignable to parameter of type '(value: unknown) => void'.
+      Object literal may only specify known properties, and 'next' does not exist in type '(value: unknown) => void'.
+
+88       next: ({ cliente, equipos }) => {
+         ~~~~
+
+
+
+Error: src/app/modules/clientes/detail/detail.component.ts:133:9 - error TS2322: Type 'unknown' is not assignable to type 'ClienteResponse | null'.
+
+133         this.cliente = response;
+            ~~~~~~~~~~~~
+
+
+Error: src/app/modules/clientes/list/list.component.html:11:41 - error TS2339: Property 'value' does not exist on type 'EventTarget'.
+
+11         (input)="onSearch($event.target.value)"
+                                           ~~~~~
+
+  src/app/modules/clientes/list/list.component.ts:29:16
+    29   templateUrl: './list.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component ListComponent.
+
+
+Error: src/app/modules/clientes/list/list.component.html:11:41 - error TS2531: Object is possibly 'null'.
+
+11         (input)="onSearch($event.target.value)"
+                                           ~~~~~
+
+  src/app/modules/clientes/list/list.component.ts:29:16
+    29   templateUrl: './list.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component ListComponent.
+
+
+Error: src/app/modules/clientes/list/list.component.ts:11:57 - error TS2305: Module '"rxjs/operators"' has no exported member 'takeUntilDestroyed'.
+
+11 import { debounceTime, distinctUntilChanged, switchMap, takeUntilDestroyed, finalize } from 'rxjs/operators';
+                                                           ~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/modules/clientes/list/list.component.ts:64:9 - error TS2322: Type 'unknown' is not assignable to type 'ClienteResponse[]'.
+
+64         this.clientes = clientes;
+           ~~~~~~~~~~~~~
+
+
+Error: src/app/modules/clientes/list/list.component.ts:65:37 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'ClienteResponse[]'.
+
+65         this.filteredClientes$.next(clientes);
+                                       ~~~~~~~~
+
+
+

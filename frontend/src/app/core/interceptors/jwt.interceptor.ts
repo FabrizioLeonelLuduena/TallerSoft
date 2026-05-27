@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   HttpRequest,
-  HttpHandler,
+  HttpHandlerFn,
   HttpEvent,
-  HttpInterceptor,
+  HttpInterceptorFn,
   HttpErrorResponse
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -12,43 +12,46 @@ import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
 
 /**
- * JWT Interceptor
+ * JWT Interceptor Function (Angular 17+)
  * Attaches Authorization header with JWT token to all HTTP requests
  * Handles 401 responses by logging out and redirecting to login
  */
-@Injectable()
-export class JwtInterceptor implements HttpInterceptor {
+export const jwtInterceptor: HttpInterceptorFn = (
+  request: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const token = authService.getToken();
 
-  constructor(private authService: AuthService, private router: Router) {}
+  // Debug logging
+  console.log('[jwtInterceptor] Processing request:', request.url);
+  console.log('[jwtInterceptor] Token available:', !!token);
 
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = this.authService.getToken();
-
-    // Debug logging
-    console.log('[JwtInterceptor] Processing request:', request.url);
-    console.log('[JwtInterceptor] Token available:', !!token);
-
-    // Attach token to request if available
-    if (token) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      console.log('[JwtInterceptor] Authorization header added');
-    }
-
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        console.error('[JwtInterceptor] HTTP Error:', error.status, error.message);
-        
-        // Handle 401 Unauthorized
-        if (error.status === 401) {
-          this.authService.logout();
-          this.router.navigate(['/login']);
-        }
-        return throwError(() => error);
-      })
-    );
+  // Attach token to request if available
+  if (token) {
+    console.log('[jwtInterceptor] Token found, adding Authorization header');
+    request = request.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    console.log('[jwtInterceptor] Authorization header added:', request.headers.get('Authorization')?.substring(0, 30) + '...');
+  } else {
+    console.warn('[jwtInterceptor] No token found in sessionStorage');
   }
-}
+
+  return next(request).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error('[jwtInterceptor] HTTP Error:', error.status, error.message);
+      
+      // Handle 401 Unauthorized
+      if (error.status === 401) {
+        console.log('[jwtInterceptor] 401 Unauthorized - logging out');
+        authService.logout();
+        router.navigate(['/login']);
+      }
+      return throwError(() => error);
+    })
+  );
+};

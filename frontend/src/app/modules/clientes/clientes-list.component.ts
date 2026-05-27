@@ -1,34 +1,89 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
+import { RouterModule } from '@angular/router';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-clientes-list',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatTableModule, MatButtonModule, MatIconModule],
-  template: `
-    <div class="clientes-container">
-      <div class="header">
-        <h1>Clientes</h1>
-        <button mat-raised-button color="primary">
-          <mat-icon>add</mat-icon>
-          Nuevo Cliente
-        </button>
-      </div>
-      <mat-card class="list-card">
-        <p>Listado de clientes próximamente</p>
-      </mat-card>
-    </div>
-  `,
-  styles: [`
-    .clientes-container {
-      h1 { font-size: 24px; font-weight: 700; color: #1e3c72; }
-      .header { display: flex; justify-content: space-between; margin-bottom: 24px; }
-      .list-card { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
-    }
-  `]
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatDividerModule,
+    RouterModule
+  ],
+  templateUrl: './clientes-list.component.html',
+  styleUrls: ['./clientes-list.component.scss']
 })
-export class ClientesListComponent {}
+export class ClientesListComponent implements OnInit {
+  searchTerm = '';
+  loading = false;
+  clientes: any[] = [];
+  filteredClientes: any[] = [];
+  currentRole$ = of('ADMIN');
+
+  ngOnInit() {
+    this.loadClientes();
+  }
+
+  loadClientes() {
+    this.loading = true;
+    // Load clientes from service
+    setTimeout(() => {
+      this.clientes = [];
+      this.loading = false;
+      this.filterClientes();
+    }, 500);
+  }
+
+  filterClientes() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredClientes = this.clientes.filter(c =>
+      c.nombre.toLowerCase().includes(term)
+    );
+  }
+
+  getInitials(nombre: string): string {
+    return nombre
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
+
+  getClienteOrdenesCount(clienteId: string): number {
+    return 0;
+  }
+
+  verDetalles(cliente: any) {
+    // Navigate to detail
+  }
+
+  crearCliente() {
+    // Navigate to create
+  }
+
+  editarCliente(cliente: any) {
+    // Navigate to edit
+  }
+
+  eliminarCliente(cliente: any) {
+    // Delete cliente
+  }
+
+  canCreateCliente(): boolean {
+    return true;
+  }
+}
+

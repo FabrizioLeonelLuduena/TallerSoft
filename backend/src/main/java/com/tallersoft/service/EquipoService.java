@@ -94,4 +94,20 @@ public class EquipoService {
         log.info("Equipo actualizado: {}", updated.getTipo());
         return equipoMapper.toResponse(updated);
     }
+
+    /**
+     * Delete an equipment
+     *
+     * @param id Equipment ID
+     * @throws EntityNotFoundException if equipment not found
+     */
+    @Transactional
+    public void eliminarEquipo(Long id) {
+        Equipo equipo = equipoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Equipo no encontrado con ID: " + id));
+        
+        equipoRepository.deleteById(id);
+        log.info("Equipo eliminado: {}", equipo.getTipo());
+    }
 }
