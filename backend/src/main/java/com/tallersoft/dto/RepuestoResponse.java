@@ -2,6 +2,7 @@ package com.tallersoft.dto;
 
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class RepuestoResponse {
@@ -12,4 +13,5 @@ public class RepuestoResponse {
     private Integer stockActual;
     private Integer stockMinimo;
     private Boolean critico;
+    private LocalDateTime createdAt;
 }

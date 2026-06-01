@@ -479,6 +479,54 @@
 }
 
 /* ========================================
+   STOCK CRÍTICO WIDGET
+   ======================================== */
+.stock-critico-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.stock-critico-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: rgba(239, 68, 68, 0.06);
+  border-left: 3px solid var(--color-danger);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: var(--font-size-sm);
+
+  .stock-critico-nombre {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60%;
+  }
+
+  .stock-critico-valores {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .stock-actual {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-danger);
+    }
+
+    .stock-sep {
+      color: var(--color-text-muted);
+    }
+
+    .stock-minimo {
+      color: var(--color-text-muted);
+    }
+  }
+}
+
+/* ========================================
    RESPONSIVE
    ======================================== */
 @media (max-width: 1200px) {

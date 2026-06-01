@@ -1,0 +1,85 @@
+import { Component, inject, DestroyRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RepuestosService, RepuestoRequest } from '@modules/ordenes/services/repuestos.service';
+
+@Component({
+  selector: 'app-stock-create',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatSnackBarModule,
+  ],
+  templateUrl: './create.component.html',
+  styleUrls: ['./create.component.scss']
+})
+export class StockCreateComponent {
+  private fb = inject(FormBuilder);
+  private repuestosService = inject(RepuestosService);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
+  private destroyRef = inject(DestroyRef);
+
+  isLoading = false;
+
+  form: FormGroup = this.fb.group({
+    nombre: ['', Validators.required],
+    categoria: [''],
+    precio: ['', [Validators.required, Validators.min(0.01)]],
+    stockActual: [0, [Validators.required, Validators.min(0)]],
+    stockMinimo: [5, [Validators.required, Validators.min(0)]]
+  });
+
+  get nombreControl() { return this.form.get('nombre'); }
+  get precioControl() { return this.form.get('precio'); }
+  get stockActualControl() { return this.form.get('stockActual'); }
+  get stockMinimoControl() { return this.form.get('stockMinimo'); }
+
+  onSubmit(): void {
+    if (this.form.invalid) {
+      Object.keys(this.form.controls).forEach(key => {
+        this.form.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    const data: RepuestoRequest = {
+      nombre: this.form.value.nombre,
+      categoria: this.form.value.categoria || null,
+      precio: Number(this.form.value.precio),
+      stockActual: Number(this.form.value.stockActual),
+      stockMinimo: Number(this.form.value.stockMinimo)
+    };
+
+    this.repuestosService.crearRepuesto(data).pipe(
+      finalize(() => this.isLoading = false),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        this.snackBar.open(
+          'Repuesto creado correctamente',
+          'Cerrar',
+          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+        );
+        this.router.navigate(['/stock']);
+      },
+      error: err => {
+        this.snackBar.open(
+          err.error?.message || 'Error al crear el repuesto',
+          'Cerrar',
+          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+        );
+      }
+    });
+  }
+
+  onCancel(): void {
+    this.router.navigate(['/stock']);
+  }
+}

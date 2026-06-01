@@ -145,7 +145,7 @@ public class UsuarioService {
     }
 
     /**
-     * Soft delete a user (sets activo=false)
+     * Delete a user (hard delete - removes from database)
      *
      * @param id User ID
      * @throws EntityNotFoundException if user not found
@@ -155,9 +155,8 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
         
-        usuario.setActivo(false);
-        usuarioRepository.save(usuario);
-        log.info("Usuario desactivado: {}", usuario.getNombre());
+        usuarioRepository.delete(usuario);
+        log.info("Usuario eliminado: {}", usuario.getNombre());
     }
 
     /**

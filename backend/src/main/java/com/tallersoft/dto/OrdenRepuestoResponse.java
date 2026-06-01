@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 @Data
 public class OrdenRepuestoResponse {
     private Long id;
+    private Long ordenId;
     private Long repuestoId;
     private String nombreRepuesto;
     private Integer cantidad;

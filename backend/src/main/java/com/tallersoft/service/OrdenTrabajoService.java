@@ -163,8 +163,12 @@ public class OrdenTrabajoService {
         
         OrdenTrabajo orden = ordenTrabajoRepository.findById(ordenId)
                 .orElseThrow(() -> new EntityNotFoundException("Orden no encontrada"));
-        
-        // Usar pessimistic locking para evitar race conditions
+
+        if (orden.getEstado() == EstadoOrden.ENTREGADO) {
+            throw new InvalidStateTransitionException(
+                    "No se puede agregar repuestos a una orden ya entregada");
+        }
+
         Repuesto repuesto = repuestoRepository.findById(request.getRepuestoId())
                 .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
         

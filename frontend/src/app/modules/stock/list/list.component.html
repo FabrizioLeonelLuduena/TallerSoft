@@ -5,10 +5,6 @@
       <h1 class="page-title">Gestión de Stock</h1>
       <p class="page-subtitle">Monitorea y gestiona tu inventario de repuestos</p>
     </div>
-    <button mat-raised-button color="primary" (click)="crearRepuesto()">
-      <mat-icon>add</mat-icon>
-      Nuevo Repuesto
-    </button>
   </div>
 
   <!-- Summary Cards Section -->
@@ -54,7 +50,7 @@
     </div>
   </div>
 
-  <!-- Filters -->
+  <!-- Filters + Create button -->
   <div class="stock-filters">
     <div class="filter-chip-group">
       <button mat-stroked-button
@@ -85,6 +81,16 @@
              [(ngModel)]="searchTerm"
              (input)="filterStock()">
     </div>
+
+    <button
+      class="btn-create"
+      type="button"
+      title="Nuevo Repuesto"
+      (click)="onCreateClick()"
+      *ngIf="currentRole === 'ADMIN'"
+    >
+      <span>+</span>
+    </button>
   </div>
 
   <!-- Skeleton Loading -->
@@ -167,10 +173,16 @@
     <p *ngIf="!searchTerm">
       Comienza agregando tu primer repuesto al inventario
     </p>
-    <button mat-raised-button color="primary" (click)="crearRepuesto()">
+    <button class="btn-empty-create" type="button" (click)="onCreateClick()" *ngIf="currentRole === 'ADMIN'">
       <mat-icon>add</mat-icon>
       Crear Primer Repuesto
     </button>
   </div>
 </div>
+
+<app-repuesto-dialog
+  [isOpen]="showEditDialog"
+  [repuesto]="repuestoToEdit"
+  (closed)="onDialogClosed($event)"
+></app-repuesto-dialog>
 

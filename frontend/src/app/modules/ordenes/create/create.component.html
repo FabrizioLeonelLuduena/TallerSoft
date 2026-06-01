@@ -1,77 +1,188 @@
-<div class="create-container">
-  <mat-card class="form-card">
-    <mat-card-header>
-      <mat-card-title>Crear Nueva Orden de Trabajo</mat-card-title>
-    </mat-card-header>
+<div class="create-container page-enter">
+  <!-- Back Button -->
+  <button class="btn-back" (click)="navigateBack()">
+    <span class="material-symbols-outlined">arrow_back</span>
+    Volver
+  </button>
 
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Cliente</mat-label>
-          <mat-select formControlName="clienteId" required>
-            <mat-option value="1">Cliente 1</mat-option>
-            <mat-option value="2">Cliente 2</mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('clienteId')?.hasError('required')">
-            Cliente es requerido
-          </mat-error>
-        </mat-form-field>
+  <!-- Form Header -->
+  <div class="form-header">
+    <div class="header-content">
+      <h1 class="form-title">Nueva Orden de Trabajo</h1>
+      <p class="form-subtitle">Registrá una nueva reparación</p>
+    </div>
+  </div>
 
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Equipo</mat-label>
-          <mat-select formControlName="equipoId" required>
-            <mat-option value="1">Equipo 1</mat-option>
-            <mat-option value="2">Equipo 2</mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('equipoId')?.hasError('required')">
-            Equipo es requerido
-          </mat-error>
-        </mat-form-field>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
+    <!-- SECTION 1: Cliente y Equipo -->
+    <section class="form-section">
+      <h2 class="section-title">Cliente y Equipo</h2>
 
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Técnico (Opcional)</mat-label>
-          <mat-select formControlName="tecnicoId">
-            <mat-option value="">Sin asignar</mat-option>
-            <mat-option value="1">Técnico 1</mat-option>
-            <mat-option value="2">Técnico 2</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <div class="form-group">
+        <label class="field-label">
+          Cliente
+          <span class="required">*</span>
+        </label>
+        <div class="search-wrapper">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input 
+            type="text"
+            class="ts-input search-input"
+            placeholder="Buscar cliente..."
+            [(ngModel)]="clienteSearchTerm"
+            (input)="onClienteSearch($event)"
+            [ngModelOptions]="{ standalone: true }"
+          />
+          <div class="dropdown" *ngIf="showClienteDropdown && clientes.length > 0">
+            <div class="dropdown-item" *ngFor="let cliente of clientes" (click)="onClienteSelect(cliente)">
+              <div class="dropdown-item-content">
+                <div class="cliente-nombre">{{ cliente.nombre }}</div>
+                <div class="cliente-email">{{ cliente.email }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="selectedCliente" class="selected-tag">
+          <span class="check-icon">✓</span>
+          <span>{{ selectedCliente.nombre }}</span>
+        </div>
+      </div>
 
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Falla Reportada</mat-label>
-          <textarea matInput 
-            formControlName="fallaReportada" 
-            required 
-            minlength="10"
-            rows="4"></textarea>
-          <mat-error *ngIf="form.get('fallaReportada')?.hasError('required')">
-            Falla reportada es requerida
-          </mat-error>
-          <mat-error *ngIf="form.get('fallaReportada')?.hasError('minlength')">
-            Debe tener al menos 10 caracteres
-          </mat-error>
-        </mat-form-field>
+      <div class="form-group">
+        <label class="field-label">
+          Equipo
+          <span class="required">*</span>
+        </label>
+        <select 
+          class="ts-input"
+          formControlName="equipoId"
+          [disabled]="!selectedCliente"
+        >
+          <option value="" disabled selected>Seleccionar equipo...</option>
+          <option *ngFor="let eq of equipos" [value]="eq.id">
+            {{ eq.tipo }} • {{ eq.marca }} {{ eq.modelo }}
+          </option>
+        </select>
+        <div class="error-text" *ngIf="equipoIdControl?.invalid && equipoIdControl?.touched">
+          El equipo es requerido
+        </div>
+      </div>
+    </section>
 
-        <div class="priority-group">
-          <label>Prioridad</label>
-          <mat-radio-group formControlName="prioridad" class="radio-group">
-            <mat-radio-button value="BAJA">Baja</mat-radio-button>
-            <mat-radio-button value="NORMAL">Normal</mat-radio-button>
-            <mat-radio-button value="ALTA">Alta</mat-radio-button>
-          </mat-radio-group>
+    <!-- SECTION 2: Detalles -->
+    <section class="form-section">
+      <h2 class="section-title">Detalles</h2>
+
+      <div class="form-grid">
+        <div class="form-column">
+          <div class="form-group">
+            <label class="field-label">
+              Técnico (Opcional)
+            </label>
+            <select class="ts-input" formControlName="tecnicoId">
+              <option value="">Sin asignar</option>
+              <option *ngFor="let tec of tecnicos" [value]="tec.id">
+                {{ tec.nombre }}
+              </option>
+            </select>
+          </div>
         </div>
 
-        <div class="button-group">
-          <button mat-raised-button type="submit" color="primary" [disabled]="loading">
-            <mat-icon *ngIf="!loading">check</mat-icon>
-            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
-            {{ loading ? 'Creando...' : 'Crear Orden' }}
-          </button>
-          <button mat-button type="button" routerLink="/ordenes">
-            Cancelar
-          </button>
+        <div class="form-column">
+          <div class="form-group">
+            <label class="field-label">
+              Presupuesto (Opcional)
+            </label>
+            <div class="input-prefix-wrapper">
+              <span class="prefix">$</span>
+              <input 
+                type="number"
+                class="ts-input"
+                formControlName="presupuesto"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+            </div>
+          </div>
         </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Prioridad -->
+    <section class="form-section">
+      <h2 class="section-title">Prioridad</h2>
+
+      <div class="selection-card-group">
+        <button
+          type="button"
+          class="selection-card"
+          [class.active]="form.get('prioridad')?.value === 'BAJA'"
+          (click)="selectPrioridad('BAJA')"
+        >
+          <span class="card-label">Baja</span>
+          <span class="material-symbols-outlined">trending_down</span>
+        </button>
+
+        <button
+          type="button"
+          class="selection-card"
+          [class.active]="form.get('prioridad')?.value === 'NORMAL'"
+          (click)="selectPrioridad('NORMAL')"
+        >
+          <span class="card-label">Normal</span>
+          <span class="material-symbols-outlined">trending_flat</span>
+        </button>
+
+        <button
+          type="button"
+          class="selection-card"
+          [class.active]="form.get('prioridad')?.value === 'ALTA'"
+          (click)="selectPrioridad('ALTA')"
+        >
+          <span class="card-label">Alta</span>
+          <span class="material-symbols-outlined">trending_up</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Falla -->
+    <section class="form-section">
+      <h2 class="section-title">Descripción del Problema</h2>
+
+      <div class="form-group">
+        <label class="field-label">
+          Falla Reportada
+          <span class="required">*</span>
+        </label>
+        <textarea
+          class="ts-input textarea-input"
+          formControlName="fallaReportada"
+          placeholder="Describí el problema en detalle..."
+          rows="5"
+        ></textarea>
+        <div class="error-text" *ngIf="fallaReportadaControl?.invalid && fallaReportadaControl?.touched">
+          La falla reportada es requerida
+        </div>
+      </div>
+    </section>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="navigateBack()">
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        class="ts-btn-primary"
+        [disabled]="form.invalid || isSubmitting"
+      >
+        <span *ngIf="!isSubmitting">Crear Orden</span>
+        <span *ngIf="isSubmitting" class="loading-state">
+          <span class="material-symbols-outlined loading-icon">hourglass_empty</span>
+          Creando...
+        </span>
+      </button>
+    </div>
+  </form>
 </div>

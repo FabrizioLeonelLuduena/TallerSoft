@@ -1,86 +1,109 @@
-<h2 mat-dialog-title>
-  {{ isEditMode ? 'Editar Repuesto' : 'Nuevo Repuesto' }}
-</h2>
+<div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
 
-<mat-dialog-content>
-  <form [formGroup]="form" class="dialog-form">
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Nombre</mat-label>
-      <input matInput formControlName="nombre" required>
-      <mat-error *ngIf="form.get('nombre')?.hasError('required')">
-        Nombre es requerido
-      </mat-error>
-      <mat-error *ngIf="form.get('nombre')?.hasError('minlength')">
-        Debe tener al menos 3 caracteres
-      </mat-error>
-    </mat-form-field>
+    <div class="modal-header">
+      <h2>Editar Repuesto</h2>
+      <button class="btn-close" type="button" (click)="onCancel()" [disabled]="loading">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Categoría</mat-label>
-      <input matInput formControlName="categoria" required>
-      <mat-error *ngIf="form.get('categoria')?.hasError('required')">
-        Categoría es requerida
-      </mat-error>
-    </mat-form-field>
+    <form [formGroup]="form" class="modal-form" (ngSubmit)="onSubmit()">
 
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Precio</mat-label>
-      <input matInput 
-        type="number" 
-        formControlName="precio" 
-        required
-        step="0.01"
-        min="0">
-      <mat-error *ngIf="form.get('precio')?.hasError('required')">
-        Precio es requerido
-      </mat-error>
-      <mat-error *ngIf="form.get('precio')?.hasError('min')">
-        Precio debe ser mayor a 0
-      </mat-error>
-    </mat-form-field>
+      <div class="form-field">
+        <label for="d-nombre">Nombre <span class="required">*</span></label>
+        <input
+          id="d-nombre"
+          type="text"
+          class="ts-input"
+          formControlName="nombre"
+          placeholder="Ej: Pantalla OLED iPhone 13"
+          [class.error]="form.get('nombre')?.invalid && form.get('nombre')?.touched"
+        />
+        <span class="error-text" *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched">
+          El nombre es requerido
+        </span>
+        <span class="error-text" *ngIf="form.get('nombre')?.hasError('minlength') && form.get('nombre')?.touched">
+          Debe tener al menos 3 caracteres
+        </span>
+      </div>
 
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Stock Actual</mat-label>
-      <input matInput 
-        type="number" 
-        formControlName="stockActual" 
-        required
-        min="0">
-      <mat-error *ngIf="form.get('stockActual')?.hasError('required')">
-        Stock actual es requerido
-      </mat-error>
-      <mat-error *ngIf="form.get('stockActual')?.hasError('min')">
-        Stock no puede ser negativo
-      </mat-error>
-    </mat-form-field>
+      <div class="form-field">
+        <label for="d-categoria">Categoría</label>
+        <input
+          id="d-categoria"
+          type="text"
+          class="ts-input"
+          formControlName="categoria"
+          placeholder="Ej: Pantallas, Baterías, Cables..."
+        />
+      </div>
 
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Stock Mínimo</mat-label>
-      <input matInput 
-        type="number" 
-        formControlName="stockMinimo" 
-        required
-        min="0">
-      <mat-error *ngIf="form.get('stockMinimo')?.hasError('required')">
-        Stock mínimo es requerido
-      </mat-error>
-      <mat-error *ngIf="form.get('stockMinimo')?.hasError('min')">
-        Stock mínimo no puede ser negativo
-      </mat-error>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
+      <div class="form-field">
+        <label for="d-precio">Precio <span class="required">*</span></label>
+        <input
+          id="d-precio"
+          type="number"
+          class="ts-input"
+          formControlName="precio"
+          placeholder="Ej: 45000"
+          min="0"
+          step="0.01"
+          [class.error]="form.get('precio')?.invalid && form.get('precio')?.touched"
+        />
+        <span class="error-text" *ngIf="form.get('precio')?.hasError('required') && form.get('precio')?.touched">
+          El precio es requerido
+        </span>
+        <span class="error-text" *ngIf="form.get('precio')?.hasError('min') && form.get('precio')?.touched">
+          El precio debe ser mayor a 0
+        </span>
+      </div>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="dialogRef.close()" [disabled]="loading">
-    Cancelar
-  </button>
-  <button mat-raised-button 
-    color="primary"
-    (click)="onSubmit()"
-    [disabled]="loading">
-    <mat-icon *ngIf="!loading">{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
-    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
-    {{ loading ? 'Guardando...' : (isEditMode ? 'Guardar' : 'Crear') }}
-  </button>
-</mat-dialog-actions>
+      <div class="form-grid-2">
+        <div class="form-field">
+          <label for="d-stockActual">Stock Actual <span class="required">*</span></label>
+          <input
+            id="d-stockActual"
+            type="number"
+            class="ts-input"
+            formControlName="stockActual"
+            min="0"
+            step="1"
+            [class.error]="form.get('stockActual')?.invalid && form.get('stockActual')?.touched"
+          />
+          <span class="error-text" *ngIf="form.get('stockActual')?.hasError('min') && form.get('stockActual')?.touched">
+            No puede ser negativo
+          </span>
+        </div>
+
+        <div class="form-field">
+          <label for="d-stockMinimo">Stock Mínimo <span class="required">*</span></label>
+          <input
+            id="d-stockMinimo"
+            type="number"
+            class="ts-input"
+            formControlName="stockMinimo"
+            min="0"
+            step="1"
+            [class.error]="form.get('stockMinimo')?.invalid && form.get('stockMinimo')?.touched"
+          />
+          <span class="error-text" *ngIf="form.get('stockMinimo')?.hasError('min') && form.get('stockMinimo')?.touched">
+            No puede ser negativo
+          </span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" type="button" (click)="onCancel()" [disabled]="loading">
+          Cancelar
+        </button>
+        <button class="btn-save" type="submit" [disabled]="loading">
+          <mat-spinner *ngIf="loading" diameter="18"></mat-spinner>
+          <mat-icon *ngIf="!loading">edit</mat-icon>
+          {{ loading ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

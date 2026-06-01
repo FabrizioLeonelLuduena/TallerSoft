@@ -9,8 +9,10 @@ import java.math.BigDecimal;
 @Mapper(componentModel = "spring")
 public interface OrdenRepuestoMapper {
     
+    @Mapping(source = "orden.id", target = "ordenId")
     @Mapping(source = "repuesto.id", target = "repuestoId")
     @Mapping(source = "repuesto.nombre", target = "nombreRepuesto")
+    @Mapping(target = "total", expression = "java(calculateTotal(ordenRepuesto))")
     OrdenRepuestoResponse toResponse(OrdenRepuesto ordenRepuesto);
     
     default BigDecimal calculateTotal(OrdenRepuesto ordenRepuesto) {

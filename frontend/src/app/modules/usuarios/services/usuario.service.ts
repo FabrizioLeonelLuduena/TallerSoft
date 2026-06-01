@@ -43,4 +43,11 @@ export class UsuarioService {
   crearUsuario(data: UsuarioRequest): Observable<UsuarioResponse> {
     return this.http.post<UsuarioResponse>(`${this.authApi}/register`, data);
   }
+
+  /**
+   * Delete a user by ID
+   */
+  deleteUsuario(usuarioId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${usuarioId}`);
+  }
 }

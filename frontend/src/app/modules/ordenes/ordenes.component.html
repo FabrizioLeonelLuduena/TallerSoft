@@ -1,0 +1,92 @@
+<div class="ordenes-principal-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="page-title">Órdenes de Trabajo</h1>
+      <p class="page-subtitle">Seguimiento de reparaciones</p>
+    </div>
+  </div>
+
+  <!-- Control Bar -->
+  <div class="control-bar">
+    <!-- Search -->
+    <div class="search-input-wrapper">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input 
+        type="text" 
+        class="search-input ts-input"
+        placeholder="Buscar por #, cliente, falla o técnico..."
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+      />
+    </div>
+
+    <!-- Técnico Filter -->
+    <select 
+      class="filter-select ts-input"
+      [(ngModel)]="selectedTecnicoId"
+      (change)="applyFilters()"
+    >
+      <option [value]="null">Técnico</option>
+      <option *ngFor="let tec of tecnicos" [value]="tec.id">
+        {{ tec.nombre }}
+      </option>
+    </select>
+
+    <!-- Prioridad Filter -->
+    <select 
+      class="filter-select ts-input"
+      [(ngModel)]="selectedPrioridad"
+      (change)="applyFilters()"
+    >
+      <option value="">Prioridad</option>
+      <option *ngFor="let pri of prioridades" [value]="pri">
+        {{ pri }}
+      </option>
+    </select>
+
+    <!-- View Mode Toggle -->
+    <div class="view-toggle">
+      <button 
+        class="toggle-btn"
+        [class.active]="viewMode === 'kanban'"
+        (click)="switchViewMode('kanban')"
+        title="Vista Kanban"
+      >
+        <span class="material-symbols-outlined">view_column</span>
+      </button>
+      <button 
+        class="toggle-btn"
+        [class.active]="viewMode === 'lista'"
+        (click)="switchViewMode('lista')"
+        title="Vista Lista"
+      >
+        <span class="material-symbols-outlined">table_rows</span>
+      </button>
+    </div>
+
+    <!-- Create Button -->
+    <button *ngIf="canCreateOrden()" class="btn-create" (click)="navigateToCreate()">
+      +
+    </button>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Kanban View -->
+    <div 
+      *ngIf="viewMode === 'kanban'"
+      class="view-content view-transition-enter"
+    >
+      <app-kanban #kanbanChild></app-kanban>
+    </div>
+
+    <!-- Lista View -->
+    <div 
+      *ngIf="viewMode === 'lista'"
+      class="view-content view-transition-enter"
+    >
+      <app-ordenes-list #listaChild></app-ordenes-list>
+    </div>
+  </div>
+</div>

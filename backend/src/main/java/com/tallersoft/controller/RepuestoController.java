@@ -46,15 +46,15 @@ public class RepuestoController {
     }
     
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RepuestoResponse> crearRepuesto(@Valid @RequestBody RepuestoRequest request) {
         log.info("Creando nuevo repuesto");
         RepuestoResponse repuesto = repuestoService.crearRepuesto(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(repuesto);
     }
-    
+
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RepuestoResponse> editarRepuesto(
             @PathVariable Long id,
             @Valid @RequestBody RepuestoRequest request) {

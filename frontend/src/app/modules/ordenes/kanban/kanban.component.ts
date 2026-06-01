@@ -1,131 +1,189 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatButtonModule } from '@angular/material/button';
+import { RouterModule, Router } from '@angular/router';
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DragDropModule } from '@angular/cdk/drag-drop';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { OrdenesService, OrdenTrabajo } from '../services/ordenes.service';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
+
+interface KanbanColumn {
+  estado: string;
+  label: string;
+  ordenes: OrdenTrabajoResponse[];
+}
 
 @Component({
   selector: 'app-kanban',
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatChipsModule,
-    MatButtonModule,
+    RouterModule,
+    DragDropModule,
     MatIconModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatSnackBarModule,
-    DragDropModule
+    MatButtonModule,
+    MatSnackBarModule
   ],
   templateUrl: './kanban.component.html',
   styleUrls: ['./kanban.component.scss']
 })
-export class KanbanComponent implements OnInit, OnDestroy {
-  loading = true;
-  
-  pendientes: OrdenTrabajo[] = [];
-  enProceso: OrdenTrabajo[] = [];
-  listo: OrdenTrabajo[] = [];
-  entregado: OrdenTrabajo[] = [];
-  
-  private destroy$ = new Subject<void>();
-  
-  statuses = ['PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO'];
+export class KanbanComponent implements OnInit {
+  private ordenesService = inject(OrdenesService);
+  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
-  constructor(
-    private ordenesService: OrdenesService,
-    private snackBar: MatSnackBar
-  ) {}
+  columns: KanbanColumn[] = [
+    { estado: 'PENDIENTE', label: 'Pendiente', ordenes: [] },
+    { estado: 'EN_PROCESO', label: 'En Proceso', ordenes: [] },
+    { estado: 'LISTO', label: 'Listo', ordenes: [] },
+    { estado: 'ENTREGADO', label: 'Entregado', ordenes: [] }
+  ];
 
-  ngOnInit(): void {
-    this.cargarOrdenes();
+  connectedLists = ['PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO'];
+  isLoading = true;
+  allOrdenes: OrdenTrabajoResponse[] = [];
+
+  ngOnInit() {
+    this.loadOrdenes();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  cargarOrdenes(): void {
-    this.loading = true;
+  loadOrdenes() {
+    this.isLoading = true;
     this.ordenesService.listarOrdenesActivas()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (ordenes) => {
-          this.pendientes = ordenes.filter(o => o.estado === 'PENDIENTE');
-          this.enProceso = ordenes.filter(o => o.estado === 'EN_PROCESO');
-          this.listo = ordenes.filter(o => o.estado === 'LISTO');
-          this.entregado = ordenes.filter(o => o.estado === 'ENTREGADO');
-          this.loading = false;
+          this.allOrdenes = ordenes;
+          this.reorganizeColumns(ordenes);
+          this.isLoading = false;
         },
-        error: (err) => {
+        error: () => {
+          this.isLoading = false;
           this.snackBar.open('Error al cargar órdenes', 'Cerrar', { duration: 3000 });
-          this.loading = false;
         }
       });
   }
 
-  drop(event: CdkDragDrop<OrdenTrabajo[]>): void {
+  setFilteredOrdenes(ordenes: OrdenTrabajoResponse[]) {
+    this.reorganizeColumns(ordenes);
+  }
+
+  private reorganizeColumns(ordenes: OrdenTrabajoResponse[]) {
+    this.columns.forEach(col => col.ordenes = []);
+    ordenes.forEach(orden => {
+      const col = this.columns.find(c => c.estado === orden.estado);
+      if (col) col.ordenes.push(orden);
+    });
+  }
+
+  onDrop(event: CdkDragDrop<OrdenTrabajoResponse[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      const orden = event.previousContainer.data[event.previousIndex];
-      const nuevoEstado = this.mapContainerToEstado(event.container);
-      
-      this.ordenesService.cambiarEstado(orden.id, nuevoEstado)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            transferArrayItem(
-              event.previousContainer.data,
-              event.container.data,
-              event.previousIndex,
-              event.currentIndex
-            );
-            this.snackBar.open(`Orden ${orden.id} movida a ${nuevoEstado}`, 'Cerrar', { duration: 2000 });
-          },
-          error: (err) => {
-            if (err.status === 409) {
-              this.snackBar.open(err.error.message || 'Transición inválida', 'Cerrar', { duration: 3000 });
-            } else {
-              this.snackBar.open('Error al actualizar orden', 'Cerrar', { duration: 3000 });
-            }
-            this.cargarOrdenes();
-          }
-        });
+      return;
+    }
+
+    const orden = event.previousContainer.data[event.previousIndex];
+    const nuevoEstado = this.columns[this.connectedLists.indexOf(event.container.id)].estado;
+    
+    const originalPrevItems = [...event.previousContainer.data];
+    const originalCurrItems = [...event.container.data];
+
+    transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+
+    this.ordenesService.cambiarEstado(orden.id, nuevoEstado)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          orden.estado = nuevoEstado as 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO';
+          this.snackBar.open('Orden actualizada', 'Cerrar', { duration: 2000 });
+        },
+        error: (err) => {
+          event.previousContainer.data = originalPrevItems;
+          event.container.data = originalCurrItems;
+          const message = err.error?.message || 'Error al cambiar estado';
+          this.snackBar.open(message, 'Cerrar', { duration: 3000 });
+        }
+      });
+  }
+
+  getRelativeTime(dateStr: string): string {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'hace un momento';
+    if (diffMins < 60) return `hace ${diffMins}m`;
+    if (diffHours < 24) return `hace ${diffHours}h`;
+    if (diffDays === 1) return 'ayer';
+    return `hace ${diffDays}d`;
+  }
+
+  getTecnicoInitials(nombre?: string | null): string {
+    if (!nombre) return '?';
+    return nombre.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
+
+  getEstadoColor(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'var(--color-info)';
+      case 'EN_PROCESO': return 'var(--color-accent)';
+      case 'LISTO': return 'var(--color-success)';
+      case 'ENTREGADO': return 'var(--color-text-muted)';
+      default: return 'var(--color-text-muted)';
     }
   }
 
-  private mapContainerToEstado(container: any): string {
-    if (container.id === 'pendientes') return 'PENDIENTE';
-    if (container.id === 'en-proceso') return 'EN_PROCESO';
-    if (container.id === 'listo') return 'LISTO';
-    if (container.id === 'entregado') return 'ENTREGADO';
-    return 'PENDIENTE';
+  getEstadoBgColor(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'rgba(59, 130, 246, 0.1)';
+      case 'EN_PROCESO': return 'rgba(0, 245, 212, 0.1)';
+      case 'LISTO': return 'rgba(34, 197, 94, 0.1)';
+      case 'ENTREGADO': return 'rgba(156, 163, 175, 0.1)';
+      default: return 'transparent';
+    }
   }
 
-  getPriorityColor(prioridad: string): string {
+  getCardBorderColor(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'var(--color-info)';
+      case 'EN_PROCESO': return 'var(--color-accent)';
+      case 'LISTO': return 'var(--color-success)';
+      case 'ENTREGADO': return 'var(--color-text-muted)';
+      default: return 'var(--color-border)';
+    }
+  }
+
+  getPrioridadColor(prioridad: string): string {
     switch (prioridad) {
-      case 'ALTA': return 'warn';
-      case 'NORMAL': return 'accent';
-      case 'BAJA': return 'primary';
-      default: return 'primary';
+      case 'ALTA': return 'var(--color-danger)';
+      case 'NORMAL': return 'var(--color-warning)';
+      case 'BAJA': return 'var(--color-text-muted)';
+      default: return 'var(--color-text-muted)';
     }
+  }
+
+  navigateToDetail(ordenId: number) {
+    this.router.navigate(['/ordenes', ordenId]);
+  }
+
+  navigateToList() {
+    this.router.navigate(['/ordenes']);
+  }
+
+  navigateToCreateNew() {
+    this.router.navigate(['/ordenes/nueva']);
+  }
+
+  padOrderId(id: number): string {
+    return String(id).padStart(4, '0');
+  }
+
+  trackByOrdenId(index: number, orden: OrdenTrabajoResponse): number {
+    return orden.id;
   }
 }

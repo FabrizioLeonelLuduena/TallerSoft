@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
-import { OrdenesListComponent } from './ordenes-list.component';
+import { OrdenesPrincipalComponent } from './ordenes.component';
+import { DetailComponent } from './detail/detail.component';
+import { CreateComponent } from './create/create.component';
 
-export const ordenesRoutes: Routes = [
-  {
-    path: '',
-    component: OrdenesListComponent,
-  },
+export const ORDENES_ROUTES: Routes = [
+  { path: '', component: OrdenesPrincipalComponent },
+  { path: 'nueva', component: CreateComponent },
+  { path: ':id', component: DetailComponent }
 ];

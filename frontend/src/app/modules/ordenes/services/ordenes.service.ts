@@ -1,26 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '@environments/environment';
 
-export interface OrdenTrabajo {
-  id: number;
-  equipoId: number;
-  clienteNombre: string;
-  clienteId: number;
-  tecnicoId: number;
-  tecnicoNombre: string;
-  fallaReportada: string;
-  diagnostico: string;
-  estado: string;
-  prioridad: string;
-  presupuesto: number;
-  createdAt: string;
-  updatedAt: string;
-  repuestos: OrdenRepuesto[];
-}
-
-export interface OrdenRepuesto {
+export interface OrdenRepuestoResponse {
   id: number;
   repuestoId: number;
   nombreRepuesto: string;
@@ -29,50 +12,88 @@ export interface OrdenRepuesto {
   total: number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface OrdenTrabajoResponse {
+  id: number;
+  equipoId: number;
+  clienteId: number;
+  clienteNombre: string;
+  tecnicoId: number | null;
+  tecnicoNombre: string | null;
+  fallaReportada: string;
+  diagnostico: string | null;
+  estado: 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO';
+  prioridad: 'BAJA' | 'NORMAL' | 'ALTA';
+  presupuesto: number;
+  createdAt: string;
+  updatedAt: string;
+  repuestos: OrdenRepuestoResponse[];
+}
+
+export interface OrdenTrabajoRequest {
+  equipoId: number;
+  clienteId: number;
+  tecnicoId?: number | null;
+  fallaReportada: string;
+  prioridad: 'BAJA' | 'NORMAL' | 'ALTA';
+}
+
+export interface CambiarEstadoRequest {
+  nuevoEstado: 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO';
+}
+
+export interface DiagnosticoRequest {
+  diagnostico: string;
+}
+
+export interface AgregarRepuestoRequest {
+  repuestoId: number;
+  cantidad: number;
+}
+
+@Injectable({ providedIn: 'root' })
 export class OrdenesService {
-  private apiUrl = `${environment.apiUrl}/ordenes`;
+  private api = `${environment.apiUrl}/api/ordenes`;
 
   constructor(private http: HttpClient) {}
 
-  listarOrdenes(filtros?: any): Observable<OrdenTrabajo[]> {
+  listarOrdenes(filtros?: { estado?: string; tecnicoId?: number }): Observable<OrdenTrabajoResponse[]> {
     let params = new HttpParams();
     if (filtros) {
       if (filtros.estado) params = params.set('estado', filtros.estado);
-      if (filtros.tecnicoId) params = params.set('tecnicoId', filtros.tecnicoId);
-      if (filtros.desde) params = params.set('desde', filtros.desde);
-      if (filtros.hasta) params = params.set('hasta', filtros.hasta);
+      if (filtros.tecnicoId) params = params.set('tecnicoId', filtros.tecnicoId.toString());
     }
-    return this.http.get<OrdenTrabajo[]>(this.apiUrl, { params });
+    return this.http.get<OrdenTrabajoResponse[]>(this.api, { params });
   }
 
-  listarOrdenesActivas(): Observable<OrdenTrabajo[]> {
-    return this.http.get<OrdenTrabajo[]>(`${this.apiUrl}/activas`);
+  listarOrdenesActivas(): Observable<OrdenTrabajoResponse[]> {
+    return this.http.get<OrdenTrabajoResponse[]>(`${this.api}/activas`);
   }
 
-  obtenerOrden(id: number): Observable<OrdenTrabajo> {
-    return this.http.get<OrdenTrabajo>(`${this.apiUrl}/${id}`);
+  listarMisOrdenes(): Observable<OrdenTrabajoResponse[]> {
+    return this.http.get<OrdenTrabajoResponse[]>(`${this.api}/mis-ordenes`);
   }
 
-  crearOrden(data: any): Observable<OrdenTrabajo> {
-    return this.http.post<OrdenTrabajo>(this.apiUrl, data);
+  obtenerOrden(id: number): Observable<OrdenTrabajoResponse> {
+    return this.http.get<OrdenTrabajoResponse>(`${this.api}/${id}`);
   }
 
-  cambiarEstado(id: number, nuevoEstado: string): Observable<OrdenTrabajo> {
-    return this.http.put<OrdenTrabajo>(`${this.apiUrl}/${id}/estado`, { nuevoEstado });
+  crearOrden(data: OrdenTrabajoRequest): Observable<OrdenTrabajoResponse> {
+    return this.http.post<OrdenTrabajoResponse>(this.api, data);
   }
 
-  agregarDiagnostico(id: number, diagnostico: string): Observable<OrdenTrabajo> {
-    return this.http.put<OrdenTrabajo>(`${this.apiUrl}/${id}/diagnostico`, { diagnostico });
+  cambiarEstado(id: number, nuevoEstado: string): Observable<OrdenTrabajoResponse> {
+    return this.http.put<OrdenTrabajoResponse>(`${this.api}/${id}/estado`, { nuevoEstado });
   }
 
-  agregarRepuesto(ordenId: number, data: any): Observable<OrdenTrabajo> {
-    return this.http.post<OrdenTrabajo>(`${this.apiUrl}/${ordenId}/repuestos`, data);
+  agregarDiagnostico(id: number, diagnostico: string): Observable<OrdenTrabajoResponse> {
+    return this.http.put<OrdenTrabajoResponse>(`${this.api}/${id}/diagnostico`, { diagnostico });
   }
 
-  listarRepuestosDeOrden(ordenId: number): Observable<OrdenTrabajo> {
-    return this.http.get<OrdenTrabajo>(`${this.apiUrl}/${ordenId}/repuestos`);
+  agregarRepuesto(ordenId: number, data: AgregarRepuestoRequest): Observable<OrdenTrabajoResponse> {
+    return this.http.post<OrdenTrabajoResponse>(`${this.api}/${ordenId}/repuestos`, data);
+  }
+
+  eliminarOrden(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/${id}`);
   }
 }

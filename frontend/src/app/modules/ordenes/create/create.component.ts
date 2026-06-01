@@ -1,92 +1,137 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { OrdenesService } from '../services/ordenes.service';
-import { ClienteRepository } from '../../clientes/repositories/cliente.repository';
+import { CommonModule } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { OrdenesService } from '../services/ordenes.service';
+import { ClienteService } from '../../clientes/services/cliente.service';
+
+interface ClienteResponse {
+  id: number;
+  nombre: string;
+  email?: string | null;
+}
+
+interface EquipoResponse {
+  id: number;
+  marca: string;
+  modelo: string;
+  tipo: string;
+}
 
 @Component({
   selector: 'app-create',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSnackBarModule,
-    MatAutocompleteModule,
-    MatProgressSpinnerModule
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss']
 })
-export class CreateComponent implements OnInit, OnDestroy {
+export class CreateComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private snackbar = inject(MatSnackBar);
+  private ordenesService = inject(OrdenesService);
+  private clienteService = inject(ClienteService);
+  private destroyRef = inject(DestroyRef);
+
   form!: FormGroup;
-  loading = false;
-  
-  private destroy$ = new Subject<void>();
+  clientes: ClienteResponse[] = [];
+  selectedCliente: ClienteResponse | null = null;
+  equipos: EquipoResponse[] = [];
+  tecnicos: ClienteResponse[] = [];
+  showClienteDropdown = false;
+  isLoading = false;
+  isSubmitting = false;
+  clienteSearchTerm = '';
+  private searchSubject = new Subject<string>();
 
-  constructor(
-    private fb: FormBuilder,
-    private ordenesService: OrdenesService,
-    private router: Router,
-    private snackBar: MatSnackBar
-  ) {}
-
-  ngOnInit(): void {
-    this.inicializarForm();
+  get equipoIdControl() {
+    return this.form.get('equipoId');
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  get fallaReportadaControl() {
+    return this.form.get('fallaReportada');
   }
 
-  private inicializarForm(): void {
+  ngOnInit() {
     this.form = this.fb.group({
-      clienteId: ['', Validators.required],
-      equipoId: ['', Validators.required],
-      tecnicoId: [''],
-      fallaReportada: ['', [Validators.required, Validators.minLength(10)]],
-      prioridad: ['NORMAL', Validators.required]
+      clienteId: [null, Validators.required],
+      equipoId: [null, Validators.required],
+      tecnicoId: [null],
+      prioridad: ['NORMAL', Validators.required],
+      presupuesto: [null],
+      fallaReportada: ['', Validators.required]
+    });
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(q => this.clienteService.listarClientes(q)),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (results) => {
+        this.clientes = results;
+        this.showClienteDropdown = results.length > 0;
+      },
+      error: () => {
+        this.snackbar.open('Error al buscar clientes', 'Cerrar', { duration: 3000 });
+      }
     });
   }
 
-  onSubmit(): void {
-    if (!this.form.valid) {
-      this.snackBar.open('Por favor, completa todos los campos requeridos', 'Cerrar', { duration: 3000 });
+  onClienteSearch(event: Event | string) {
+    const value = typeof event === 'string' ? event : (event.target as HTMLInputElement).value;
+    this.clienteSearchTerm = value;
+    this.showClienteDropdown = value.length > 0;
+    if (value.length > 0) {
+      this.searchSubject.next(value);
+    } else {
+      this.clientes = [];
+      this.showClienteDropdown = false;
+    }
+  }
+
+  onClienteSelect(cliente: ClienteResponse) {
+    this.selectedCliente = cliente;
+    this.form.patchValue({ clienteId: cliente.id, equipoId: null });
+    this.showClienteDropdown = false;
+    this.clienteSearchTerm = cliente.nombre;
+    // TODO: Load equipos if equipo service available
+  }
+
+  onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.snackbar.open('Completá todos los campos requeridos', 'Cerrar', { duration: 3000 });
       return;
     }
 
-    this.loading = true;
-    this.ordenesService.crearOrden(this.form.value)
-      .pipe(takeUntil(this.destroy$))
+    this.isSubmitting = true;
+    const formData = { ...this.form.value };
+
+    this.ordenesService.crearOrden(formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (orden) => {
-          this.snackBar.open('Orden creada exitosamente', 'Cerrar', { duration: 2000 });
+          this.snackbar.open('Orden creada exitosamente', 'Cerrar', { duration: 2000 });
           this.router.navigate(['/ordenes', orden.id]);
         },
-        error: () => {
-          this.snackBar.open('Error al crear la orden', 'Cerrar', { duration: 3000 });
-          this.loading = false;
+        error: (err) => {
+          this.isSubmitting = false;
+          const message = err.error?.message || 'Error al crear la orden';
+          this.snackbar.open(message, 'Cerrar', { duration: 3000 });
         }
       });
+  }
+
+  navigateBack() {
+    this.router.navigate(['/ordenes']);
+  }
+
+  selectPrioridad(prioridad: 'BAJA' | 'NORMAL' | 'ALTA') {
+    this.form.patchValue({ prioridad });
   }
 }

@@ -57,7 +57,7 @@
       </div>
       <div class="stat-content">
         <p class="stat-label">Repuestos Críticos</p>
-        <p class="stat-value">3</p>
+        <p class="stat-value">{{ repuestosCriticos.length }}</p>
       </div>
     </div>
   </div>
@@ -187,15 +187,33 @@
       </div>
     </div>
 
-    <!-- Payment Distribution Pie Chart -->
+    <!-- Stock Crítico Widget -->
     <div class="data-card">
       <div class="card-header">
-        <h3>Distribución de Cobros</h3>
+        <h3>
+          <mat-icon style="vertical-align: middle; margin-right: 6px; color: var(--color-danger)">warning</mat-icon>
+          Stock Crítico
+        </h3>
+        <a routerLink="/stock" style="font-size: 13px; color: var(--color-accent); text-decoration: none;">Ver todo</a>
       </div>
       <div class="card-body">
-        <div class="chart-placeholder">
-          <mat-icon>pie_chart</mat-icon>
-          <span>Gráfico circular</span>
+        <div *ngIf="loadingStock" style="text-align:center; color: var(--color-text-muted); padding: 16px;">
+          Cargando...
+        </div>
+        <div *ngIf="!loadingStock && repuestosCriticos.length === 0"
+             style="text-align:center; color: var(--color-success); padding: 16px; font-size: 14px;">
+          <mat-icon style="vertical-align: middle;">check_circle</mat-icon>
+          Todos los repuestos tienen stock suficiente
+        </div>
+        <div *ngIf="!loadingStock && repuestosCriticos.length > 0" class="stock-critico-list">
+          <div *ngFor="let r of repuestosCriticos" class="stock-critico-item">
+            <div class="stock-critico-nombre">{{ r.nombre }}</div>
+            <div class="stock-critico-valores">
+              <span class="stock-actual">{{ r.stockActual }}</span>
+              <span class="stock-sep">/</span>
+              <span class="stock-minimo">mín {{ r.stockMinimo }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

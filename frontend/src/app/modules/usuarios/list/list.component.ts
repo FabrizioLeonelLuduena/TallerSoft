@@ -32,6 +32,8 @@ export class ListComponent implements OnInit {
   isLoading = true;
   currentRole: string | null = '';
   searchTerm = '';
+  showDeleteUserModal = false;
+  userToDelete: any = null;
 
   ngOnInit() {
     this.currentRole = this.authService.getCurrentRole();
@@ -113,5 +115,43 @@ export class ListComponent implements OnInit {
     const target = event.target as HTMLInputElement;
     this.searchTerm = target.value;
     // TODO: Implement search filtering if needed
+  }
+
+  openDeleteUserModal(usuario: any) {
+    this.userToDelete = usuario;
+    this.showDeleteUserModal = true;
+  }
+
+  confirmDeleteUser() {
+    if (this.userToDelete) {
+      // Llamar al servicio de eliminación con el ID del usuario
+      this.usuarioService.deleteUsuario(this.userToDelete.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Usuario eliminado correctamente', 'Cerrar', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'bottom',
+              panelClass: ['snackbar-success']
+            });
+            this.loadUsuarios();
+            this.cancelDeleteUser();
+          },
+          error: (err) => {
+            console.error('Error deleting usuario:', err);
+            this.snackBar.open(
+              err.error?.message || 'Error al eliminar el usuario',
+              'Cerrar',
+              { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+            );
+          }
+        });
+    }
+  }
+
+  cancelDeleteUser() {
+    this.showDeleteUserModal = false;
+    this.userToDelete = null;
   }
 }

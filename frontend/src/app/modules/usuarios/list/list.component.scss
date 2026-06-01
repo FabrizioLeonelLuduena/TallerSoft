@@ -422,3 +422,146 @@
   }
 }
 
+// Delete Button Styles
+.btn-icon-danger {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 200ms ease;
+  padding: 0;
+  font-family: inherit;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.6);
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
+// Modal Overlay
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 200ms ease;
+
+  .modal-content {
+    background: var(--color-surface);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    min-width: 320px;
+    max-width: 420px;
+    border: 1px solid rgba(222, 225, 247, 0.1);
+    animation: slideUp 200ms ease;
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px;
+      border-bottom: 1px solid rgba(222, 225, 247, 0.05);
+
+      .modal-icon {
+        color: #ef4444;
+        font-size: 28px;
+        flex-shrink: 0;
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+
+      strong {
+        color: var(--color-text-primary);
+        font-weight: 600;
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 24px;
+      border-top: 1px solid rgba(222, 225, 247, 0.05);
+
+      button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 150ms ease;
+        border: none;
+        font-family: inherit;
+
+        &.btn-secondary {
+          background: rgba(222, 225, 247, 0.08);
+          color: var(--color-text-primary);
+          border: 1px solid rgba(222, 225, 247, 0.2);
+
+          &:hover {
+            background: rgba(222, 225, 247, 0.12);
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
+        }
+
+        &.btn-danger {
+          background: #ef4444;
+          color: white;
+
+          &:hover {
+            background: #dc2626;
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

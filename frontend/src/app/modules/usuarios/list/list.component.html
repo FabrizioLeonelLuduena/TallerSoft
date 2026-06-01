@@ -46,7 +46,7 @@
           <th>Usuario</th>
           <th>Email</th>
           <th>Rol</th>
-          <th>Estado</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -74,12 +74,11 @@
             </span>
           </td>
 
-          <!-- Estado Column -->
-          <td class="cell-estado">
-            <div class="status-cell">
-              <span class="status-dot" [class.active]="usuario.activo"></span>
-              {{ usuario.activo ? 'Activo' : 'Inactivo' }}
-            </div>
+          <!-- Acciones Column -->
+          <td class="cell-acciones">
+            <button (click)="openDeleteUserModal(usuario)" class="btn-icon-danger" type="button" title="Eliminar usuario">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
           </td>
         </tr>
       </tbody>
@@ -97,7 +96,22 @@
   </div>
 </div>
 
-<!-- Access Denied State -->
+<!-- Delete User Modal -->
+<div class="modal-overlay" *ngIf="showDeleteUserModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="material-symbols-outlined modal-icon">delete_forever</span>
+      <h2 class="modal-title">¿Eliminar usuario?</h2>
+    </div>
+    <div class="modal-body">
+      <p>Se eliminará la cuenta de <strong>{{ userToDelete?.nombre || userToDelete?.name }}</strong>. Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="modal-footer">
+      <button (click)="cancelDeleteUser()" class="btn-secondary" type="button">Cancelar</button>
+      <button (click)="confirmDeleteUser()" class="btn-danger" type="button">Eliminar</button>
+    </div>
+  </div>
+</div>
 <div class="access-denied" *ngIf="currentRole !== 'ADMIN' && currentRole !== ''">
   <span class="material-symbols-outlined">lock</span>
   <p class="denied-title">Acceso denegado</p>

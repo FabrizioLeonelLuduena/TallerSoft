@@ -1,14 +1,10 @@
-import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { RepuestosService, Repuesto } from '../../ordenes/services/repuestos.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { RepuestosService, Repuesto } from '../../../ordenes/services/repuestos.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -18,34 +14,35 @@ import { takeUntil } from 'rxjs/operators';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
+    MatSnackBarModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatIconModule
   ],
   templateUrl: './repuesto-dialog.component.html',
   styleUrls: ['./repuesto-dialog.component.scss']
 })
-export class RepuestoDialogComponent implements OnInit, OnDestroy {
+export class RepuestoDialogComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() isOpen = false;
+  @Input() repuesto: Repuesto | null = null;
+  @Output() closed = new EventEmitter<boolean>();
+
   form!: FormGroup;
   loading = false;
-  isEditMode = false;
-  
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private repuestosService: RepuestosService,
-    private snackBar: MatSnackBar,
-    private dialogRef: MatDialogRef<RepuestoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data?: Repuesto
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.inicializarForm();
+    this.initForm();
+  }
+
+  ngOnChanges(): void {
+    this.initForm();
   }
 
   ngOnDestroy(): void {
@@ -53,53 +50,49 @@ export class RepuestoDialogComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private inicializarForm(): void {
-    this.isEditMode = !!this.data;
-    
+  private initForm(): void {
     this.form = this.fb.group({
-      nombre: [this.data?.nombre || '', [Validators.required, Validators.minLength(3)]],
-      categoria: [this.data?.categoria || '', Validators.required],
-      precio: [this.data?.precio || '', [Validators.required, Validators.min(0.01)]],
-      stockActual: [this.data?.stockActual || 0, [Validators.required, Validators.min(0)]],
-      stockMinimo: [this.data?.stockMinimo || 5, [Validators.required, Validators.min(0)]]
+      nombre:      [this.repuesto?.nombre      || '', [Validators.required, Validators.minLength(3)]],
+      categoria:   [this.repuesto?.categoria   || ''],
+      precio:      [this.repuesto?.precio      || '', [Validators.required, Validators.min(0.01)]],
+      stockActual: [this.repuesto?.stockActual ?? 0,  [Validators.required, Validators.min(0)]],
+      stockMinimo: [this.repuesto?.stockMinimo ?? 5,  [Validators.required, Validators.min(0)]]
     });
   }
 
+  onCancel(): void {
+    this.form.reset();
+    this.closed.emit(false);
+  }
+
   onSubmit(): void {
-    if (!this.form.valid) {
-      this.snackBar.open('Por favor, completa todos los campos correctamente', 'Cerrar', { duration: 3000 });
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
     this.loading = true;
-    const formValue = this.form.value;
 
-    if (this.isEditMode) {
-      this.repuestosService.editarRepuesto(this.data!.id, formValue)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Repuesto actualizado exitosamente', 'Cerrar', { duration: 2000 });
-            this.dialogRef.close(true);
-          },
-          error: () => {
-            this.snackBar.open('Error al actualizar repuesto', 'Cerrar', { duration: 3000 });
-            this.loading = false;
-          }
-        });
-    } else {
-      this.repuestosService.crearRepuesto(formValue)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Repuesto creado exitosamente', 'Cerrar', { duration: 2000 });
-            this.dialogRef.close(true);
-          },
-          error: () => {
-            this.snackBar.open('Error al crear repuesto', 'Cerrar', { duration: 3000 });
-            this.loading = false;
-          }
-        });
-    }
+    this.repuestosService.editarRepuesto(this.repuesto!.id, this.form.value)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.snackBar.open(
+            'Repuesto actualizado correctamente',
+            'Cerrar',
+            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+          );
+          this.loading = false;
+          this.closed.emit(true);
+        },
+        error: err => {
+          this.snackBar.open(
+            err.error?.message || 'Error al actualizar el repuesto',
+            'Cerrar',
+            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+          );
+          this.loading = false;
+        }
+      });
   }
 }

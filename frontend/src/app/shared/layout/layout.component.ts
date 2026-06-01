@@ -53,6 +53,12 @@ export class LayoutComponent implements OnInit {
       roles: ['ADMIN', 'TECNICO', 'RECEPCION']
     },
     {
+      label: 'Stock',
+      icon: 'inventory_2',
+      route: '/stock',
+      roles: ['ADMIN', 'TECNICO', 'RECEPCION']
+    },
+    {
       label: 'Inventario',
       icon: 'inventory_2',
       route: '/inventario',

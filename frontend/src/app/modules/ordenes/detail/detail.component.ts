@@ -1,98 +1,269 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { FormsModule } from '@angular/forms';
-import { OrdenesService, OrdenTrabajo } from '../services/ordenes.service';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthService } from '@core/auth/auth.service';
+import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
+import { AddRepuestoDialogComponent } from '../dialogs/add-repuesto-dialog/add-repuesto-dialog.component';
 
 @Component({
-  selector: 'app-detail',
+  selector: 'app-orden-detail',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
-    MatCardModule,
-    MatTabsModule,
-    MatTableModule,
-    MatButtonModule,
+    RouterModule,
+    FormsModule,
     MatIconModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatInputModule,
+    MatButtonModule,
     MatSnackBarModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    FormsModule
+    MatDialogModule
   ],
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.scss']
 })
-export class DetailComponent implements OnInit, OnDestroy {
-  orden: OrdenTrabajo | null = null;
-  loading = true;
-  displayedColumns: string[] = ['nombre', 'cantidad', 'precioUnit', 'total'];
-  
-  private destroy$ = new Subject<void>();
+export class DetailComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private ordenesService = inject(OrdenesService);
+  private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+  private destroyRef = inject(DestroyRef);
 
-  constructor(
-    private route: ActivatedRoute,
-    private ordenesService: OrdenesService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
-  ) {}
+  orden: OrdenTrabajoResponse | null = null;
+  isLoading = true;
+  isSavingDiagnostico = false;
+  isChangingEstado = false;
+  currentRole: string | null = '';
+  diagnosticoText = '';
 
-  ngOnInit(): void {
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const id = params['id'];
-      this.cargarOrden(id);
-    });
+  ngOnInit() {
+    this.currentRole = this.authService.getCurrentRole();
+    const id = +this.route.snapshot.paramMap.get('id')!;
+    this.loadOrden(id);
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  cargarOrden(id: number): void {
-    this.loading = true;
+  private loadOrden(id: number) {
+    this.isLoading = true;
     this.ordenesService.obtenerOrden(id)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (orden) => {
           this.orden = orden;
-          this.loading = false;
+          this.diagnosticoText = orden.diagnostico ?? '';
+          this.isLoading = false;
         },
-        error: () => {
-          this.snackBar.open('Error al cargar la orden', 'Cerrar', { duration: 3000 });
-          this.loading = false;
+        error: (err) => {
+          this.isLoading = false;
+          this.snackBar.open(
+            err.error?.message || 'Error al cargar la orden',
+            'Cerrar',
+            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+          );
+          setTimeout(() => this.router.navigate(['/ordenes']), 2000);
         }
       });
   }
 
-  cambiarEstado(): void {
+  onSaveDiagnostico() {
     if (!this.orden) return;
-    // TODO: Implementar cambio de estado con validaciones
+    this.isSavingDiagnostico = true;
+    this.ordenesService.agregarDiagnostico(this.orden.id, this.diagnosticoText)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedOrden) => {
+          this.orden = updatedOrden;
+          this.isSavingDiagnostico = false;
+          this.snackBar.open('Diagnóstico guardado', 'Cerrar', {
+            duration: 2000,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom'
+          });
+        },
+        error: (err) => {
+          this.isSavingDiagnostico = false;
+          this.snackBar.open(
+            err.error?.message || 'Error al guardar el diagnóstico',
+            'Cerrar',
+            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+          );
+        }
+      });
   }
 
-  agregarRepuesto(): void {
+  onChangeEstado() {
     if (!this.orden) return;
-    // TODO: Abrir diálogo para agregar repuesto
+    const nextEstado = this.getNextEstado(this.orden.estado);
+    if (!nextEstado) return;
+
+    this.isChangingEstado = true;
+    this.ordenesService.cambiarEstado(this.orden.id, nextEstado)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedOrden) => {
+          this.orden = updatedOrden;
+          this.isChangingEstado = false;
+          this.snackBar.open('Estado actualizado', 'Cerrar', {
+            duration: 2000,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom'
+          });
+        },
+        error: (err) => {
+          this.isChangingEstado = false;
+          const msg = err.error?.message || 'Error al cambiar el estado';
+          this.snackBar.open(msg, 'Cerrar', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom'
+          });
+        }
+      });
   }
 
-  editarDiagnostico(): void {
+  openAddRepuestoDialog() {
     if (!this.orden) return;
-    // TODO: Permitir editar diagnóstico
+    this.dialog.open(AddRepuestoDialogComponent, {
+      width: '400px',
+      panelClass: 'dark-dialog',
+      data: { ordenId: this.orden.id }
+    }).afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => {
+        if (result) {
+          const id = this.orden!.id;
+          this.loadOrden(id);
+        }
+      });
+  }
+
+  navigateBack() {
+    this.router.navigate(['/ordenes']);
+  }
+
+  getNextEstado(current: string): string | null {
+    const map: Record<string, string> = {
+      'PENDIENTE': 'EN_PROCESO',
+      'EN_PROCESO': 'LISTO',
+      'LISTO': 'ENTREGADO'
+    };
+    return map[current] ?? null;
+  }
+
+  getNextEstadoLabel(current: string): string {
+    const labels: Record<string, string> = {
+      'PENDIENTE': 'Iniciar reparación',
+      'EN_PROCESO': 'Marcar como Listo',
+      'LISTO': 'Entregar al cliente'
+    };
+    return labels[current] ?? 'Cambiar estado';
+  }
+
+  canSaveDiagnostico(): boolean {
+    return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
+           this.orden?.estado !== 'ENTREGADO';
+  }
+
+  canChangeEstado(): boolean {
+    return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
+           this.orden?.estado !== 'ENTREGADO';
+  }
+
+  canAddRepuesto(): boolean {
+    return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
+           this.orden?.estado !== 'ENTREGADO';
+  }
+
+  isChangeEstadoDisabled(): boolean {
+    return this.orden?.estado === 'EN_PROCESO' && !this.orden?.diagnostico;
+  }
+
+  isCompleted(estado: string): boolean {
+    if (!this.orden) return false;
+    const estados = ['PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO'];
+    const currentIndex = estados.indexOf(this.orden.estado);
+    const checkIndex = estados.indexOf(estado);
+    return checkIndex < currentIndex;
+  }
+
+  isCurrent(estado: string): boolean {
+    return this.orden?.estado === estado;
+  }
+
+  formatCurrency(amount: number): string {
+    return '$' + amount.toLocaleString('es-AR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  }
+
+  formatDate(dateStr: string): string {
+    try {
+      return new Date(dateStr).toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'N/A';
+    }
+  }
+
+  getRelativeTime(dateStr: string): string {
+    try {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const hours = Math.floor(diff / 3600000);
+      if (hours < 1) return 'hace un momento';
+      if (hours < 24) return `hace ${hours}h`;
+      const days = Math.floor(hours / 24);
+      if (days === 1) return 'ayer';
+      return `hace ${days} días`;
+    } catch {
+      return 'N/A';
+    }
+  }
+
+  padOrderId(id: number): string {
+    return '#' + String(id).padStart(4, '0');
+  }
+
+  getEstadoColor(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'var(--color-info)';
+      case 'EN_PROCESO': return 'var(--color-accent)';
+      case 'LISTO': return 'var(--color-success)';
+      case 'ENTREGADO': return 'var(--color-text-muted)';
+      default: return 'transparent';
+    }
+  }
+
+  getEstadoBgColor(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'rgba(59, 130, 246, 0.15)';
+      case 'EN_PROCESO': return 'rgba(249, 115, 22, 0.15)';
+      case 'LISTO': return 'rgba(34, 197, 94, 0.15)';
+      case 'ENTREGADO': return 'rgba(75, 85, 99, 0.2)';
+      default: return 'transparent';
+    }
+  }
+
+  getPrioridadColor(prioridad: string): string {
+    switch (prioridad) {
+      case 'ALTA': return 'var(--color-danger)';
+      case 'NORMAL': return 'var(--color-warning)';
+      case 'BAJA': return 'var(--color-text-muted)';
+      default: return 'var(--color-text-muted)';
+    }
+  }
+
+  getTotalRepuestos(): number {
+    return this.orden?.repuestos.reduce((sum, r) => sum + r.total, 0) ?? 0;
   }
 }

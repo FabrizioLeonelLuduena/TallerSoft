@@ -1,70 +1,66 @@
-<h2 mat-dialog-title>Agregar Repuesto a la Orden</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="form" class="dialog-form">
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Repuesto</mat-label>
-      <input matInput
-        type="text"
-        formControlName="repuesto"
-        matAutocomplete="repuestoAuto"
-        required>
-      <mat-autocomplete #repuestoAuto="matAutocomplete"
-        [displayWith]="getDisplayName.bind(this)">
-        <mat-option *ngFor="let repuesto of (filteredRepuestos$ | async)"
-          (click)="onRepuestoSelected(repuesto)">
-          <div class="option-content">
-            <strong>{{ repuesto.nombre }}</strong>
-            <span class="stock-info">Stock: {{ repuesto.stockActual }}</span>
-          </div>
-        </mat-option>
-      </mat-autocomplete>
-      <mat-error *ngIf="form.get('repuesto')?.hasError('required')">
-        Debes seleccionar un repuesto
-      </mat-error>
-    </mat-form-field>
-
-    <mat-card *ngIf="selectedRepuesto" class="info-card">
-      <mat-card-content>
-        <p>
-          <strong>Precio:</strong> {{ selectedRepuesto.precio | currency }}
-        </p>
-        <p>
-          <strong>Stock Disponible:</strong> {{ selectedRepuesto.stockActual }}
-        </p>
-        <p>
-          <strong>Categoría:</strong> {{ selectedRepuesto.categoria }}
-        </p>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Cantidad</mat-label>
-      <input matInput
-        type="number"
-        formControlName="cantidad"
-        min="1"
-        required>
-      <mat-error *ngIf="form.get('cantidad')?.hasError('required')">
-        Cantidad es requerida
-      </mat-error>
-      <mat-error *ngIf="form.get('cantidad')?.hasError('min')">
-        La cantidad debe ser mayor a 0
-      </mat-error>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button (click)="dialogRef.close()" [disabled]="loading">
-    Cancelar
+<div class="dialog-header">
+  <h2>Agregar Repuesto</h2>
+  <button class="btn-close" (click)="onCancel()">
+    <span class="material-symbols-outlined">close</span>
   </button>
-  <button mat-raised-button 
-    color="primary"
-    (click)="onSubmit()"
-    [disabled]="loading">
-    <mat-icon *ngIf="!loading">add</mat-icon>
-    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
-    {{ loading ? 'Agregando...' : 'Agregar' }}
+</div>
+
+<div class="dialog-content">
+  <!-- Search Input -->
+  <div class="search-wrapper">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="onSearch($event)"
+      placeholder="Buscar repuesto..."
+      class="search-input"
+    />
+    <div class="search-results" *ngIf="filteredRepuestos.length > 0">
+      <div class="result-item" *ngFor="let repuesto of filteredRepuestos" (click)="onSelectRepuesto(repuesto)">
+        <div class="result-name">{{ repuesto.nombre }}</div>
+        <div class="result-details">
+          <span>${{ repuesto.precio }}</span>
+          <span *ngIf="repuesto.critico" class="critico">Stock crítico</span>
+          <span>Stock: {{ repuesto.stockActual }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selected Repuesto -->
+  <div *ngIf="selectedRepuesto" class="selected-repuesto">
+    <span class="checkmark">✓</span>
+    <div class="repuesto-info">
+      <div class="repuesto-nombre">{{ selectedRepuesto.nombre }}</div>
+      <div class="repuesto-stock">Stock disponible: {{ selectedRepuesto.stockActual }} unidades</div>
+    </div>
+  </div>
+
+  <!-- Quantity Input -->
+  <div class="form-group" *ngIf="selectedRepuesto">
+    <label>Cantidad</label>
+    <input
+      type="number"
+      [(ngModel)]="cantidad"
+      [min]="1"
+      [max]="selectedRepuesto.stockActual"
+      class="input-field"
+    />
+  </div>
+
+  <!-- Stock Error -->
+  <div class="stock-error" *ngIf="stockError">
+    {{ stockError }}
+  </div>
+</div>
+
+<div class="dialog-actions">
+  <button class="btn-cancel" (click)="onCancel()">Cancelar</button>
+  <button 
+    class="btn-submit" 
+    (click)="onSubmit()" 
+    [disabled]="!selectedRepuesto || isLoading"
+  >
+    {{ isLoading ? 'Agregando...' : 'Agregar →' }}
   </button>
-</mat-dialog-actions>
+</div>
