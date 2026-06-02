@@ -186,3 +186,20 @@
   (closed)="onDialogClosed($event)"
 ></app-repuesto-dialog>
 
+<!-- Delete Repuesto Modal -->
+<div class="modal-overlay" *ngIf="showDeleteModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="material-symbols-outlined modal-icon">delete_forever</span>
+      <h2 class="modal-title">¿Eliminar repuesto?</h2>
+    </div>
+    <div class="modal-body">
+      <p>Se eliminará el repuesto <strong>{{ repuestoToDelete?.nombre }}</strong>. Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="modal-footer">
+      <button (click)="cancelDeleteRepuesto()" class="btn-secondary" type="button">Cancelar</button>
+      <button (click)="confirmDeleteRepuesto()" class="btn-danger" type="button">Eliminar</button>
+    </div>
+  </div>
+</div>
+

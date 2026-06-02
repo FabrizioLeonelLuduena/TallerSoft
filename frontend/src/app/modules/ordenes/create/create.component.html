@@ -1,16 +1,13 @@
 <div class="create-container page-enter">
-  <!-- Back Button -->
-  <button class="btn-back" (click)="navigateBack()">
-    <span class="material-symbols-outlined">arrow_back</span>
-    Volver
-  </button>
-
   <!-- Form Header -->
   <div class="form-header">
     <div class="header-content">
       <h1 class="form-title">Nueva Orden de Trabajo</h1>
       <p class="form-subtitle">Registrá una nueva reparación</p>
     </div>
+    <button type="button" class="btn-back" (click)="navigateBack()" title="Volver">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
@@ -18,53 +15,61 @@
     <section class="form-section">
       <h2 class="section-title">Cliente y Equipo</h2>
 
-      <div class="form-group">
-        <label class="field-label">
-          Cliente
-          <span class="required">*</span>
-        </label>
-        <div class="search-wrapper">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input 
-            type="text"
-            class="ts-input search-input"
-            placeholder="Buscar cliente..."
-            [(ngModel)]="clienteSearchTerm"
-            (input)="onClienteSearch($event)"
-            [ngModelOptions]="{ standalone: true }"
-          />
-          <div class="dropdown" *ngIf="showClienteDropdown && clientes.length > 0">
-            <div class="dropdown-item" *ngFor="let cliente of clientes" (click)="onClienteSelect(cliente)">
-              <div class="dropdown-item-content">
-                <div class="cliente-nombre">{{ cliente.nombre }}</div>
-                <div class="cliente-email">{{ cliente.email }}</div>
+      <div class="form-grid">
+        <div class="form-column">
+          <div class="form-group">
+            <label class="field-label">
+              Cliente
+              <span class="required">*</span>
+            </label>
+            <div class="search-wrapper">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input
+                type="text"
+                class="ts-input search-input"
+                placeholder="Buscar cliente..."
+                [(ngModel)]="clienteSearchTerm"
+                (input)="onClienteSearch($event)"
+                [ngModelOptions]="{ standalone: true }"
+              />
+              <div class="dropdown" *ngIf="showClienteDropdown && clientes.length > 0">
+                <div class="dropdown-item" *ngFor="let cliente of clientes" (click)="onClienteSelect(cliente)">
+                  <div class="dropdown-item-content">
+                    <div class="cliente-nombre">{{ cliente.nombre }}</div>
+                    <div class="cliente-email">{{ cliente.email }}</div>
+                  </div>
+                </div>
               </div>
+            </div>
+            <div *ngIf="selectedCliente" class="selected-tag">
+              <span class="check-icon">✓</span>
+              <span>{{ selectedCliente.nombre }}</span>
             </div>
           </div>
         </div>
-        <div *ngIf="selectedCliente" class="selected-tag">
-          <span class="check-icon">✓</span>
-          <span>{{ selectedCliente.nombre }}</span>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label class="field-label">
-          Equipo
-          <span class="required">*</span>
-        </label>
-        <select 
-          class="ts-input"
-          formControlName="equipoId"
-          [disabled]="!selectedCliente"
-        >
-          <option value="" disabled selected>Seleccionar equipo...</option>
-          <option *ngFor="let eq of equipos" [value]="eq.id">
-            {{ eq.tipo }} • {{ eq.marca }} {{ eq.modelo }}
-          </option>
-        </select>
-        <div class="error-text" *ngIf="equipoIdControl?.invalid && equipoIdControl?.touched">
-          El equipo es requerido
+        <div class="form-column">
+          <div class="form-group">
+            <label class="field-label">
+              Equipo
+              <span class="required">*</span>
+            </label>
+            <select
+              class="ts-input"
+              formControlName="equipoId"
+              [disabled]="!selectedCliente || isLoadingEquipos"
+            >
+              <option value="" disabled selected>
+                {{ !selectedCliente ? 'Primero seleccioná un cliente' : isLoadingEquipos ? 'Cargando equipos...' : equipos.length === 0 ? 'Sin equipos registrados' : 'Seleccionar equipo...' }}
+              </option>
+              <option *ngFor="let eq of equipos" [value]="eq.id">
+                {{ eq.tipo }} • {{ eq.marca }} {{ eq.modelo }}
+              </option>
+            </select>
+            <div class="error-text" *ngIf="equipoIdControl?.invalid && equipoIdControl?.touched">
+              El equipo es requerido
+            </div>
+          </div>
         </div>
       </div>
     </section>

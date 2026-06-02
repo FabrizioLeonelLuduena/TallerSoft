@@ -52,6 +52,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(400, "BAD_REQUEST", ex.getMessage()));
     }
 
+    @ExceptionHandler(CobrosException.class)
+    public ResponseEntity<ErrorResponse> handleCobrosException(CobrosException ex) {
+        log.warn("Cobros business error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(400, "BAD_REQUEST", ex.getMessage()));
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());

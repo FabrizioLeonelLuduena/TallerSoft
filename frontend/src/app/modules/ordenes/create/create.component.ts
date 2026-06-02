@@ -4,22 +4,17 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrdenesService } from '../services/ordenes.service';
 import { ClienteService } from '../../clientes/services/cliente.service';
+import { EquipoService, EquipoResponse } from '../services/equipo.service';
+import { UsuariosService, Usuario } from '../../../core/services/usuarios.service';
 
 interface ClienteResponse {
   id: number;
   nombre: string;
   email?: string | null;
-}
-
-interface EquipoResponse {
-  id: number;
-  marca: string;
-  modelo: string;
-  tipo: string;
 }
 
 @Component({
@@ -35,13 +30,16 @@ export class CreateComponent implements OnInit {
   private snackbar = inject(MatSnackBar);
   private ordenesService = inject(OrdenesService);
   private clienteService = inject(ClienteService);
+  private equipoService = inject(EquipoService);
+  private usuariosService = inject(UsuariosService);
   private destroyRef = inject(DestroyRef);
 
   form!: FormGroup;
   clientes: ClienteResponse[] = [];
   selectedCliente: ClienteResponse | null = null;
   equipos: EquipoResponse[] = [];
-  tecnicos: ClienteResponse[] = [];
+  tecnicos: Usuario[] = [];
+  isLoadingEquipos = false;
   showClienteDropdown = false;
   isLoading = false;
   isSubmitting = false;
@@ -80,6 +78,17 @@ export class CreateComponent implements OnInit {
         this.snackbar.open('Error al buscar clientes', 'Cerrar', { duration: 3000 });
       }
     });
+
+    this.usuariosService.obtenerUsuariosPorRol('TECNICO')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (usuarios) => {
+          this.tecnicos = usuarios.filter(u => u.activo);
+        },
+        error: () => {
+          this.snackbar.open('Error al cargar técnicos', 'Cerrar', { duration: 3000 });
+        }
+      });
   }
 
   onClienteSearch(event: Event | string) {
@@ -99,7 +108,20 @@ export class CreateComponent implements OnInit {
     this.form.patchValue({ clienteId: cliente.id, equipoId: null });
     this.showClienteDropdown = false;
     this.clienteSearchTerm = cliente.nombre;
-    // TODO: Load equipos if equipo service available
+    this.equipos = [];
+    this.isLoadingEquipos = true;
+    this.equipoService.listarEquiposDelCliente(cliente.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (equipos) => {
+          this.equipos = equipos;
+          this.isLoadingEquipos = false;
+        },
+        error: () => {
+          this.isLoadingEquipos = false;
+          this.snackbar.open('Error al cargar equipos del cliente', 'Cerrar', { duration: 3000 });
+        }
+      });
   }
 
   onSubmit() {

@@ -235,6 +235,14 @@
       display: flex;
       align-items: center;
       overflow: hidden;
+
+      &.col-estado,
+      &.col-prioridad,
+      &.col-tecnico,
+      &.col-presupuesto,
+      &.col-fecha {
+        justify-content: center;
+      }
     }
   }
 
@@ -265,6 +273,17 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+
+      &.col-estado,
+      &.col-prioridad,
+      &.col-tecnico,
+      &.col-presupuesto,
+      &.col-fecha {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
     }
 
     .monospace {

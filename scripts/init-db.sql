@@ -142,12 +142,15 @@ CREATE TABLE cobros (
     id                  BIGSERIAL PRIMARY KEY,
     orden_id            BIGINT NOT NULL UNIQUE REFERENCES ordenes_trabajo(id) ON DELETE CASCADE,
     monto               NUMERIC(10,2) NOT NULL,
+    monto_recibido      NUMERIC(10,2),
+    vuelto              NUMERIC(10,2),
     medio_pago          VARCHAR(20) NOT NULL,
     estado_pago         VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
     mp_payment_id       VARCHAR(100),
+    mp_link_pago        VARCHAR(500),
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    CONSTRAINT fk_cobro_orden FOREIGN KEY (orden_id) 
+
+    CONSTRAINT fk_cobro_orden FOREIGN KEY (orden_id)
         REFERENCES ordenes_trabajo(id) ON DELETE CASCADE,
     CONSTRAINT check_medio_pago CHECK (medio_pago IN ('EFECTIVO', 'TARJETA', 'MERCADOPAGO')),
     CONSTRAINT check_estado_pago CHECK (estado_pago IN ('PENDIENTE', 'APROBADO', 'RECHAZADO')),

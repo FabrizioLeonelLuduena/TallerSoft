@@ -39,6 +39,9 @@ export class StockListComponent implements OnInit, OnDestroy {
   showEditDialog = false;
   repuestoToEdit: Repuesto | null = null;
 
+  showDeleteModal = false;
+  repuestoToDelete: Repuesto | null = null;
+
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
@@ -129,8 +132,39 @@ export class StockListComponent implements OnInit, OnDestroy {
     if (saved) this.cargarRepuestos();
   }
 
-  eliminarRepuesto(_repuesto: Repuesto): void {
-    this.snackBar.open('La eliminación de repuestos no está disponible en esta versión', 'Cerrar', { duration: 3000 });
+  eliminarRepuesto(repuesto: Repuesto): void {
+    this.repuestoToDelete = repuesto;
+    this.showDeleteModal = true;
+  }
+
+  confirmDeleteRepuesto(): void {
+    if (!this.repuestoToDelete) return;
+    this.repuestosService.eliminarRepuesto(this.repuestoToDelete.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Repuesto eliminado correctamente', 'Cerrar', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+            panelClass: ['snackbar-success']
+          });
+          this.cancelDeleteRepuesto();
+          this.cargarRepuestos();
+        },
+        error: (err) => {
+          this.snackBar.open(
+            err.error?.message || 'Error al eliminar el repuesto',
+            'Cerrar',
+            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+          );
+        }
+      });
+  }
+
+  cancelDeleteRepuesto(): void {
+    this.showDeleteModal = false;
+    this.repuestoToDelete = null;
   }
 
   // ---- Stats helpers ----

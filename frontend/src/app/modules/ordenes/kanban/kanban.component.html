@@ -1,13 +1,4 @@
 <div class="kanban-wrapper">
-  <!-- Header -->
-  <div class="kanban-header">
-    <h1>Órdenes de Trabajo - Kanban</h1>
-    <div class="header-buttons">
-      <button (click)="navigateToList()">← Lista</button>
-      <button class="btn-primary" (click)="navigateToCreateNew()">+ Nueva Orden</button>
-    </div>
-  </div>
-
   <!-- Loading State -->
   <div *ngIf="isLoading" class="skeleton-row">
     <div></div>
@@ -30,8 +21,8 @@
         </div>
         <span class="column-count">{{ columns[0].ordenes.length }}</span>
       </div>
-      <div cdkDropList="PENDIENTE" [cdkDropListData]="columns[0].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list" [cdkDropListConnectedTo]="connectedLists">
-        <div class="kanban-card pending" *ngFor="let orden of columns[0].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
+      <div cdkDropList id="PENDIENTE" [cdkDropListData]="columns[0].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list">
+        <div class="kanban-card pending" cdkDrag *ngFor="let orden of columns[0].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
           <div class="card-header">
             <div class="client-name">#{{ padOrderId(orden.id) }} • {{ orden.clienteNombre }}</div>
             <span class="prioridad-chip" [style.color]="getPrioridadColor(orden.prioridad)">{{ orden.prioridad }}</span>
@@ -62,8 +53,8 @@
         </div>
         <span class="column-count">{{ columns[1].ordenes.length }}</span>
       </div>
-      <div cdkDropList="EN_PROCESO" [cdkDropListData]="columns[1].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list" [cdkDropListConnectedTo]="connectedLists">
-        <div class="kanban-card processing" *ngFor="let orden of columns[1].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
+      <div cdkDropList id="EN_PROCESO" [cdkDropListData]="columns[1].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list">
+        <div class="kanban-card processing" cdkDrag *ngFor="let orden of columns[1].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
           <div class="card-header">
             <div class="client-name">#{{ padOrderId(orden.id) }} • {{ orden.clienteNombre }}</div>
             <span class="prioridad-chip" [style.color]="getPrioridadColor(orden.prioridad)">{{ orden.prioridad }}</span>
@@ -94,8 +85,8 @@
         </div>
         <span class="column-count">{{ columns[2].ordenes.length }}</span>
       </div>
-      <div cdkDropList="LISTO" [cdkDropListData]="columns[2].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list" [cdkDropListConnectedTo]="connectedLists">
-        <div class="kanban-card ready" *ngFor="let orden of columns[2].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
+      <div cdkDropList id="LISTO" [cdkDropListData]="columns[2].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list">
+        <div class="kanban-card ready" cdkDrag *ngFor="let orden of columns[2].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
           <div class="card-header">
             <div class="client-name">#{{ padOrderId(orden.id) }} • {{ orden.clienteNombre }}</div>
             <span class="prioridad-chip" [style.color]="getPrioridadColor(orden.prioridad)">{{ orden.prioridad }}</span>
@@ -126,8 +117,8 @@
         </div>
         <span class="column-count">{{ columns[3].ordenes.length }}</span>
       </div>
-      <div cdkDropList="ENTREGADO" [cdkDropListData]="columns[3].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list" [cdkDropListConnectedTo]="connectedLists">
-        <div class="kanban-card completed" *ngFor="let orden of columns[3].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
+      <div cdkDropList id="ENTREGADO" [cdkDropListData]="columns[3].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list">
+        <div class="kanban-card completed" cdkDrag *ngFor="let orden of columns[3].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
           <div class="card-header">
             <div class="client-name">#{{ padOrderId(orden.id) }} • {{ orden.clienteNombre }}</div>
             <span class="prioridad-chip" [style.color]="getPrioridadColor(orden.prioridad)">{{ orden.prioridad }}</span>
@@ -150,8 +141,4 @@
     </div>
   </div>
 
-  <!-- FAB Button -->
-  <button class="fab-button" (click)="navigateToCreateNew()">
-    <span class="material-symbols-outlined">add</span>
-  </button>
 </div>

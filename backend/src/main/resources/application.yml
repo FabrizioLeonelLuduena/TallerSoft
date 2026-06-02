@@ -49,6 +49,20 @@ springdoc:
     path: /swagger-ui.html
     enabled: true
 
+taller:
+  nombre: ${TALLER_NOMBRE:TallerSoft Demo}
+  direccion: ${TALLER_DIRECCION:Av. Colón 1234, Córdoba}
+  telefono: ${TALLER_TELEFONO:0351-4123456}
+  email: ${TALLER_EMAIL:contacto@tallersoft.com}
+
+mercadopago:
+  access-token: ${MP_ACCESS_TOKEN:TEST-placeholder}
+  webhook-secret: ${MP_WEBHOOK_SECRET:placeholder}
+  sandbox: ${MP_SANDBOX:true}
+
+webhook:
+  base-url: ${WEBHOOK_BASE_URL:http://localhost:8080}
+
 management:
   endpoints:
     web:

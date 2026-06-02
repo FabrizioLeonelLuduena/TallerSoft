@@ -6,9 +6,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/auth/auth.service';
 import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
+import { CobrosService } from '../../caja/services/cobros.service';
 import { AddRepuestoDialogComponent } from '../dialogs/add-repuesto-dialog/add-repuesto-dialog.component';
 
 @Component({
@@ -31,6 +33,8 @@ export class DetailComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private ordenesService = inject(OrdenesService);
+  private cobrosService = inject(CobrosService);
+  private sanitizer = inject(DomSanitizer);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
@@ -41,6 +45,10 @@ export class DetailComponent implements OnInit {
   isChangingEstado = false;
   currentRole: string | null = '';
   diagnosticoText = '';
+
+  pdfUrl: SafeResourceUrl | null = null;
+  showPdfPreview = false;
+  isPdfLoading = false;
 
   ngOnInit() {
     this.currentRole = this.authService.getCurrentRole();
@@ -140,6 +148,47 @@ export class DetailComponent implements OnInit {
           this.loadOrden(id);
         }
       });
+  }
+
+  previsualizarPDF(): void {
+    if (!this.orden) return;
+    this.isPdfLoading = true;
+    this.cobrosService.generarPresupuesto(this.orden.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl);
+          this.showPdfPreview = true;
+          this.isPdfLoading = false;
+        },
+        error: () => {
+          this.isPdfLoading = false;
+          this.snackBar.open('Error al generar el presupuesto', 'Cerrar', { duration: 3000 });
+        }
+      });
+  }
+
+  descargarPDF(): void {
+    if (!this.orden) return;
+    this.cobrosService.generarPresupuesto(this.orden.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `presupuesto-orden-${this.orden!.id}.pdf`;
+          link.click();
+        },
+        error: () => {
+          this.snackBar.open('Error al descargar el presupuesto', 'Cerrar', { duration: 3000 });
+        }
+      });
+  }
+
+  cerrarPdfPreview(): void {
+    this.showPdfPreview = false;
+    this.pdfUrl = null;
   }
 
   navigateBack() {

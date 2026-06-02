@@ -60,6 +60,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
       { label: 'Clientes', icon: 'people', route: '/clientes', roles: ['ADMIN', 'RECEPCION'] },
       { label: 'Órdenes de Trabajo', icon: 'assignment', route: '/ordenes', roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
+      { label: 'Caja y Facturación', icon: 'point_of_sale', route: '/caja/diaria', roles: ['ADMIN', 'RECEPCION'] },
       { label: 'Inventario', icon: 'inventory_2', route: '/inventario', roles: ['ADMIN', 'TECNICO'] },
       { label: 'Reportes', icon: 'bar_chart', route: '/reportes', roles: ['ADMIN'] },
       { label: 'Usuarios', icon: 'admin_panel_settings', route: '/usuarios', roles: ['ADMIN'] }

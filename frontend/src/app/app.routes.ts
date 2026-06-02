@@ -36,6 +36,11 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
       },
       {
+        path: 'caja',
+        loadChildren: () => import('./modules/caja/caja.routes').then(m => m.cajaRoutes),
+        canActivate: [AuthGuard]
+      },
+      {
         path: 'inventario',
         component: InventarioComponent,
         canActivate: [AuthGuard]

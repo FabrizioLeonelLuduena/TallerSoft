@@ -131,6 +131,16 @@
         </div>
       </div>
 
+      <!-- Registrar Cobro (solo visible en estado LISTO) -->
+      <div class="section cobro-section" *ngIf="orden.estado === 'LISTO'">
+        <h3 class="section-title">Cobro pendiente</h3>
+        <p class="cobro-hint">La orden está lista para ser entregada. Registrá el cobro para completar el proceso.</p>
+        <a class="btn-cobrar" [routerLink]="['/caja/cobrar', orden.id]">
+          <span class="material-symbols-outlined">payments</span>
+          Registrar cobro
+        </a>
+      </div>
+
       <!-- Estado Change -->
       <div class="section">
         <h3 class="section-title">Cambiar Estado</h3>
@@ -139,7 +149,7 @@
             <span class="label">Estado actual:</span>
             <span class="value" [style.color]="getEstadoColor(orden.estado)">{{ orden.estado }}</span>
           </div>
-          <button 
+          <button
             *ngIf="canChangeEstado()"
             class="btn-estado-change"
             (click)="onChangeEstado()"
@@ -151,6 +161,31 @@
           <div *ngIf="isChangeEstadoDisabled()" class="state-hint">
             ⓘ Agregá un diagnóstico antes de continuar
           </div>
+        </div>
+      </div>
+
+      <!-- Presupuesto PDF -->
+      <div class="section">
+        <h3 class="section-title">Presupuesto</h3>
+        <div class="pdf-actions">
+          <button class="btn-pdf btn-pdf--preview" (click)="previsualizarPDF()" [disabled]="isPdfLoading">
+            <span class="material-symbols-outlined">visibility</span>
+            {{ isPdfLoading ? 'Generando...' : 'Ver presupuesto' }}
+          </button>
+          <button class="btn-pdf btn-pdf--download" (click)="descargarPDF()">
+            <span class="material-symbols-outlined">download</span>
+            Descargar PDF
+          </button>
+        </div>
+
+        <div *ngIf="showPdfPreview" class="pdf-preview-wrapper">
+          <div class="pdf-preview-header">
+            <span>Presupuesto #{{ padOrderId(orden.id) }}</span>
+            <button class="btn-close-pdf" (click)="cerrarPdfPreview()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <iframe [src]="pdfUrl" class="pdf-iframe" frameborder="0"></iframe>
         </div>
       </div>
     </div>

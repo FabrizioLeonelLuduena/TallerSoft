@@ -58,4 +58,8 @@ export class RepuestosService {
   editarRepuesto(id: number, request: RepuestoRequest): Observable<RepuestoResponse> {
     return this.http.put<RepuestoResponse>(`${this.api}/${id}`, request);
   }
+
+  eliminarRepuesto(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/${id}`);
+  }
 }

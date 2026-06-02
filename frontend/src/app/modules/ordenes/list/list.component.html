@@ -79,11 +79,11 @@
             </div>
           </div>
 
-          <div class="col-presupuesto text-right">
+          <div class="col-presupuesto">
             {{ orden.presupuesto ? formatCurrency(orden.presupuesto) : '—' }}
           </div>
 
-          <div class="col-fecha text-right">
+          <div class="col-fecha">
             {{ getRelativeTime(orden.createdAt) }}
           </div>
 

@@ -104,23 +104,24 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- PDF Generation - DISABLED FOR INITIAL BUILD (requires authentication) -->
-        <!--
+        <!-- PDF Generation — iText 7 -->
         <dependency>
             <groupId>com.itextpdf</groupId>
-            <artifactId>itext7-core</artifactId>
+            <artifactId>kernel</artifactId>
             <version>${itext.version}</version>
         </dependency>
-        -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
 
-        <!-- MercadoPago - DISABLED FOR INITIAL BUILD (requires authentication) -->
-        <!--
+        <!-- MercadoPago -->
         <dependency>
             <groupId>com.mercadopago</groupId>
             <artifactId>sdk-java</artifactId>
             <version>${mercadopago.version}</version>
         </dependency>
-        -->
 
         <!-- API Documentation -->
         <dependency>

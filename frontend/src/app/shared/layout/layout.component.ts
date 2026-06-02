@@ -59,6 +59,12 @@ export class LayoutComponent implements OnInit {
       roles: ['ADMIN', 'TECNICO', 'RECEPCION']
     },
     {
+      label: 'Caja y Facturación',
+      icon: 'point_of_sale',
+      route: '/caja/diaria',
+      roles: ['ADMIN', 'RECEPCION']
+    },
+    {
       label: 'Inventario',
       icon: 'inventory_2',
       route: '/inventario',
