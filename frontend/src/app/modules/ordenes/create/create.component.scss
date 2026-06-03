@@ -155,6 +155,31 @@
 }
 
 // ───────────────────────────────────────────────────────────
+// SELECT STYLING
+// ───────────────────────────────────────────────────────────
+
+select.ts-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-color: rgba(9, 14, 28, 0.6);
+  padding-right: 36px;
+  cursor: pointer;
+  width: 100%;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  option {
+    background: #0d1425;
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+// ───────────────────────────────────────────────────────────
 // SEARCH WRAPPER (Cliente Autocomplete)
 // ───────────────────────────────────────────────────────────
 
@@ -174,6 +199,7 @@
 
   .search-input {
     padding-left: calc(var(--spacing-md) + 24px);
+    width: 100%;
   }
 
   &:focus-within .search-icon {
@@ -182,24 +208,34 @@
 
   .dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 4px);
     left: 0;
     right: 0;
-    z-index: 10;
-    margin-top: 4px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(0, 245, 212, 0.2);
+    z-index: 100;
+    background: #0d1425;
+    border: 1px solid rgba(0, 245, 212, 0.25);
     border-radius: var(--radius-md);
-    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     max-height: 250px;
     overflow-y: auto;
 
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 245, 212, 0.2);
+      border-radius: 2px;
+    }
+
     .dropdown-item {
-      padding: var(--spacing-md);
+      padding: 10px var(--spacing-md);
       cursor: pointer;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: background 150ms ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 120ms ease;
 
       &:last-child {
         border-bottom: none;
@@ -212,7 +248,7 @@
       .dropdown-item-content {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 2px;
 
         .cliente-nombre {
           font-size: 13px;
@@ -221,7 +257,7 @@
         }
 
         .cliente-email {
-          font-size: 12px;
+          font-size: 11px;
           color: rgba(255, 255, 255, 0.4);
         }
       }

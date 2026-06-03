@@ -8,10 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * JWT Utility for Gateway
- * Validates JWT tokens without signature verification (relies on shared secret)
- */
 @Slf4j
 @Component
 public class JwtUtil {
@@ -19,23 +15,19 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    /**
-     * Validate JWT token
-     * Checks signature and expiration
-     */
     public boolean validateToken(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+            Claims claims = Jwts.parser()
+                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
 
-            log.debug("Token validated successfully for user: {}", claims.getSubject());
+            log.debug("Token validated for user: {}", claims.getSubject());
             return true;
 
         } catch (JwtException | IllegalArgumentException ex) {
-            log.error("JWT validation failed: ", ex);
+            log.debug("JWT validation failed: {}", ex.getMessage());
             return false;
         }
     }

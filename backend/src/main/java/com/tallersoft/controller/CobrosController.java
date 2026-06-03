@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/cobros")
@@ -41,6 +42,17 @@ public class CobrosController {
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ResponseEntity<CobroResponse> confirmarPagoManual(@PathVariable Long id) {
         return ResponseEntity.ok(cobrosService.confirmarPagoManual(id));
+    }
+
+    @GetMapping("/historial")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    public ResponseEntity<List<CajaDiariaResponse>> getHistorialCajas(
+            @RequestParam(required = false) Integer anio,
+            @RequestParam(required = false) Integer mes) {
+        LocalDate now = LocalDate.now();
+        int year  = anio != null ? anio : now.getYear();
+        int month = mes  != null ? mes  : now.getMonthValue();
+        return ResponseEntity.ok(cobrosService.getHistorialCajas(year, month));
     }
 
     @GetMapping("/ordenes/{ordenId}/presupuesto-pdf")

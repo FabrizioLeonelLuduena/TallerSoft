@@ -9,6 +9,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CobrosService, CajaDiariaResponse, CobroResponse } from '../../services/cobros.service';
 import { OrdenesService, OrdenTrabajoResponse } from '../../../ordenes/services/ordenes.service';
 
+type ViewMode = 'cobros' | 'caja' | 'historial';
+
 @Component({
   selector: 'app-caja-diaria',
   standalone: true,
@@ -22,25 +24,45 @@ export class CajaDiariaComponent implements OnInit {
   private snackBar       = inject(MatSnackBar);
   private destroyRef     = inject(DestroyRef);
 
-  viewMode: 'cobros' | 'historial' = 'cobros';
+  viewMode: ViewMode = 'cobros';
 
+  // Caja diaria (toggle 2)
   cajaDiaria: CajaDiariaResponse | null = null;
   ordenesPendientes: OrdenTrabajoResponse[] = [];
-  isLoading  = true;
-  fechaInput = this.hoyISO();
+  isLoading = true;
+
+  // Historial (toggle 3)
+  historialCajas: CajaDiariaResponse[] = [];
+  isLoadingHistorial = false;
+  selectedAnio: number = new Date().getFullYear();
+  selectedMes: number  = new Date().getMonth() + 1;
+
+  readonly meses = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  readonly anios: number[] = (() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => current - i);
+  })();
 
   ngOnInit(): void {
     this.cargarTodo();
   }
 
-  switchView(mode: 'cobros' | 'historial'): void {
+  switchView(mode: ViewMode): void {
     this.viewMode = mode;
+    if (mode === 'historial' && this.historialCajas.length === 0) {
+      this.cargarHistorial();
+    }
   }
 
+  // ── Carga inicial ────────────────────────────────────────
   cargarTodo(): void {
     this.isLoading = true;
     forkJoin({
-      caja:       this.cobrosService.getCajaDiaria(this.fechaInput),
+      caja:       this.cobrosService.getCajaDiaria(),
       pendientes: this.ordenesService.listarOrdenes({ estado: 'LISTO' })
     }).pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -56,23 +78,73 @@ export class CajaDiariaComponent implements OnInit {
       });
   }
 
-  onFechaChange(): void {
-    this.cobrosService.getCajaDiaria(this.fechaInput)
+  // ── Historial ────────────────────────────────────────────
+  cargarHistorial(): void {
+    this.isLoadingHistorial = true;
+    this.cobrosService.getHistorialCajas(this.selectedAnio, this.selectedMes)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => { this.cajaDiaria = data; },
-        error: () => this.snackBar.open('Error al cargar la caja diaria', 'Cerrar', { duration: 3000 })
+        next: (data) => {
+          this.historialCajas     = data;
+          this.isLoadingHistorial = false;
+        },
+        error: () => {
+          this.isLoadingHistorial = false;
+          this.snackBar.open('Error al cargar el historial', 'Cerrar', { duration: 3000 });
+        }
       });
   }
 
-  // ── Helpers ──────────────────────────────────────────────
+  onPeriodoChange(): void {
+    this.cargarHistorial();
+  }
 
+  // ── Totales mensuales ─────────────────────────────────────
+  getTotalMes(): number {
+    return this.historialCajas.reduce((s, c) => s + (c.totalDia as any), 0);
+  }
+
+  getTotalMesEfectivo(): number {
+    return this.historialCajas.reduce((s, c) => s + (c.totalEfectivo as any), 0);
+  }
+
+  getTotalMesTarjeta(): number {
+    return this.historialCajas.reduce((s, c) => s + (c.totalTarjeta as any), 0);
+  }
+
+  getTotalMesMercadoPago(): number {
+    return this.historialCajas.reduce((s, c) => s + (c.totalMercadoPago as any), 0);
+  }
+
+  getTotalMesCobros(): number {
+    return this.historialCajas.reduce((s, c) => s + c.cantidadOrdenes, 0);
+  }
+
+  getMesLabel(): string {
+    return this.meses[this.selectedMes - 1];
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
   formatCurrency(amount: number): string {
-    return '$' + amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return '$' + Number(amount).toLocaleString('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
   padOrderId(id: number): string {
     return '#' + String(id).padStart(4, '0');
+  }
+
+  formatFecha(fecha: string): string {
+    try {
+      const [y, m, d] = fecha.split('-');
+      return `${d}/${m}/${y}`;
+    } catch { return fecha; }
+  }
+
+  formatFechaHoy(): string {
+    return this.formatFecha(new Date().toISOString().split('T')[0]);
   }
 
   getEstadoClass(cobro: CobroResponse): string {
@@ -100,16 +172,5 @@ export class CajaDiariaComponent implements OnInit {
       MERCADOPAGO: 'MercadoPago'
     };
     return labels[medio] ?? medio;
-  }
-
-  formatFechaDisplay(): string {
-    try {
-      const [y, m, d] = this.fechaInput.split('-');
-      return `${d}/${m}/${y}`;
-    } catch { return this.fechaInput; }
-  }
-
-  private hoyISO(): string {
-    return new Date().toISOString().split('T')[0];
   }
 }

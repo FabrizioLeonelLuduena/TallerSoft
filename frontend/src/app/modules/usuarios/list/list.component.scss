@@ -422,6 +422,36 @@
   }
 }
 
+// Edit Button Styles
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 245, 212, 0.2);
+  background: rgba(0, 245, 212, 0.06);
+  color: var(--color-primary, #00f5d4);
+  cursor: pointer;
+  transition: all 200ms ease;
+  padding: 0;
+  font-family: inherit;
+
+  &:hover {
+    background: rgba(0, 245, 212, 0.14);
+    border-color: rgba(0, 245, 212, 0.5);
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
 // Delete Button Styles
 .btn-icon-danger {
   width: 36px;

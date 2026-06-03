@@ -56,6 +56,13 @@ export class CobrosService {
     return this.http.post<CobroResponse>(`${this.api}/${cobroId}/confirmar`, {});
   }
 
+  getHistorialCajas(anio?: number, mes?: number): Observable<CajaDiariaResponse[]> {
+    let params = new HttpParams();
+    if (anio) params = params.set('anio', anio.toString());
+    if (mes)  params = params.set('mes',  mes.toString());
+    return this.http.get<CajaDiariaResponse[]>(`${this.api}/historial`, { params });
+  }
+
   generarPresupuesto(ordenId: number): Observable<Blob> {
     return this.http.get(`${this.api}/ordenes/${ordenId}/presupuesto-pdf`, {
       responseType: 'blob'

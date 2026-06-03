@@ -163,20 +163,30 @@
     </table>
   </div>
 
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="!loading && filteredStock.length === 0">
+  <!-- Empty State: sin repuestos en el sistema -->
+  <div class="empty-state" *ngIf="!loading && filteredStock.length === 0 && allRepuestos.length === 0">
     <mat-icon>inventory_2</mat-icon>
     <h3>No hay repuestos</h3>
-    <p *ngIf="searchTerm">
-      No se encontraron repuestos que coincidan con tu búsqueda
-    </p>
-    <p *ngIf="!searchTerm">
-      Comienza agregando tu primer repuesto al inventario
-    </p>
+    <p>Comienza agregando tu primer repuesto al inventario</p>
     <button class="btn-empty-create" type="button" (click)="onCreateClick()" *ngIf="currentRole === 'ADMIN'">
       <mat-icon>add</mat-icon>
       Crear Primer Repuesto
     </button>
+  </div>
+
+  <!-- Empty State: filtros activos sin resultados -->
+  <div class="empty-state" *ngIf="!loading && filteredStock.length === 0 && allRepuestos.length > 0">
+    <mat-icon *ngIf="searchTerm.trim()">search_off</mat-icon>
+    <mat-icon *ngIf="!searchTerm.trim() && filterState === 'criticos'">warning</mat-icon>
+    <mat-icon *ngIf="!searchTerm.trim() && filterState === 'bajo'">trending_down</mat-icon>
+
+    <h3 *ngIf="searchTerm.trim()">No hay coincidencias</h3>
+    <h3 *ngIf="!searchTerm.trim() && filterState === 'criticos'">No hay repuestos en estado crítico</h3>
+    <h3 *ngIf="!searchTerm.trim() && filterState === 'bajo'">No hay repuestos en bajo stock</h3>
+
+    <p *ngIf="searchTerm.trim()">Intentá con otro nombre o categoría</p>
+    <p *ngIf="!searchTerm.trim() && filterState === 'criticos'">Todos los repuestos tienen stock suficiente</p>
+    <p *ngIf="!searchTerm.trim() && filterState === 'bajo'">Todos los repuestos están por encima del mínimo</p>
   </div>
 </div>
 

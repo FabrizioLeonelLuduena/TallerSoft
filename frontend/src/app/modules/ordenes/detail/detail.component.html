@@ -1,4 +1,5 @@
 <div class="detail-wrapper" *ngIf="!isLoading; else loadingState">
+
   <!-- Back Button -->
   <button class="btn-back" (click)="navigateBack()">
     <span class="material-symbols-outlined">arrow_back</span>
@@ -7,8 +8,19 @@
 
   <!-- Header Card -->
   <div class="header-card" *ngIf="orden">
-    <div class="header-top">
+    <div class="header-left">
       <div class="order-id">{{ padOrderId(orden.id) }}</div>
+      <h1 class="client-name">{{ orden.clienteNombre }}</h1>
+      <div class="header-meta">
+        <span class="material-symbols-outlined meta-icon">devices</span>
+        <span>Equipo #{{ orden.equipoId }}</span>
+        <span class="meta-sep">·</span>
+        <span>Creada {{ getRelativeTime(orden.createdAt) }}</span>
+        <span class="meta-sep">·</span>
+        <span>Actualizada {{ getRelativeTime(orden.updatedAt) }}</span>
+      </div>
+    </div>
+    <div class="header-right">
       <div class="header-badges">
         <span class="estado-chip" [style.background-color]="getEstadoBgColor(orden.estado)" [style.color]="getEstadoColor(orden.estado)">
           {{ orden.estado }}
@@ -17,30 +29,25 @@
           {{ orden.prioridad }}
         </span>
       </div>
-    </div>
-
-    <div class="header-content">
-      <h1 class="client-name">{{ orden.clienteNombre }}</h1>
-      <p class="equipment-info">Equipo #{{ orden.equipoId }}</p>
-      <p class="dates-info">
-        Creada {{ getRelativeTime(orden.createdAt) }} · Actualizada {{ getRelativeTime(orden.updatedAt) }}
-      </p>
-    </div>
-
-    <div class="presupuesto-section">
-      <span class="presupuesto-label">Presupuesto total</span>
-      <div class="presupuesto-value">{{ formatCurrency(orden.presupuesto) }}</div>
+      <div class="presupuesto-block">
+        <span class="presupuesto-label">Total</span>
+        <div class="presupuesto-value">{{ formatCurrency(orden.presupuesto) }}</div>
+      </div>
     </div>
   </div>
 
-  <!-- Main Content Grid -->
+  <!-- Content Grid -->
   <div class="content-grid" *ngIf="orden">
-    <!-- Left Panel -->
-    <div class="left-panel">
+
+    <!-- LEFT COLUMN: Área Técnica (70%) -->
+    <div class="left-col">
+
       <!-- Diagnóstico -->
-      <div class="section">
-        <h3 class="section-title">Diagnóstico</h3>
-        <textarea 
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Diagnóstico</h3>
+        </div>
+        <textarea
           *ngIf="canSaveDiagnostico()"
           [(ngModel)]="diagnosticoText"
           placeholder="Describí el diagnóstico..."
@@ -57,9 +64,86 @@
         </button>
       </div>
 
-      <!-- Timeline -->
-      <div class="section">
-        <h3 class="section-title">Historial</h3>
+      <!-- Repuestos Utilizados -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Repuestos Utilizados</h3>
+          <button *ngIf="canSaveDiagnostico()" class="btn-agregar" (click)="openAddRepuestoDialog()">
+            <span class="material-symbols-outlined">add</span>
+            Agregar
+          </button>
+        </div>
+
+        <div class="repuestos-table" *ngIf="orden.repuestos && orden.repuestos.length > 0">
+          <div class="table-header">
+            <div class="col col-nombre">Repuesto</div>
+            <div class="col col-cantidad">Cant.</div>
+            <div class="col col-precio">Precio Unit.</div>
+            <div class="col col-total">Total</div>
+            <div class="col col-actions" *ngIf="canSaveDiagnostico()"></div>
+          </div>
+          <div class="table-row" *ngFor="let repuesto of orden.repuestos">
+            <div class="col col-nombre">{{ repuesto.nombreRepuesto }}</div>
+            <div class="col col-cantidad">{{ repuesto.cantidad }}</div>
+            <div class="col col-precio">{{ formatCurrency(repuesto.precioUnit) }}</div>
+            <div class="col col-total">{{ formatCurrency(repuesto.cantidad * repuesto.precioUnit) }}</div>
+            <div class="col col-actions" *ngIf="canSaveDiagnostico()">
+              <button class="btn-remove" (click)="onRemoveRepuesto(repuesto.id)" title="Eliminar">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!orden.repuestos || orden.repuestos.length === 0" class="empty-state">
+          Sin repuestos registrados
+        </div>
+      </div>
+
+      <!-- Cobro Pendiente (solo cuando estado = LISTO) -->
+      <div class="card card--cobro" *ngIf="orden.estado === 'LISTO'">
+        <div class="card-header">
+          <h3 class="card-title">Cobro Pendiente</h3>
+        </div>
+        <p class="cobro-hint">La orden está lista para ser entregada. Registrá el cobro para completar el proceso.</p>
+        <a class="btn-cobrar" [routerLink]="['/caja/cobrar', orden.id]">
+          <span class="material-symbols-outlined">payments</span>
+          Registrar cobro
+        </a>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Sidebar de Gestión (30%) -->
+    <div class="right-col">
+
+      <!-- Cambiar Estado -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Cambiar Estado</h3>
+        </div>
+        <div class="current-estado">
+          <span class="label">Estado actual:</span>
+          <span class="value" [style.color]="getEstadoColor(orden.estado)">{{ orden.estado }}</span>
+        </div>
+        <button
+          *ngIf="canChangeEstado()"
+          class="btn-estado-change"
+          (click)="onChangeEstado()"
+          [disabled]="isChangeEstadoDisabled()"
+          [title]="isChangeEstadoDisabled() ? 'Agregá un diagnóstico antes de continuar' : ''"
+        >
+          {{ getNextEstadoLabel(orden.estado) }} →
+        </button>
+        <div *ngIf="isChangeEstadoDisabled()" class="state-hint">
+          ⓘ Agregá un diagnóstico antes de continuar
+        </div>
+      </div>
+
+      <!-- Historial -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Historial</h3>
+        </div>
         <div class="timeline">
           <div class="timeline-item" [class.completed]="isCompleted('PENDIENTE')" [class.current]="isCurrent('PENDIENTE')">
             <div class="timeline-dot"></div>
@@ -69,7 +153,6 @@
               <span class="timeline-date">{{ orden.createdAt | date: 'dd/MM HH:mm' }}</span>
             </div>
           </div>
-
           <div class="timeline-item" [class.completed]="isCompleted('EN_PROCESO')" [class.current]="isCurrent('EN_PROCESO')">
             <div class="timeline-dot"></div>
             <div class="timeline-line"></div>
@@ -78,7 +161,6 @@
               <span class="timeline-date" *ngIf="orden.estado !== 'PENDIENTE'">{{ orden.updatedAt | date: 'dd/MM HH:mm' }}</span>
             </div>
           </div>
-
           <div class="timeline-item" [class.completed]="isCompleted('LISTO')" [class.current]="isCurrent('LISTO')">
             <div class="timeline-dot"></div>
             <div class="timeline-line"></div>
@@ -87,7 +169,6 @@
               <span class="timeline-date" *ngIf="orden.estado !== 'PENDIENTE' && orden.estado !== 'EN_PROCESO'">{{ orden.updatedAt | date: 'dd/MM HH:mm' }}</span>
             </div>
           </div>
-
           <div class="timeline-item" [class.completed]="isCompleted('ENTREGADO')" [class.current]="isCurrent('ENTREGADO')">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
@@ -97,76 +178,12 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Right Panel - Parts & Summary -->
-    <div class="right-panel">
-      <!-- Repuestos Table -->
-      <div class="section">
-        <div class="section-header">
-          <h3 class="section-title">Repuestos Utilizados</h3>
-          <button *ngIf="canSaveDiagnostico()" class="btn-add-small" (click)="openAddRepuestoDialog()">
-            <span class="material-symbols-outlined">add</span>
-            Agregar
-          </button>
+      <!-- Presupuesto / PDF -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Presupuesto</h3>
         </div>
-
-        <div class="repuestos-table" *ngIf="orden.repuestos && orden.repuestos.length > 0">
-          <div class="table-header">
-            <div class="col col-nombre">Repuesto</div>
-            <div class="col col-cantidad">Cantidad</div>
-            <div class="col col-precio">Precio</div>
-            <div class="col col-total">Total</div>
-          </div>
-          <div class="table-row" *ngFor="let repuesto of orden.repuestos">
-            <div class="col col-nombre">{{ repuesto.nombreRepuesto }}</div>
-            <div class="col col-cantidad">{{ repuesto.cantidad }}</div>
-            <div class="col col-precio">{{ formatCurrency(repuesto.precioUnit) }}</div>
-            <div class="col col-total">{{ formatCurrency(repuesto.cantidad * repuesto.precioUnit) }}</div>
-          </div>
-        </div>
-
-        <div *ngIf="!orden.repuestos || orden.repuestos.length === 0" class="empty-state">
-          Sin repuestos registrados
-        </div>
-      </div>
-
-      <!-- Registrar Cobro (solo visible en estado LISTO) -->
-      <div class="section cobro-section" *ngIf="orden.estado === 'LISTO'">
-        <h3 class="section-title">Cobro pendiente</h3>
-        <p class="cobro-hint">La orden está lista para ser entregada. Registrá el cobro para completar el proceso.</p>
-        <a class="btn-cobrar" [routerLink]="['/caja/cobrar', orden.id]">
-          <span class="material-symbols-outlined">payments</span>
-          Registrar cobro
-        </a>
-      </div>
-
-      <!-- Estado Change -->
-      <div class="section">
-        <h3 class="section-title">Cambiar Estado</h3>
-        <div class="estado-change-card">
-          <div class="current-estado">
-            <span class="label">Estado actual:</span>
-            <span class="value" [style.color]="getEstadoColor(orden.estado)">{{ orden.estado }}</span>
-          </div>
-          <button
-            *ngIf="canChangeEstado()"
-            class="btn-estado-change"
-            (click)="onChangeEstado()"
-            [disabled]="isChangeEstadoDisabled()"
-            [title]="isChangeEstadoDisabled() ? 'Agregá un diagnóstico antes de continuar' : ''"
-          >
-            {{ getNextEstadoLabel(orden.estado) }} →
-          </button>
-          <div *ngIf="isChangeEstadoDisabled()" class="state-hint">
-            ⓘ Agregá un diagnóstico antes de continuar
-          </div>
-        </div>
-      </div>
-
-      <!-- Presupuesto PDF -->
-      <div class="section">
-        <h3 class="section-title">Presupuesto</h3>
         <div class="pdf-actions">
           <button class="btn-pdf btn-pdf--preview" (click)="previsualizarPDF()" [disabled]="isPdfLoading">
             <span class="material-symbols-outlined">visibility</span>
@@ -177,18 +194,22 @@
             Descargar PDF
           </button>
         </div>
-
-        <div *ngIf="showPdfPreview" class="pdf-preview-wrapper">
-          <div class="pdf-preview-header">
-            <span>Presupuesto #{{ padOrderId(orden.id) }}</span>
-            <button class="btn-close-pdf" (click)="cerrarPdfPreview()">
-              <span class="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <iframe [src]="pdfUrl" class="pdf-iframe" frameborder="0"></iframe>
-        </div>
       </div>
+
     </div>
+  </div>
+</div>
+
+<!-- PDF Modal Overlay -->
+<div class="pdf-modal-overlay" *ngIf="showPdfPreview" (click)="cerrarPdfPreview()">
+  <div class="pdf-modal" (click)="$event.stopPropagation()">
+    <div class="pdf-modal-header">
+      <span class="pdf-modal-title">Presupuesto {{ padOrderId(orden!.id) }}</span>
+      <button class="pdf-modal-close" (click)="cerrarPdfPreview()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <iframe [src]="pdfUrl" class="pdf-iframe" frameborder="0"></iframe>
   </div>
 </div>
 

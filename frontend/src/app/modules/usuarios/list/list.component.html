@@ -76,6 +76,9 @@
 
           <!-- Acciones Column -->
           <td class="cell-acciones">
+            <button (click)="openEditDialog(usuario)" class="btn-icon" type="button" title="Editar usuario">
+              <span class="material-symbols-outlined">edit</span>
+            </button>
             <button (click)="openDeleteUserModal(usuario)" class="btn-icon-danger" type="button" title="Eliminar usuario">
               <span class="material-symbols-outlined">delete</span>
             </button>
@@ -112,6 +115,12 @@
     </div>
   </div>
 </div>
+<app-edit-user-dialog
+  [isOpen]="showEditDialog"
+  [usuario]="usuarioToEdit"
+  (closed)="onEditDialogClosed($event)"
+></app-edit-user-dialog>
+
 <div class="access-denied" *ngIf="currentRole !== 'ADMIN' && currentRole !== ''">
   <span class="material-symbols-outlined">lock</span>
   <p class="denied-title">Acceso denegado</p>

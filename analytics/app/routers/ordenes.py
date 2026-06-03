@@ -1,30 +1,32 @@
-"""
-Analytics Service - Órdenes Router
-
-Endpoints for retrieving analytics and insights about work orders.
-"""
-
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Query
+from typing import Literal
+from sqlalchemy.orm import Session
+from app.db.database import get_db
+from app.services import analytics_service as svc
 
 router = APIRouter()
 
 
 @router.get("/resumen")
-async def resumen_ordenes():
-    """Get summary of orders by status"""
-    # TODO: Implement in Sprint 4
-    return {"message": "To be implemented in Sprint 4"}
+def resumen_ordenes(db: Session = Depends(get_db)):
+    """Totales de órdenes por estado."""
+    return svc.resumen_ordenes(db)
 
 
 @router.get("/por-periodo")
-async def ordenes_por_periodo():
-    """Get orders grouped by week for the last 4 weeks"""
-    # TODO: Implement in Sprint 4
-    return {"message": "To be implemented in Sprint 4"}
+def ordenes_por_periodo(
+    agrupacion: Literal["semana", "mes"] = Query("mes"),
+    meses_atras: int = Query(6, ge=1, le=24),
+    db: Session = Depends(get_db),
+):
+    """Órdenes agrupadas por semana o mes en los últimos N meses."""
+    return svc.ordenes_por_periodo(db, agrupacion, meses_atras)
 
 
 @router.get("/tecnicos/rendimiento")
-async def rendimiento_tecnicos():
-    """Get technician performance metrics"""
-    # TODO: Implement in Sprint 4
-    return {"message": "To be implemented in Sprint 4"}
+def rendimiento_tecnicos(
+    mes_actual: bool = Query(True),
+    db: Session = Depends(get_db),
+):
+    """Rendimiento de técnicos: órdenes cerradas y tiempo promedio."""
+    return svc.rendimiento_tecnicos(db, mes_actual)

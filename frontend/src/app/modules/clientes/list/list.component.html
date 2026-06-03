@@ -12,21 +12,12 @@
       <input 
         type="text"
         class="ts-input search-input"
-        placeholder="Buscar clientes, órdenes o contactos..."
+        placeholder="Buscar clientes"
         [value]="searchTerm"
         (input)="onSearch($event)"
       />
     </div>
-    <button 
-      class="btn-filters"
-      (click)="onFilterClick()"
-      type="button"
-      title="Filtros"
-    >
-      <span class="material-symbols-outlined">tune</span>
-      <span>Filtros</span>
-    </button>
-    <button 
+    <button
       class="btn-create"
       (click)="onCreateClick()"
       type="button"

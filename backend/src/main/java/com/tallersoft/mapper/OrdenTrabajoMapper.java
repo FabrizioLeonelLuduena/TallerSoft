@@ -5,8 +5,9 @@ import com.tallersoft.dto.OrdenTrabajoRequest;
 import com.tallersoft.dto.OrdenTrabajoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import com.tallersoft.mapper.OrdenRepuestoMapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {OrdenRepuestoMapper.class})
 public interface OrdenTrabajoMapper {
     
     @Mapping(source = "equipo.id", target = "equipoId")

@@ -21,12 +21,18 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
-# Configure CORS - Allow only Gateway
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://gateway:8080"],
+    allow_origins=[
+        "http://localhost:8080",
+        "http://gateway:8080",
+        "http://localhost:4200",
+        "http://localhost",
+        "http://localhost:80",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 

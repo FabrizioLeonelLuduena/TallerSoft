@@ -4,6 +4,7 @@ import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd } fro
 import { AuthService } from '@core/auth/auth.service';
 import { CurrentUser } from '@core/auth/auth.service';
 import { filter } from 'rxjs/operators';
+import { ChatFlotanteComponent } from '@shared/components/chat-flotante/chat-flotante.component';
 
 interface NavItem {
   label: string;
@@ -21,6 +22,7 @@ interface NavItem {
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    ChatFlotanteComponent,
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
@@ -81,6 +83,12 @@ export class LayoutComponent implements OnInit {
       icon: 'admin_panel_settings',
       route: '/usuarios',
       roles: ['ADMIN']
+    },
+    {
+      label: 'Asistente IA',
+      icon: 'smart_toy',
+      route: '/asistente',
+      roles: ['ADMIN', 'RECEPCION']
     },
   ];
 

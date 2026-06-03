@@ -2,6 +2,7 @@ package com.tallersoft.controller;
 
 import com.tallersoft.dto.UsuarioRequest;
 import com.tallersoft.dto.UsuarioResponse;
+import com.tallersoft.dto.UsuarioUpdateRequest;
 import com.tallersoft.service.UsuarioService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,7 @@ public class UsuariosController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponse> editar(
             @PathVariable Long id,
-            @Valid @RequestBody UsuarioRequest request) {
+            @Valid @RequestBody UsuarioUpdateRequest request) {
         log.info("Actualizando usuario: {}", id);
         UsuarioResponse usuario = usuarioService.editarUsuario(id, request);
         return ResponseEntity.ok(usuario);

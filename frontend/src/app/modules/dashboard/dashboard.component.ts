@@ -1,13 +1,26 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RepuestosService, Repuesto } from '../ordenes/services/repuestos.service';
+
+import {
+  AnalyticsService,
+  ResumenOrdenes,
+  RendimientoTecnico,
+  RepuestoCritico,
+  ResumenCajaDiario,
+  EvolucionMensual,
+} from '@core/services/analytics.service';
+
+export interface BarItem {
+  mes: string;
+  valor: number;
+  porcentaje: number;
+  label: string;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -15,24 +28,28 @@ import { RepuestosService, Repuesto } from '../ordenes/services/repuestos.servic
   imports: [
     CommonModule,
     RouterModule,
-    MatCardModule,
     MatIconModule,
     MatButtonModule,
-    MatCheckboxModule
   ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  repuestosCriticos: Repuesto[] = [];
-  loadingStock = true;
+  loading = true;
+  error = false;
+
+  resumenOrdenes: ResumenOrdenes | null = null;
+  cajaDiaria: ResumenCajaDiario | null = null;
+  stockCritico: RepuestoCritico[] = [];
+  tecnicosRendimiento: RendimientoTecnico[] = [];
+  barras: BarItem[] = [];
 
   private destroy$ = new Subject<void>();
 
-  constructor(private repuestosService: RepuestosService) {}
+  constructor(private analytics: AnalyticsService) {}
 
   ngOnInit(): void {
-    this.cargarStockCritico();
+    this.cargarDatos();
   }
 
   ngOnDestroy(): void {
@@ -40,17 +57,50 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private cargarStockCritico(): void {
-    this.repuestosService.listarRepuestos(true)
+  private cargarDatos(): void {
+    this.loading = true;
+    this.error = false;
+
+    forkJoin({
+      ordenes:   this.analytics.getResumenOrdenes(),
+      caja:      this.analytics.getResumenCajaDiario(),
+      stock:     this.analytics.getStockCritico(),
+      tecnicos:  this.analytics.getRendimientoTecnicos(),
+      evolucion: this.analytics.getEvolucionMensual(6),
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (repuestos) => {
-          this.repuestosCriticos = repuestos;
-          this.loadingStock = false;
+        next: ({ ordenes, caja, stock, tecnicos, evolucion }) => {
+          this.resumenOrdenes      = ordenes;
+          this.cajaDiaria          = caja;
+          this.stockCritico        = stock;
+          this.tecnicosRendimiento = tecnicos;
+          this.barras              = this.buildBarras(evolucion);
+          this.loading = false;
         },
         error: () => {
-          this.loadingStock = false;
-        }
+          this.error   = true;
+          this.loading = false;
+        },
       });
+  }
+
+  private buildBarras(evolucion: EvolucionMensual[]): BarItem[] {
+    if (!evolucion.length) return [];
+    const max = Math.max(...evolucion.map(e => e.total_ingresos), 1);
+    return evolucion.map(e => ({
+      mes:        e.mes,
+      valor:      e.total_ingresos,
+      porcentaje: Math.round((e.total_ingresos / max) * 100),
+      label:      `$${e.total_ingresos.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`,
+    }));
+  }
+
+  reintentar(): void {
+    this.cargarDatos();
+  }
+
+  getInitials(nombre: string): string {
+    return nombre.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
   }
 }

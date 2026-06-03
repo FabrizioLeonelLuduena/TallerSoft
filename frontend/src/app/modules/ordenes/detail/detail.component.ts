@@ -134,10 +134,35 @@ export class DetailComponent implements OnInit {
       });
   }
 
+  onRemoveRepuesto(ordenRepuestoId: number) {
+    if (!this.orden) return;
+    this.ordenesService.eliminarRepuesto(this.orden.id, ordenRepuestoId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedOrden) => {
+          this.orden = updatedOrden;
+          this.snackBar.open('Repuesto eliminado', 'Cerrar', {
+            duration: 2000,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom'
+          });
+        },
+        error: (err) => {
+          this.snackBar.open(
+            err.error?.message || 'Error al eliminar repuesto',
+            'Cerrar',
+            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+          );
+        }
+      });
+  }
+
   openAddRepuestoDialog() {
     if (!this.orden) return;
     this.dialog.open(AddRepuestoDialogComponent, {
-      width: '400px',
+      width: '620px',
+      maxWidth: '95vw',
+      minHeight: '420px',
       panelClass: 'dark-dialog',
       data: { ordenId: this.orden.id }
     }).afterClosed()

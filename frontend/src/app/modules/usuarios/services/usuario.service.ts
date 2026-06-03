@@ -10,6 +10,13 @@ export interface UsuarioRequest {
   rol: string;
 }
 
+export interface UsuarioUpdateRequest {
+  nombre: string;
+  email: string;
+  password?: string;
+  rol: string;
+}
+
 export interface UsuarioResponse {
   id: number;
   nombre: string;
@@ -42,6 +49,13 @@ export class UsuarioService {
    */
   crearUsuario(data: UsuarioRequest): Observable<UsuarioResponse> {
     return this.http.post<UsuarioResponse>(`${this.authApi}/register`, data);
+  }
+
+  /**
+   * Update a user by ID
+   */
+  editarUsuario(usuarioId: number, data: UsuarioUpdateRequest): Observable<UsuarioResponse> {
+    return this.http.put<UsuarioResponse>(`${this.apiUrl}/${usuarioId}`, data);
   }
 
   /**

@@ -208,6 +208,42 @@ public class OrdenTrabajoService {
     }
     
     @Transactional
+    public OrdenTrabajoResponse eliminarRepuesto(Long ordenId, Long ordenRepuestoId) {
+        log.info("Eliminando repuesto {} de orden {}", ordenRepuestoId, ordenId);
+
+        OrdenTrabajo orden = ordenTrabajoRepository.findById(ordenId)
+                .orElseThrow(() -> new EntityNotFoundException("Orden no encontrada"));
+
+        if (orden.getEstado() == EstadoOrden.ENTREGADO) {
+            throw new InvalidStateTransitionException("No se puede modificar una orden ya entregada");
+        }
+
+        OrdenRepuesto ordenRepuesto = ordenRepuestoRepository.findById(ordenRepuestoId)
+                .orElseThrow(() -> new EntityNotFoundException("Item de repuesto no encontrado"));
+
+        // Devolver stock al inventario
+        Repuesto repuesto = ordenRepuesto.getRepuesto();
+        repuesto.setStockActual(repuesto.getStockActual() + ordenRepuesto.getCantidad());
+        repuestoRepository.save(repuesto);
+
+        // Eliminar de la colección en memoria antes de deletar en BD
+        // (evita que el caché de Hibernate de primer nivel devuelva el ítem en el response)
+        orden.getRepuestos().removeIf(r -> r.getId().equals(ordenRepuestoId));
+        ordenRepuestoRepository.deleteById(ordenRepuestoId);
+
+        // Recalcular presupuesto con la colección ya actualizada
+        BigDecimal nuevoPresupuesto = orden.getRepuestos().stream()
+                .map(or -> or.getPrecioUnit().multiply(new BigDecimal(or.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        orden.setPresupuesto(nuevoPresupuesto);
+        OrdenTrabajo updated = ordenTrabajoRepository.save(orden);
+
+        log.info("Repuesto eliminado de orden {}, nuevo presupuesto: {}", ordenId, nuevoPresupuesto);
+        return ordenTrabajoMapper.toResponse(updated);
+    }
+
+    @Transactional
     public void actualizarEstadoAEntregado(Long ordenId) {
         log.info("Actualizando orden {} a estado ENTREGADO", ordenId);
         

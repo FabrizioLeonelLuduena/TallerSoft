@@ -12,8 +12,10 @@
 
 .page-header {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
 
   .title-section {
     .page-title {
@@ -28,6 +30,13 @@
       font-size: 14px;
       color: rgba(255, 255, 255, 0.5);
     }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
   }
 }
 
@@ -44,6 +53,7 @@
   .search-input-wrapper {
     position: relative;
     flex: 1;
+    max-width: 50%;
     min-width: 200px;
 
     .search-icon {
@@ -59,6 +69,7 @@
 
     .search-input {
       padding-left: calc(var(--spacing-md) + 24px);
+      width: 100%;
       background: rgba(0, 245, 212, 0.04);
       border-color: rgba(0, 245, 212, 0.1);
       transition: all 150ms ease;
@@ -109,66 +120,72 @@
     }
   }
 
-  .view-toggle {
+}
+
+// ───────────────────────────────────────────────────────────
+// HEADER ACTIONS (View Toggle + Create Button)
+// ───────────────────────────────────────────────────────────
+
+.view-toggle {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.02);
+
+  .toggle-btn {
     display: flex;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 2px;
-    gap: 0;
-    background: rgba(255, 255, 255, 0.02);
-
-    .toggle-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 40px;
-      background: transparent;
-      border: none;
-      border-radius: 6px;
-      color: rgba(255, 255, 255, 0.4);
-      cursor: pointer;
-      transition: all 200ms ease;
-
-      span.material-symbols-outlined {
-        font-size: 20px;
-      }
-
-      &:hover {
-        color: rgba(255, 255, 255, 0.6);
-      }
-
-      &.active {
-        background: rgba(0, 245, 212, 0.1);
-        border-radius: 6px;
-        color: #00f5d4;
-        box-shadow: 0 0 12px rgba(0, 245, 212, 0.15);
-      }
-    }
-  }
-
-  .btn-create {
+    align-items: center;
+    justify-content: center;
     width: 44px;
-    height: 44px;
-    min-width: 44px;
-    background: #00f5d4;
-    color: #0a0f1e;
+    height: 40px;
+    background: transparent;
     border: none;
-    border-radius: var(--radius-md);
-    font-size: 24px;
-    font-weight: 700;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
-    box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
-    transition: all 150ms ease;
+    transition: all 200ms ease;
+
+    span.material-symbols-outlined {
+      font-size: 20px;
+    }
 
     &:hover {
-      box-shadow: 0 0 30px rgba(0, 245, 212, 0.35);
-      transform: translateY(-2px);
+      color: rgba(255, 255, 255, 0.6);
     }
 
-    &:active {
-      transform: translateY(0);
+    &.active {
+      background: rgba(0, 245, 212, 0.1);
+      border-radius: 6px;
+      color: #00f5d4;
+      box-shadow: 0 0 12px rgba(0, 245, 212, 0.15);
     }
+  }
+}
+
+.btn-create {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  margin-left: auto;
+  background: #00f5d4;
+  color: #0a0f1e;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
+  transition: all 150ms ease;
+
+  &:hover {
+    box-shadow: 0 0 30px rgba(0, 245, 212, 0.35);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
@@ -213,12 +230,10 @@
 @media (max-width: 1024px) {
   .control-bar {
     .search-input-wrapper {
-      max-width: 100%;
+      max-width: 60%;
     }
 
-    .filter-select,
-    .view-toggle,
-    .btn-create {
+    .filter-select {
       min-width: auto;
     }
   }
@@ -240,21 +255,15 @@
 
   .control-bar {
     gap: var(--spacing-sm);
-    flex-direction: column;
+    flex-wrap: wrap;
 
     .search-input-wrapper {
       max-width: 100%;
-      width: 100%;
+      flex: 1 1 100%;
     }
 
-    .filter-select,
-    .view-toggle,
-    .btn-create {
-      width: 100%;
-    }
-
-    .btn-create {
-      width: 100%;
+    .filter-select {
+      flex: 1;
     }
   }
 }

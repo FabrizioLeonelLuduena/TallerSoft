@@ -2,6 +2,7 @@ package com.tallersoft.service;
 
 import com.tallersoft.dto.UsuarioRequest;
 import com.tallersoft.dto.UsuarioResponse;
+import com.tallersoft.dto.UsuarioUpdateRequest;
 import com.tallersoft.exception.EntityNotFoundException;
 import com.tallersoft.mapper.UsuarioMapper;
 import com.tallersoft.model.Rol;
@@ -112,7 +113,7 @@ public class UsuarioService {
      * @throws EntityNotFoundException if user not found
      */
     @Transactional
-    public UsuarioResponse editarUsuario(Long id, UsuarioRequest request) {
+    public UsuarioResponse editarUsuario(Long id, UsuarioUpdateRequest request) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
 

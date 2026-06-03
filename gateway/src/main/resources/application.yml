@@ -8,21 +8,17 @@ spring:
   cloud:
     gateway:
       routes:
-        # API Routes to Core Service
+        # API Routes to Core Service — backend ya maneja /api/** paths
         - id: core-api
           uri: http://backend:${BACKEND_PORT:8081}
           predicates:
             - Path=/api/**
-          filters:
-            - RewritePath=/api/(?<segment>.*), /$\{segment}
 
         # Auth Routes to Core Service
         - id: auth
           uri: http://backend:${BACKEND_PORT:8081}
           predicates:
             - Path=/auth/**
-          filters:
-            - RewritePath=/auth/(?<segment>.*), /auth/$\{segment}
 
         # Analytics Routes to Analytics Service
         - id: analytics

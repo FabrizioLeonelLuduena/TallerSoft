@@ -107,4 +107,14 @@ public class OrdenTrabajoController {
         OrdenTrabajoResponse orden = ordenTrabajoService.obtenerOrden(id);
         return ResponseEntity.ok(orden);
     }
+
+    @DeleteMapping("/{id}/repuestos/{ordenRepuestoId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    public ResponseEntity<OrdenTrabajoResponse> eliminarRepuesto(
+            @PathVariable Long id,
+            @PathVariable Long ordenRepuestoId) {
+        log.info("Eliminando repuesto {} de orden {}", ordenRepuestoId, id);
+        OrdenTrabajoResponse orden = ordenTrabajoService.eliminarRepuesto(id, ordenRepuestoId);
+        return ResponseEntity.ok(orden);
+    }
 }

@@ -56,6 +56,11 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
       },
       {
+        path: 'asistente',
+        loadChildren: () => import('./modules/asistente/asistente.routes').then(m => m.asistenteRoutes),
+        canActivate: [AuthGuard]
+      },
+      {
         path: 'unauthorized',
         component: UnauthorizedComponent
       },

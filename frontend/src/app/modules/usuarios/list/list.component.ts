@@ -7,6 +7,7 @@ import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/auth/auth.service';
 import { UsuarioService, UsuarioResponse } from '../services/usuario.service';
+import { EditUserDialogComponent } from '../dialogs/edit-user-dialog/edit-user-dialog.component';
 
 @Component({
   selector: 'app-usuarios-list',
@@ -16,7 +17,8 @@ import { UsuarioService, UsuarioResponse } from '../services/usuario.service';
     MatIconModule,
     MatButtonModule,
     MatSnackBarModule,
-    RouterModule
+    RouterModule,
+    EditUserDialogComponent
   ],
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss']
@@ -32,8 +34,12 @@ export class ListComponent implements OnInit {
   isLoading = true;
   currentRole: string | null = '';
   searchTerm = '';
+
   showDeleteUserModal = false;
   userToDelete: any = null;
+
+  showEditDialog = false;
+  usuarioToEdit: UsuarioResponse | null = null;
 
   ngOnInit() {
     this.currentRole = this.authService.getCurrentRole();
@@ -67,6 +73,19 @@ export class ListComponent implements OnInit {
 
   openCreateDialog() {
     this.router.navigate(['/usuarios/nuevo']);
+  }
+
+  openEditDialog(usuario: UsuarioResponse): void {
+    this.usuarioToEdit = usuario;
+    this.showEditDialog = true;
+  }
+
+  onEditDialogClosed(saved: boolean): void {
+    this.showEditDialog = false;
+    this.usuarioToEdit = null;
+    if (saved) {
+      this.loadUsuarios();
+    }
   }
 
   getInitials(nombre: string): string {
@@ -114,7 +133,6 @@ export class ListComponent implements OnInit {
   onSearch(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm = target.value;
-    // TODO: Implement search filtering if needed
   }
 
   openDeleteUserModal(usuario: any) {
@@ -124,7 +142,6 @@ export class ListComponent implements OnInit {
 
   confirmDeleteUser() {
     if (this.userToDelete) {
-      // Llamar al servicio de eliminación con el ID del usuario
       this.usuarioService.deleteUsuario(this.userToDelete.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({

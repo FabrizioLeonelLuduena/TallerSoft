@@ -53,7 +53,7 @@ public class OrdenTrabajo {
     @Column
     private LocalDateTime updatedAt;
     
-    @OneToMany(mappedBy = "orden", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "orden", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrdenRepuesto> repuestos;
     
     @PrePersist

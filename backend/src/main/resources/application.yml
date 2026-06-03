@@ -31,6 +31,9 @@ spring:
     default-property-inclusion: non_null
     serialization:
       indent-output: false
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
 
 logging:
   level:

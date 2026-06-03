@@ -46,7 +46,8 @@ export class KanbanComponent implements OnInit {
   allOrdenes: OrdenTrabajoResponse[] = [];
 
   ngOnInit() {
-    this.loadOrdenes();
+    // Data is provided by the parent OrdenesPrincipalComponent via setFilteredOrdenes()
+    this.isLoading = false;
   }
 
   loadOrdenes() {

@@ -178,6 +178,38 @@ public class CobrosService {
         return response;
     }
 
+    @Transactional(readOnly = true)
+    public List<CajaDiariaResponse> getHistorialCajas(int anio, int mes) {
+        LocalDate inicio = LocalDate.of(anio, mes, 1);
+        LocalDate fin    = inicio.withDayOfMonth(inicio.lengthOfMonth());
+
+        List<Cobro> cobros = cobrosRepository.findByEstadoPagoAndCreatedAtBetween(
+                EstadoPago.APROBADO, inicio.atStartOfDay(), fin.atTime(LocalTime.MAX));
+
+        return cobros.stream()
+                .collect(Collectors.groupingBy(c -> c.getCreatedAt().toLocalDate()))
+                .entrySet().stream()
+                .map(e -> buildCajaDiariaFromList(e.getKey(), e.getValue()))
+                .sorted((a, b) -> b.getFecha().compareTo(a.getFecha()))
+                .collect(Collectors.toList());
+    }
+
+    private CajaDiariaResponse buildCajaDiariaFromList(LocalDate fecha, List<Cobro> cobros) {
+        BigDecimal totalEfectivo    = sumarPorMedio(cobros, MedioPago.EFECTIVO);
+        BigDecimal totalTarjeta     = sumarPorMedio(cobros, MedioPago.TARJETA);
+        BigDecimal totalMercadoPago = sumarPorMedio(cobros, MedioPago.MERCADOPAGO);
+
+        CajaDiariaResponse response = new CajaDiariaResponse();
+        response.setFecha(fecha);
+        response.setTotalDia(totalEfectivo.add(totalTarjeta).add(totalMercadoPago));
+        response.setCantidadOrdenes(cobros.size());
+        response.setTotalEfectivo(totalEfectivo);
+        response.setTotalTarjeta(totalTarjeta);
+        response.setTotalMercadoPago(totalMercadoPago);
+        response.setCobrosDelDia(cobros.stream().map(cobroMapper::toResponse).collect(Collectors.toList()));
+        return response;
+    }
+
     private BigDecimal sumarPorMedio(List<Cobro> cobros, MedioPago medio) {
         return cobros.stream()
                 .filter(c -> c.getMedioPago() == medio)

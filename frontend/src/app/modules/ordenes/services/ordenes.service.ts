@@ -93,6 +93,10 @@ export class OrdenesService {
     return this.http.post<OrdenTrabajoResponse>(`${this.api}/${ordenId}/repuestos`, data);
   }
 
+  eliminarRepuesto(ordenId: number, ordenRepuestoId: number): Observable<OrdenTrabajoResponse> {
+    return this.http.delete<OrdenTrabajoResponse>(`${this.api}/${ordenId}/repuestos/${ordenRepuestoId}`);
+  }
+
   eliminarOrden(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }

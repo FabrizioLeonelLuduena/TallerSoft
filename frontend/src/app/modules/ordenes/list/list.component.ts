@@ -51,12 +51,8 @@ export class ListComponent implements OnInit {
 
   ngOnInit() {
     this.currentRole = this.authService.getCurrentRole();
-    
-    if (this.currentRole === 'TECNICO') {
-      this.loadMisOrdenes();
-    } else {
-      this.loadOrdenes();
-    }
+    // Data is provided by the parent OrdenesPrincipalComponent via setFilteredOrdenes()
+    this.isLoading = false;
   }
 
   private loadOrdenes() {

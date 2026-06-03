@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, DestroyRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -27,7 +27,7 @@ import { ListComponent } from './list/list.component';
   templateUrl: './ordenes.component.html',
   styleUrls: ['./ordenes.component.scss']
 })
-export class OrdenesPrincipalComponent implements OnInit {
+export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
   private authService = inject(AuthService);
   private ordenesService = inject(OrdenesService);
   private snackBar = inject(MatSnackBar);
@@ -53,6 +53,11 @@ export class OrdenesPrincipalComponent implements OnInit {
     this.loadOrdenes();
   }
 
+  ngAfterViewInit() {
+    // Push data to children once view (and @ViewChild refs) are ready
+    setTimeout(() => this.applyFilters(), 0);
+  }
+
   private loadOrdenes() {
     this.isLoading = true;
     const loadObservable = this.currentRole === 'TECNICO' 
@@ -66,7 +71,7 @@ export class OrdenesPrincipalComponent implements OnInit {
           this.ordenes = ordenes;
           this.extractTecnicos();
           this.isLoading = false;
-          this.applyFilters();
+          setTimeout(() => this.applyFilters(), 0);
         },
         error: (err) => {
           this.isLoading = false;
@@ -91,17 +96,25 @@ export class OrdenesPrincipalComponent implements OnInit {
 
   switchViewMode(mode: 'kanban' | 'lista') {
     this.viewMode = mode;
+    // Wait for *ngIf to create the new child and update @ViewChild
+    setTimeout(() => this.applyFilters(), 0);
   }
 
   applyFilters() {
+    const term = this.searchTerm.trim().toLowerCase();
+    // Normalize tecnicoId: native <select> coerces [value]="null" to the string "null"
+    const rawTecnico = this.selectedTecnicoId;
+    const tecnicoId = (rawTecnico === null || `${rawTecnico}` === 'null' || `${rawTecnico}` === '') ? null : rawTecnico;
+
     const filtered = this.ordenes.filter(orden => {
-      const tecnicoMatch = !this.selectedTecnicoId || orden.tecnicoId === this.selectedTecnicoId;
+      // eslint-disable-next-line eqeqeq
+      const tecnicoMatch = tecnicoId === null || orden.tecnicoId == tecnicoId;
       const prioridadMatch = !this.selectedPrioridad || orden.prioridad === this.selectedPrioridad;
-      const searchMatch = !this.searchTerm || 
-        orden.clienteNombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        orden.id.toString().includes(this.searchTerm) ||
-        orden.fallaReportada.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        (orden.tecnicoNombre && orden.tecnicoNombre.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      const searchMatch = !term ||
+        (orden.clienteNombre ?? '').toLowerCase().includes(term) ||
+        orden.id.toString().includes(term) ||
+        (orden.fallaReportada ?? '').toLowerCase().includes(term) ||
+        (orden.tecnicoNombre ?? '').toLowerCase().includes(term);
       return tecnicoMatch && prioridadMatch && searchMatch;
     });
 
