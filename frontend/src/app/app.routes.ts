@@ -5,6 +5,7 @@ import { DashboardComponent } from './modules/dashboard/dashboard.component';
 import { InventarioComponent } from './modules/inventario/inventario.component';
 import { ReportesComponent } from './modules/reportes/reportes.component';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
+import { PerfilComponent } from './modules/perfil/perfil.component';
 
 export const routes: Routes = [
   {
@@ -58,6 +59,11 @@ export const routes: Routes = [
       {
         path: 'asistente',
         loadChildren: () => import('./modules/asistente/asistente.routes').then(m => m.asistenteRoutes),
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'perfil',
+        component: PerfilComponent,
         canActivate: [AuthGuard]
       },
       {

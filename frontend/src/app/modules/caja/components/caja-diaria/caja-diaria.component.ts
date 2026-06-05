@@ -26,6 +26,39 @@ export class CajaDiariaComponent implements OnInit {
 
   viewMode: ViewMode = 'cobros';
 
+  readonly pageSize = 10;
+
+  // Paginación — tab cobros (órdenes listas para cobrar)
+  pendPage = 1;
+  get pendTotalPages(): number { return Math.max(1, Math.ceil(this.ordenesPendientes.length / this.pageSize)); }
+  get pagedPendientes(): OrdenTrabajoResponse[] {
+    const s = (this.pendPage - 1) * this.pageSize;
+    return this.ordenesPendientes.slice(s, s + this.pageSize);
+  }
+  get pendPageStart(): number { return this.ordenesPendientes.length === 0 ? 0 : (this.pendPage - 1) * this.pageSize + 1; }
+  get pendPageEnd(): number { return Math.min(this.pendPage * this.pageSize, this.ordenesPendientes.length); }
+  prevPendPage() { if (this.pendPage > 1) this.pendPage--; }
+  nextPendPage() { if (this.pendPage < this.pendTotalPages) this.pendPage++; }
+
+  // Paginación — tab caja del día (cobros del día)
+  cobrosPage = 1;
+  get cobrosTotalPages(): number {
+    const len = this.cajaDiaria?.cobrosDelDia?.length ?? 0;
+    return Math.max(1, Math.ceil(len / this.pageSize));
+  }
+  get pagedCobros(): any[] {
+    if (!this.cajaDiaria) return [];
+    const s = (this.cobrosPage - 1) * this.pageSize;
+    return this.cajaDiaria.cobrosDelDia.slice(s, s + this.pageSize);
+  }
+  get cobrosPageStart(): number {
+    const len = this.cajaDiaria?.cobrosDelDia?.length ?? 0;
+    return len === 0 ? 0 : (this.cobrosPage - 1) * this.pageSize + 1;
+  }
+  get cobrosPageEnd(): number { return Math.min(this.cobrosPage * this.pageSize, this.cajaDiaria?.cobrosDelDia?.length ?? 0); }
+  prevCobrosPage() { if (this.cobrosPage > 1) this.cobrosPage--; }
+  nextCobrosPage() { if (this.cobrosPage < this.cobrosTotalPages) this.cobrosPage++; }
+
   // Caja diaria (toggle 2)
   cajaDiaria: CajaDiariaResponse | null = null;
   ordenesPendientes: OrdenTrabajoResponse[] = [];
@@ -69,7 +102,9 @@ export class CajaDiariaComponent implements OnInit {
         next: ({ caja, pendientes }) => {
           this.cajaDiaria        = caja;
           this.ordenesPendientes = pendientes;
-          this.isLoading         = false;
+          this.pendPage   = 1;
+          this.cobrosPage = 1;
+          this.isLoading  = false;
         },
         error: () => {
           this.isLoading = false;

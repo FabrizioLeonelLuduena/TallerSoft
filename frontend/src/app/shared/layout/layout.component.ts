@@ -1,16 +1,17 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
-import { AuthService } from '@core/auth/auth.service';
-import { CurrentUser } from '@core/auth/auth.service';
+import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { AuthService, CurrentUser } from '@core/auth/auth.service';
+import { ChatHistoryService, ChatSession } from '@core/services/chat-history.service';
 import { ChatFlotanteComponent } from '@shared/components/chat-flotante/chat-flotante.component';
+import { TopBarComponent } from '@shared/components/top-bar/top-bar.component';
 
 interface NavItem {
   label: string;
   icon: string;
   route?: string;
-  children?: NavItem[];
   roles?: string[];
 }
 
@@ -23,93 +24,51 @@ interface NavItem {
     RouterLink,
     RouterLinkActive,
     ChatFlotanteComponent,
+    TopBarComponent,
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
 })
-export class LayoutComponent implements OnInit {
+export class LayoutComponent implements OnInit, OnDestroy {
 
   currentUser: CurrentUser | null = null;
   sidebarCollapsed = false;
   isMobile = false;
-  profileDropdownOpen = false;
-  hasNotifications = true;
+  chatSessions: ChatSession[] = [];
+  openMenuId: string | null = null;
+  currentSessionId: string | null = null;
+  private subs = new Subscription();
 
   navItems: NavItem[] = [
-    {
-      label: 'Dashboard',
-      icon: 'dashboard',
-      route: '/dashboard',
-      roles: ['ADMIN', 'TECNICO', 'RECEPCION']
-    },
-    {
-      label: 'Clientes',
-      icon: 'people',
-      route: '/clientes',
-      roles: ['ADMIN', 'RECEPCION']
-    },
-    {
-      label: 'Órdenes de Trabajo',
-      icon: 'build',
-      route: '/ordenes',
-      roles: ['ADMIN', 'TECNICO', 'RECEPCION']
-    },
-    {
-      label: 'Stock',
-      icon: 'inventory_2',
-      route: '/stock',
-      roles: ['ADMIN', 'TECNICO', 'RECEPCION']
-    },
-    {
-      label: 'Caja y Facturación',
-      icon: 'point_of_sale',
-      route: '/caja/diaria',
-      roles: ['ADMIN', 'RECEPCION']
-    },
-    {
-      label: 'Inventario',
-      icon: 'inventory_2',
-      route: '/inventario',
-      roles: ['ADMIN', 'TECNICO']
-    },
-    {
-      label: 'Reportes',
-      icon: 'bar_chart',
-      route: '/reportes',
-      roles: ['ADMIN']
-    },
-    {
-      label: 'Usuarios',
-      icon: 'admin_panel_settings',
-      route: '/usuarios',
-      roles: ['ADMIN']
-    },
-    {
-      label: 'Asistente IA',
-      icon: 'smart_toy',
-      route: '/asistente',
-      roles: ['ADMIN', 'RECEPCION']
-    },
+    { label: 'Dashboard',         icon: 'dashboard',           route: '/dashboard',   roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
+    { label: 'Clientes',          icon: 'people',              route: '/clientes',    roles: ['ADMIN', 'RECEPCION'] },
+    { label: 'Órdenes de Trabajo',icon: 'build',               route: '/ordenes',     roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
+    { label: 'Stock',             icon: 'inventory_2',         route: '/stock',       roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
+    { label: 'Caja y Facturación',icon: 'point_of_sale',       route: '/caja/diaria', roles: ['ADMIN', 'RECEPCION'] },
+    { label: 'Usuarios',          icon: 'admin_panel_settings',route: '/usuarios',    roles: ['ADMIN'] },
+    { label: 'Asistente IA',      icon: 'smart_toy',           route: '/asistente',   roles: ['ADMIN', 'RECEPCION'] },
   ];
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private historyService: ChatHistoryService,
   ) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
+    this.subs.add(this.authService.currentUser$.subscribe(user => { this.currentUser = user; }));
+    this.subs.add(this.historyService.sessions.subscribe(s => { this.chatSessions = s; }));
+    this.subs.add(
+      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
+        this.updateCurrentSession(e.url);
+      })
+    );
+    this.updateCurrentSession(this.router.url);
     this.checkScreenSize();
     window.addEventListener('resize', () => this.checkScreenSize());
-    
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.updateModuleName(event.url);
-    });
   }
+
+  ngOnDestroy(): void { this.subs.unsubscribe(); }
 
   checkScreenSize(): void {
     this.isMobile = window.innerWidth <= 768;
@@ -122,72 +81,42 @@ export class LayoutComponent implements OnInit {
     );
   }
 
-  logout(): void {
-    this.profileDropdownOpen = false;
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-
-  getRolLabel(): string {
-    const rolMap: { [key: string]: string } = {
-      'ADMIN': 'Administrador',
-      'TECNICO': 'Técnico',
-      'RECEPCION': 'Recepción'
-    };
-    return rolMap[this.currentUser?.rol || 'TECNICO'];
-  }
-
-  getUserInitials(): string {
-    if (!this.currentUser?.email) return 'U';
-    const parts = this.currentUser.email.split('@')[0].split('.');
-    return parts.map(part => part.charAt(0).toUpperCase()).join('').substring(0, 2);
-  }
-
-  getUserName(): string {
-    if (!this.currentUser?.email) return 'User';
-    return this.currentUser.email.split('@')[0];
-  }
-
-  updateModuleName(url: string): void {
-    const moduleMap: { [key: string]: string } = {
-      '/dashboard': 'Dashboard',
-      '/ordenes': 'Órdenes',
-      '/clientes': 'Clientes',
-      '/inventario': 'Inventario',
-      '/stock': 'Stock',
-      '/caja': 'Caja',
-      '/reportes': 'Reportes',
-      '/usuarios': 'Usuarios',
-      '/asistente': 'Asistente IA'
-    };
-
-    for (const [path, name] of Object.entries(moduleMap)) {
-      if (url.startsWith(path)) {
-        return;
-      }
+  private updateCurrentSession(url: string): void {
+    if (url.includes('/asistente')) {
+      const match = url.match(/[?&]id=([^&]+)/);
+      this.currentSessionId = match ? match[1] : null;
+    } else {
+      this.currentSessionId = null;
     }
+  }
+
+  navigateToSession(sessionId: string): void {
+    this.openMenuId = null;
+    this.router.navigate(['/asistente'], { queryParams: { id: sessionId } });
+  }
+
+  toggleSessionMenu(sessionId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.openMenuId = this.openMenuId === sessionId ? null : sessionId;
+  }
+
+  deleteSession(sessionId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.historyService.deleteSession(sessionId);
+    if (this.currentSessionId === sessionId) {
+      this.router.navigate(['/asistente']);
+    }
+    this.openMenuId = null;
+  }
+
+  @HostListener('document:click')
+  closeMenus(): void {
+    this.openMenuId = null;
   }
 
   toggleSidebar(): void {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
-  toggleProfileDropdown(): void {
-    this.profileDropdownOpen = !this.profileDropdownOpen;
-  }
-
-  goToProfile(): void {
-    this.profileDropdownOpen = false;
-    this.router.navigate(['/profile']);
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    const profileElement = document.querySelector('.user-profile');
-    
-    if (profileElement && !profileElement.contains(target)) {
-      this.profileDropdownOpen = false;
-    }
-  }
+  updateModuleName(url: string): void {}
 }

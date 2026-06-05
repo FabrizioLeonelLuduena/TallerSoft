@@ -39,11 +39,20 @@ ESTADO ACTUAL DEL TALLER:
   - Listas para entregar: {contexto.get('ordenes_listas', 0)}
   - Entregadas (histórico): {contexto.get('ordenes_entregadas', 0)}
 
+Alertas operativas:
+  - Órdenes ALTA prioridad paradas (≥2 días): {contexto.get('ordenes_alta_prioridad_paradas', 0)}
+  - Órdenes sin movimiento (≥5 días): {contexto.get('ordenes_sin_movimiento', 0)}
+
 Stock:
   - Repuestos con stock crítico: {criticos_str}
 
-Caja del día:
+Finanzas:
   - Ingresos de hoy: ${contexto.get('ingresos_hoy', 0):,.2f}
+  - Tasa conversión presupuesto→cobro: {contexto.get('conversion_presupuesto_pct', 0)}%
+  - Cobros rechazados hoy: ${contexto.get('rechazos_hoy_monto', 0):,.0f}
+
+Clientes:
+  - % clientes recurrentes este mes: {contexto.get('clientes_recurrentes_pct', 0)}%
 
 Rendimiento del equipo (mes actual):
 {tecnicos_str}

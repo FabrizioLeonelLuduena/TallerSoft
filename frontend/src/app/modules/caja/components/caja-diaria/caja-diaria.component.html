@@ -2,11 +2,6 @@
 
   <!-- Page Header -->
   <div class="page-header">
-    <div class="title-section">
-      <h1 class="page-title">Caja y Facturación</h1>
-      <p class="page-subtitle">Gestión de cobros y movimientos</p>
-    </div>
-
     <!-- View Mode Toggle -->
     <div class="view-toggle">
       <button
@@ -64,7 +59,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="table-row" *ngFor="let orden of ordenesPendientes">
+          <tr class="table-row" *ngFor="let orden of pagedPendientes">
             <td class="col-orden">
               <span class="orden-id">{{ padOrderId(orden.id) }}</span>
             </td>
@@ -82,6 +77,18 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination cobros -->
+    <div *ngIf="!isLoading && pendTotalPages > 1" class="pagination-controls">
+      <button class="pag-btn" [disabled]="pendPage === 1" (click)="prevPendPage()">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <span class="pag-label">Página {{ pendPage }} de {{ pendTotalPages }}</span>
+      <button class="pag-btn" [disabled]="pendPage === pendTotalPages" (click)="nextPendPage()">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+      <span class="pag-count">{{ pendPageStart }}–{{ pendPageEnd }} de {{ ordenesPendientes.length }}</span>
     </div>
 
     <div class="empty-state" *ngIf="!isLoading && ordenesPendientes.length === 0">
@@ -173,7 +180,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="table-row" *ngFor="let cobro of cajaDiaria.cobrosDelDia">
+          <tr class="table-row" *ngFor="let cobro of pagedCobros">
             <td class="col-orden"><span class="orden-id">{{ padOrderId(cobro.ordenId) }}</span></td>
             <td class="col-cliente">{{ cobro.clienteNombre }}</td>
             <td class="col-medio">
@@ -189,6 +196,18 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination cobros del día -->
+    <div *ngIf="!isLoading && cobrosTotalPages > 1" class="pagination-controls">
+      <button class="pag-btn" [disabled]="cobrosPage === 1" (click)="prevCobrosPage()">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <span class="pag-label">Página {{ cobrosPage }} de {{ cobrosTotalPages }}</span>
+      <button class="pag-btn" [disabled]="cobrosPage === cobrosTotalPages" (click)="nextCobrosPage()">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+      <span class="pag-count">{{ cobrosPageStart }}–{{ cobrosPageEnd }} de {{ cajaDiaria?.cobrosDelDia?.length }}</span>
     </div>
 
     <div class="empty-state" *ngIf="!isLoading && cajaDiaria && cajaDiaria.cobrosDelDia.length === 0">

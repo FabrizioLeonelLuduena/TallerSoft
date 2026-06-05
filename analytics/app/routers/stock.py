@@ -31,3 +31,10 @@ def repuestos_mas_usados(
     Returns the top N most-used parts in orders from the last `dias` days.
     """
     return get_repuestos_mas_usados(db, dias=dias, top=top)
+
+
+@router.get("/por-categoria")
+def stock_por_categoria(db: Session = Depends(get_db)):
+    """Consumo de repuestos agrupado por categoría."""
+    from app.services.analytics_service import stock_por_categoria as svc_fn
+    return svc_fn(db)

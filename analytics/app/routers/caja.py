@@ -24,3 +24,18 @@ def evolucion_mensual(
 ):
     """Evolución de ingresos mes a mes."""
     return svc.evolucion_mensual_caja(db, meses)
+
+
+@router.get("/rechazos")
+def rechazos_cobros(
+    dias: int = Query(7, ge=1, le=90),
+    db: Session = Depends(get_db),
+):
+    """Cobros rechazados en los últimos N días agrupados por medio de pago."""
+    return svc.rechazos_cobros(db, dias)
+
+
+@router.get("/conversion-presupuesto")
+def conversion_presupuesto(db: Session = Depends(get_db)):
+    """Tasa de conversión de órdenes con presupuesto a cobros aprobados."""
+    return svc.conversion_presupuesto(db)

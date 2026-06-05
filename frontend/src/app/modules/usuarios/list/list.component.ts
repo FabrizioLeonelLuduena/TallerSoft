@@ -35,6 +35,38 @@ export class ListComponent implements OnInit {
   currentRole: string | null = '';
   searchTerm = '';
 
+  currentPage = 1;
+  readonly pageSize = 10;
+
+  get filteredUsuarios(): UsuarioResponse[] {
+    if (!this.searchTerm.trim()) return this.usuarios;
+    const term = this.searchTerm.toLowerCase();
+    return this.usuarios.filter(u =>
+      u.nombre.toLowerCase().includes(term) ||
+      u.email.toLowerCase().includes(term)
+    );
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredUsuarios.length / this.pageSize));
+  }
+
+  get pagedUsuarios(): UsuarioResponse[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredUsuarios.slice(start, start + this.pageSize);
+  }
+
+  get pageStart(): number {
+    return this.filteredUsuarios.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.filteredUsuarios.length);
+  }
+
+  prevPage() { if (this.currentPage > 1) this.currentPage--; }
+  nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
+
   showDeleteUserModal = false;
   userToDelete: any = null;
 
@@ -133,6 +165,7 @@ export class ListComponent implements OnInit {
   onSearch(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm = target.value;
+    this.currentPage = 1;
   }
 
   openDeleteUserModal(usuario: any) {

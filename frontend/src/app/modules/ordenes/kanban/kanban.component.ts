@@ -77,6 +77,10 @@ export class KanbanComponent implements OnInit {
       const col = this.columns.find(c => c.estado === orden.estado);
       if (col) col.ordenes.push(orden);
     });
+    // Sort ENTREGADO by updatedAt DESC so the 3 most recent appear first
+    this.columns[3].ordenes.sort((a, b) =>
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
   }
 
   onDrop(event: CdkDragDrop<OrdenTrabajoResponse[]>) {
@@ -98,6 +102,15 @@ export class KanbanComponent implements OnInit {
       .subscribe({
         next: () => {
           orden.estado = nuevoEstado as 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO';
+          if (nuevoEstado === 'ENTREGADO') {
+            // Move newly delivered order to front so it appears among the visible 3
+            const col = this.columns[3];
+            const idx = col.ordenes.indexOf(orden);
+            if (idx > 0) {
+              col.ordenes.splice(idx, 1);
+              col.ordenes.unshift(orden);
+            }
+          }
           this.snackBar.open('Orden actualizada', 'Cerrar', { duration: 2000 });
         },
         error: (err) => {

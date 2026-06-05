@@ -1,10 +1,4 @@
 <div class="usuarios-container page-enter" *ngIf="currentRole === 'ADMIN'">
-  <!-- Page Header -->
-  <div class="page-header">
-    <h1 class="page-title">Usuarios del Sistema</h1>
-    <p class="page-subtitle">Gestiona los usuarios y roles del sistema</p>
-  </div>
-
   <!-- Search & Filter Bar -->
   <div class="search-filter-bar">
     <div class="search-input-wrapper">
@@ -40,7 +34,7 @@
     </div>
 
     <!-- Table Content -->
-    <table class="data-table" *ngIf="!isLoading && usuarios.length > 0">
+    <table class="data-table" *ngIf="!isLoading && filteredUsuarios.length > 0">
       <thead>
         <tr>
           <th>Usuario</th>
@@ -50,7 +44,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let usuario of usuarios; let i = index" class="table-row table-row-enter" [style.animation-delay]="(i * 25) + 'ms'">
+        <tr *ngFor="let usuario of pagedUsuarios; let i = index" class="table-row table-row-enter" [style.animation-delay]="(i * 25) + 'ms'">
           <!-- Usuario Column -->
           <td class="cell-usuario">
             <div class="user-cell">
@@ -87,8 +81,20 @@
       </tbody>
     </table>
 
+    <!-- Pagination -->
+    <div *ngIf="!isLoading && totalPages > 1" class="pagination-controls">
+      <button class="pag-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <span class="pag-label">Página {{ currentPage }} de {{ totalPages }}</span>
+      <button class="pag-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+      <span class="pag-count">{{ pageStart }}–{{ pageEnd }} de {{ filteredUsuarios.length }}</span>
+    </div>
+
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!isLoading && usuarios.length === 0">
+    <div class="empty-state" *ngIf="!isLoading && filteredUsuarios.length === 0">
       <span class="material-symbols-outlined">group</span>
       <p class="empty-title">No hay usuarios registrados</p>
       <button class="ts-btn-primary" (click)="openCreateDialog()" type="button">

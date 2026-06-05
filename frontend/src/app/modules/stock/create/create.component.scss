@@ -14,27 +14,7 @@
 
 .form-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
-
-  .header-content {
-    flex: 1;
-  }
-
-  .form-title {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 900;
-    color: var(--color-on-surface);
-    line-height: 1.2;
-  }
-
-  .form-subtitle {
-    margin: 8px 0 0 0;
-    font-size: 14px;
-    color: var(--color-secondary);
-  }
+  justify-content: flex-end;
 
   .btn-back {
     padding: 8px 12px;

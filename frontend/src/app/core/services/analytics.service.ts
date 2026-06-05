@@ -94,4 +94,50 @@ export class AnalyticsService {
       { pregunta }
     );
   }
+
+  // ─── Nuevos endpoints ────────────────────────────────────────────────────
+
+  getOrdenesSinMovimiento(diasUmbral = 5): Observable<any[]> {
+    const params = new HttpParams().set('dias_umbral', diasUmbral);
+    return this.http.get<any[]>(`${this.base}/ordenes/sin-movimiento`, { params });
+  }
+
+  getOrdenesAltaPrioridad(diasMinimos = 1): Observable<any[]> {
+    const params = new HttpParams().set('dias_minimos', diasMinimos);
+    return this.http.get<any[]>(`${this.base}/ordenes/alta-prioridad`, { params });
+  }
+
+  getTiempoPorEstado(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/ordenes/tiempo-por-estado`);
+  }
+
+  getRechazos(dias = 7): Observable<any> {
+    const params = new HttpParams().set('dias', dias);
+    return this.http.get<any>(`${this.base}/caja/rechazos`, { params });
+  }
+
+  getConversionPresupuesto(): Observable<any> {
+    return this.http.get<any>(`${this.base}/caja/conversion-presupuesto`);
+  }
+
+  getRecurrenciaClientes(meses = 6): Observable<any[]> {
+    const params = new HttpParams().set('meses', meses);
+    return this.http.get<any[]>(`${this.base}/clientes/recurrencia`, { params });
+  }
+
+  getStockPorCategoria(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/stock/por-categoria`);
+  }
+
+  getAlertasActivas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/alertas/activas`);
+  }
+
+  getResumenAlertas(): Observable<any> {
+    return this.http.get<any>(`${this.base}/alertas/resumen`);
+  }
+
+  marcarAlertaLeida(alertaId: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/alertas/${alertaId}/marcar-leida`, {});
+  }
 }

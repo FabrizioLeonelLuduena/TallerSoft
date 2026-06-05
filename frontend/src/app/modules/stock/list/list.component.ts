@@ -36,6 +36,29 @@ export class StockListComponent implements OnInit, OnDestroy {
   filterState: FilterState = 'todos';
   searchTerm = '';
 
+  currentPage = 1;
+  readonly pageSize = 10;
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredStock.length / this.pageSize));
+  }
+
+  get pagedStock(): Repuesto[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredStock.slice(start, start + this.pageSize);
+  }
+
+  get pageStart(): number {
+    return this.filteredStock.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.filteredStock.length);
+  }
+
+  prevPage() { if (this.currentPage > 1) this.currentPage--; }
+  nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
+
   showEditDialog = false;
   repuestoToEdit: Repuesto | null = null;
 
@@ -119,6 +142,7 @@ export class StockListComponent implements OnInit, OnDestroy {
     }
 
     this.filteredStock = base;
+    this.currentPage = 1;
   }
 
   editarRepuesto(repuesto: Repuesto): void {

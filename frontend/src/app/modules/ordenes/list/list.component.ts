@@ -39,7 +39,10 @@ export class ListComponent implements OnInit {
   selectedTecnicoId: number | null = null;
   currentRole: string | null = '';
   searchTerm = '';
-  
+
+  currentPage = 1;
+  readonly pageSize = 10;
+
   estados = ['PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO'];
   tecnicos: { id: number | null; nombre: string }[] = [];
   
@@ -149,10 +152,36 @@ export class ListComponent implements OnInit {
 
   setFilteredOrdenes(ordenes: OrdenTrabajoResponse[]) {
     this.filteredOrdenes = this.ordenesSorted_internal(ordenes);
+    this.currentPage = 1;
   }
 
   get ordenesSorted(): OrdenTrabajoResponse[] {
     return this.ordenesSorted_internal(this.filteredOrdenes);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.ordenesSorted.length / this.pageSize));
+  }
+
+  get pagedOrdenes(): OrdenTrabajoResponse[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.ordenesSorted.slice(start, start + this.pageSize);
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.ordenesSorted.length);
+  }
+
+  get pageStart(): number {
+    return this.ordenesSorted.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
   }
 
   private ordenesSorted_internal(ordenes: OrdenTrabajoResponse[]): OrdenTrabajoResponse[] {
@@ -284,12 +313,13 @@ export class ListComponent implements OnInit {
   }
 
   shouldShowEstadoSeparator(index: number): boolean {
+    const paged = this.pagedOrdenes;
     if (index === 0) return true;
-    return this.ordenesSorted[index].estado !== this.ordenesSorted[index - 1].estado;
+    return paged[index].estado !== paged[index - 1].estado;
   }
 
   getEstadoForSeparator(index: number): string {
-    return this.ordenesSorted[index].estado;
+    return this.pagedOrdenes[index].estado;
   }
 
   getEstadoCount(estado: string): number {

@@ -1,10 +1,4 @@
 <div class="clientes-container page-enter">
-  <!-- Page Header -->
-  <div class="page-header">
-    <h1 class="page-title">Directorio de Clientes</h1>
-    <p class="page-subtitle">Gestiona tu base de datos de clientes e historial de servicios</p>
-  </div>
-
   <!-- Search & Filter Bar -->
   <div class="search-filter-bar">
     <div class="search-input-wrapper">
@@ -41,9 +35,9 @@
 
   <!-- Clients Grid -->
   <div class="clients-grid" *ngIf="!isLoading && clientes.length > 0">
-    <div 
+    <div
       class="glass-panel client-card card-enter"
-      *ngFor="let cliente of clientes; let i = index"
+      *ngFor="let cliente of pagedClientes; let i = index"
       (click)="navigateToClient(cliente.id)"
       [style.animation-delay]="(i * 40) + 'ms'"
     >
@@ -84,6 +78,18 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && totalPages > 1" class="pagination-controls">
+    <button class="pag-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    <span class="pag-label">Página {{ currentPage }} de {{ totalPages }}</span>
+    <button class="pag-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+    <span class="pag-count">{{ pageStart }}–{{ pageEnd }} de {{ clientes.length }}</span>
   </div>
 
   <!-- Empty State -->

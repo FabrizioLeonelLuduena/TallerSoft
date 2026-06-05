@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, HostListener, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -33,18 +33,43 @@ export class CreateComponent implements OnInit {
   private equipoService = inject(EquipoService);
   private usuariosService = inject(UsuariosService);
   private destroyRef = inject(DestroyRef);
+  private el = inject(ElementRef);
 
   form!: FormGroup;
+
+  // Cliente
   clientes: ClienteResponse[] = [];
   selectedCliente: ClienteResponse | null = null;
-  equipos: EquipoResponse[] = [];
-  tecnicos: Usuario[] = [];
-  isLoadingEquipos = false;
   showClienteDropdown = false;
-  isLoading = false;
-  isSubmitting = false;
   clienteSearchTerm = '';
   private searchSubject = new Subject<string>();
+
+  // Equipo
+  equipos: EquipoResponse[] = [];
+  filteredEquipos: EquipoResponse[] = [];
+  selectedEquipo: EquipoResponse | null = null;
+  showEquipoDropdown = false;
+  equipoSearchTerm = '';
+  isLoadingEquipos = false;
+
+  // Técnico
+  tecnicos: Usuario[] = [];
+  filteredTecnicos: Usuario[] = [];
+  selectedTecnico: Usuario | null = null;
+  showTecnicoDropdown = false;
+  tecnicoSearchTerm = '';
+
+  isLoading = false;
+  isSubmitting = false;
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.el.nativeElement.contains(event.target)) {
+      this.showClienteDropdown = false;
+      this.showEquipoDropdown = false;
+      this.showTecnicoDropdown = false;
+    }
+  }
 
   get equipoIdControl() {
     return this.form.get('equipoId');
@@ -84,6 +109,7 @@ export class CreateComponent implements OnInit {
       .subscribe({
         next: (usuarios) => {
           this.tecnicos = usuarios.filter(u => u.activo);
+          this.filteredTecnicos = this.tecnicos;
         },
         error: () => {
           this.snackbar.open('Error al cargar técnicos', 'Cerrar', { duration: 3000 });
@@ -91,20 +117,30 @@ export class CreateComponent implements OnInit {
       });
   }
 
+  // ── Cliente ──────────────────────────────────────────────
+
+  onClienteFocus() {
+    this.showEquipoDropdown = false;
+    this.showTecnicoDropdown = false;
+    if (this.clientes.length > 0) {
+      this.showClienteDropdown = true;
+      return;
+    }
+    this.searchSubject.next(this.clienteSearchTerm);
+  }
+
   onClienteSearch(event: Event | string) {
     const value = typeof event === 'string' ? event : (event.target as HTMLInputElement).value;
     this.clienteSearchTerm = value;
-    this.showClienteDropdown = value.length > 0;
-    if (value.length > 0) {
-      this.searchSubject.next(value);
-    } else {
-      this.clientes = [];
-      this.showClienteDropdown = false;
-    }
+    this.showClienteDropdown = true;
+    this.searchSubject.next(value);
   }
 
   onClienteSelect(cliente: ClienteResponse) {
     this.selectedCliente = cliente;
+    this.selectedEquipo = null;
+    this.equipoSearchTerm = '';
+    this.filteredEquipos = [];
     this.form.patchValue({ clienteId: cliente.id, equipoId: null });
     this.showClienteDropdown = false;
     this.clienteSearchTerm = cliente.nombre;
@@ -115,6 +151,7 @@ export class CreateComponent implements OnInit {
       .subscribe({
         next: (equipos) => {
           this.equipos = equipos;
+          this.filteredEquipos = equipos;
           this.isLoadingEquipos = false;
         },
         error: () => {
@@ -123,6 +160,67 @@ export class CreateComponent implements OnInit {
         }
       });
   }
+
+  // ── Equipo ───────────────────────────────────────────────
+
+  onEquipoFocus() {
+    if (!this.selectedCliente || this.isLoadingEquipos) return;
+    this.filteredEquipos = this.equipos;
+    this.showEquipoDropdown = this.equipos.length > 0;
+    this.showClienteDropdown = false;
+    this.showTecnicoDropdown = false;
+  }
+
+  onEquipoSearch(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.equipoSearchTerm = value;
+    const q = value.toLowerCase().trim();
+    if (q === '') {
+      this.filteredEquipos = this.equipos;
+    } else {
+      this.filteredEquipos = this.equipos.filter(eq =>
+        eq.tipo.toLowerCase().includes(q) ||
+        (eq.marca?.toLowerCase().includes(q) ?? false) ||
+        (eq.modelo?.toLowerCase().includes(q) ?? false)
+      );
+    }
+    this.showEquipoDropdown = this.filteredEquipos.length > 0;
+  }
+
+  onEquipoSelect(equipo: EquipoResponse) {
+    this.selectedEquipo = equipo;
+    this.form.patchValue({ equipoId: equipo.id });
+    this.equipoSearchTerm = [equipo.tipo, equipo.marca, equipo.modelo].filter(Boolean).join(' • ');
+    this.showEquipoDropdown = false;
+  }
+
+  // ── Técnico ──────────────────────────────────────────────
+
+  onTecnicoFocus() {
+    this.filteredTecnicos = this.tecnicos;
+    this.showTecnicoDropdown = true;
+    this.showClienteDropdown = false;
+    this.showEquipoDropdown = false;
+  }
+
+  onTecnicoSearch(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.tecnicoSearchTerm = value;
+    const q = value.toLowerCase().trim();
+    this.filteredTecnicos = q === ''
+      ? this.tecnicos
+      : this.tecnicos.filter(tec => tec.nombre.toLowerCase().includes(q));
+    this.showTecnicoDropdown = true;
+  }
+
+  onTecnicoSelect(tecnico: Usuario | null) {
+    this.selectedTecnico = tecnico;
+    this.form.patchValue({ tecnicoId: tecnico ? tecnico.id : null });
+    this.tecnicoSearchTerm = tecnico ? tecnico.nombre : '';
+    this.showTecnicoDropdown = false;
+  }
+
+  // ── Formulario ───────────────────────────────────────────
 
   onSubmit() {
     if (this.form.invalid) {

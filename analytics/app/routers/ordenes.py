@@ -30,3 +30,27 @@ def rendimiento_tecnicos(
 ):
     """Rendimiento de técnicos: órdenes cerradas y tiempo promedio."""
     return svc.rendimiento_tecnicos(db, mes_actual)
+
+
+@router.get("/alta-prioridad")
+def ordenes_alta_prioridad(
+    dias_minimos: int = Query(1, ge=0),
+    db: Session = Depends(get_db),
+):
+    """Órdenes ALTA prioridad que llevan N+ días sin avanzar."""
+    return svc.ordenes_alta_prioridad(db, dias_minimos)
+
+
+@router.get("/sin-movimiento")
+def ordenes_sin_movimiento(
+    dias_umbral: int = Query(5, ge=1),
+    db: Session = Depends(get_db),
+):
+    """Órdenes activas sin cambios en más de N días."""
+    return svc.ordenes_sin_movimiento(db, dias_umbral)
+
+
+@router.get("/tiempo-por-estado")
+def tiempo_por_estado(db: Session = Depends(get_db)):
+    """Tiempo promedio en días por estado (embudo de reparación)."""
+    return svc.tiempo_promedio_por_estado(db)

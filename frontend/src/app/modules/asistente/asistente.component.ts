@@ -1,12 +1,14 @@
-import { Component, OnDestroy, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AnalyticsService } from '@core/services/analytics.service';
+import { ChatHistoryService, ChatSession } from '@core/services/chat-history.service';
 
 interface Mensaje {
   rol: 'usuario' | 'asistente';
@@ -26,22 +28,16 @@ interface Mensaje {
   templateUrl: './asistente.component.html',
   styleUrls: ['./asistente.component.scss'],
 })
-export class AsistenteComponent implements AfterViewChecked, OnDestroy {
+export class AsistenteComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('mensajesContainer') mensajesContainer!: ElementRef<HTMLDivElement>;
 
-  mensajes: Mensaje[] = [
-    {
-      rol: 'asistente',
-      texto: '¡Hola! Soy el asistente de TallerSoft. Podés preguntarme sobre órdenes, stock, ingresos o el rendimiento del equipo técnico.',
-      timestamp: new Date(),
-    },
-  ];
-
+  mensajes: Mensaje[] = [];
   preguntaActual = '';
   cargando = false;
   inputFocused = false;
   private scrollPendiente = false;
   private destroy$ = new Subject<void>();
+  private sessionId: string | null = null;
 
   sugerencias = [
     '¿Cuántas órdenes están pendientes?',
@@ -50,7 +46,38 @@ export class AsistenteComponent implements AfterViewChecked, OnDestroy {
     '¿Cuál es el rendimiento del equipo técnico?',
   ];
 
-  constructor(private analytics: AnalyticsService) {}
+  constructor(
+    private analytics: AnalyticsService,
+    private historyService: ChatHistoryService,
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const id = params['id'];
+      if (id) {
+        const session = this.historyService.getSession(id);
+        if (session) {
+          this.sessionId = id;
+          this.mensajes = session.messages.map(m => ({
+            rol: m.rol,
+            texto: m.texto,
+            timestamp: new Date(m.timestamp),
+          }));
+          this.scrollPendiente = true;
+        }
+        // id present but session not found yet (mid-creation): don't reset
+        return;
+      }
+      this.sessionId = null;
+      this.mensajes = [{
+        rol: 'asistente',
+        texto: '¡Hola! Soy el asistente de TallerSoft. Podés preguntarme sobre órdenes, stock, ingresos o el rendimiento del equipo técnico.',
+        timestamp: new Date(),
+      }];
+    });
+  }
 
   ngAfterViewChecked(): void {
     if (this.scrollPendiente) {
@@ -73,6 +100,17 @@ export class AsistenteComponent implements AfterViewChecked, OnDestroy {
     this.cargando = true;
     this.scrollPendiente = true;
 
+    if (!this.sessionId) {
+      this.sessionId = this.historyService.generateId();
+      // Persist BEFORE navigating so queryParams subscription finds the session
+      this.persistSession();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { id: this.sessionId },
+        replaceUrl: true,
+      });
+    }
+
     this.analytics
       .consultarAsistente(pregunta)
       .pipe(takeUntil(this.destroy$))
@@ -81,6 +119,7 @@ export class AsistenteComponent implements AfterViewChecked, OnDestroy {
           this.mensajes.push({ rol: 'asistente', texto: res.respuesta, timestamp: new Date() });
           this.cargando = false;
           this.scrollPendiente = true;
+          this.persistSession();
         },
         error: () => {
           this.mensajes.push({
@@ -90,8 +129,30 @@ export class AsistenteComponent implements AfterViewChecked, OnDestroy {
           });
           this.cargando = false;
           this.scrollPendiente = true;
+          this.persistSession();
         },
       });
+  }
+
+  private persistSession(): void {
+    if (!this.sessionId) return;
+    const userMessages = this.mensajes.filter(m => m.rol === 'usuario');
+    const title = userMessages.length > 0
+      ? userMessages[0].texto.slice(0, 48) + (userMessages[0].texto.length > 48 ? '…' : '')
+      : 'Nueva conversación';
+
+    const session: ChatSession = {
+      id: this.sessionId,
+      title,
+      messages: this.mensajes.map(m => ({
+        rol: m.rol,
+        texto: m.texto,
+        timestamp: m.timestamp.toISOString(),
+      })),
+      createdAt: this.mensajes[0].timestamp.toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.historyService.saveSession(session);
   }
 
   usarSugerencia(texto: string): void {

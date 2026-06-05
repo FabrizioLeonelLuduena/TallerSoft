@@ -52,6 +52,13 @@ export class UsuarioService {
   }
 
   /**
+   * Get a single user by ID
+   */
+  obtenerUsuario(id: number): Observable<UsuarioResponse> {
+    return this.http.get<UsuarioResponse>(`${this.apiUrl}/${id}`);
+  }
+
+  /**
    * Update a user by ID
    */
   editarUsuario(usuarioId: number, data: UsuarioUpdateRequest): Observable<UsuarioResponse> {

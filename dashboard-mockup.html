@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TallerSoft — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Paleta fiel a la captura — fondo muy oscuro, acento teal/cyan como en la app real */
+  --bg:         #0d1117;
+  --sidebar-bg: #131720;
+  --surface:    #161b26;
+  --surface2:   #1c2233;
+  --border:     #252d3d;
+  --border2:    #2e3a50;
+  --accent:     #00c9a7;   /* teal — igual al logo/activos de la captura */
+  --accent-dim: rgba(0,201,167,.12);
+  --orange:     #f97316;
+  --blue:       #3b82f6;
+  --green:      #22c55e;
+  --warn:       #f59e0b;
+  --danger:     #ef4444;
+  --text:       #dde3ee;
+  --muted:      #5a6680;
+  --muted2:     #8492a8;
+  --card-r:     10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════════
+   SIDEBAR  (fiel a la captura)
+════════════════════════════════════════════ */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+
+/* Logo row */
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.logo-icon svg { width: 18px; height: 18px; color: #0d1117; }
+.logo-text { line-height: 1.2; }
+.logo-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); }
+.logo-ver  { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+
+/* Nav */
+.nav { padding: 10px 8px; flex: 1; overflow-y: auto; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  color: var(--muted2);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  transition: background .12s, color .12s;
+  margin-bottom: 1px;
+  white-space: nowrap;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 500;
+  border: 1px solid rgba(0,201,167,.18);
+}
+.nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: rgba(239,68,68,.15);
+  color: #f87171;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* Sidebar bottom — user */
+.sidebar-bottom {
+  padding: 12px 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background .12s;
+}
+.sidebar-bottom:hover { background: var(--surface2); }
+.s-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #0ea5e9);
+  display: grid; place-items: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: #0d1117;
+  flex-shrink: 0;
+}
+.s-user-name  { font-size: 12px; font-weight: 500; color: var(--text); }
+.s-user-role  { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; }
+.s-chevron { margin-left: auto; color: var(--muted); }
+.s-chevron svg { width: 14px; height: 14px; }
+
+/* ════════════════════════════════════════════
+   MAIN AREA
+════════════════════════════════════════════ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════════
+   TOPBAR  — solo bell + avatar
+════════════════════════════════════════════ */
+.topbar {
+  height: 54px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 15;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.topbar-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 3px 9px;
+  border-radius: 5px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bell button */
+.bell-btn {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: grid; place-items: center;
+  cursor: pointer;
+  position: relative;
+  transition: background .12s, border-color .12s;
+  flex-shrink: 0;
+}
+.bell-btn:hover { background: var(--border); border-color: var(--border2); }
+.bell-btn svg { width: 16px; height: 16px; color: var(--muted2); }
+.bell-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 8px; height: 8px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid var(--sidebar-bg);
+  transition: transform .2s;
+}
+.bell-btn:hover .bell-dot { transform: scale(1.2); }
+
+/* Divider */
+.topbar-divider {
+  width: 1px; height: 22px;
+  background: var(--border);
+}
+
+/* Avatar button */
+.avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+  position: relative;
+}
+.avatar-btn:hover { background: var(--border); border-color: var(--border2); }
+.avatar-img {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #0ea5e9);
+  display: grid; place-items: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px; font-weight: 700;
+  color: #0d1117;
+  flex-shrink: 0;
+}
+.avatar-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.avatar-chevron svg {
+  width: 13px; height: 13px;
+  color: var(--muted);
+  transition: transform .2s;
+}
+.avatar-btn.open .avatar-chevron svg { transform: rotate(180deg); }
+
+/* ── Profile dropdown ── */
+.profile-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.55);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropIn .15s ease;
+}
+.profile-dropdown.open { display: block; }
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dd-header {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dd-avatar-lg {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #0ea5e9);
+  display: grid; place-items: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: #0d1117;
+  flex-shrink: 0;
+}
+.dd-user-name  { font-size: 13px; font-weight: 600; color: var(--text); }
+.dd-user-email { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.dd-role-badge {
+  margin-top: 4px;
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  letter-spacing: .5px;
+  font-weight: 500;
+}
+
+.dd-menu { padding: 6px; }
+.dd-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 6px;
+  color: var(--muted2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .1s, color .1s;
+}
+.dd-item:hover { background: var(--surface2); color: var(--text); }
+.dd-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+.dd-item.danger { color: #f87171; }
+.dd-item.danger:hover { background: rgba(239,68,68,.1); color: var(--danger); }
+.dd-separator { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* ════════════════════════════════════════════
+   NOTIFICATION PANEL
+════════════════════════════════════════════ */
+.notif-overlay { display: none; position: fixed; inset: 0; z-index: 50; }
+.notif-overlay.open { display: block; }
+.notif-panel {
+  position: absolute;
+  top: 54px; right: 22px;
+  width: 340px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.6);
+  overflow: hidden;
+  animation: dropIn .15s ease;
+}
+.notif-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.notif-head-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+.notif-head-meta  { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.notif-list { max-height: 380px; overflow-y: auto; }
+.notif-item {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .1s;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: var(--surface2); }
+.notif-item.unread { background: rgba(0,201,167,.03); }
+.n-icon {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.n-icon svg { width: 14px; height: 14px; }
+.n-icon.danger  { background: rgba(239,68,68,.14); color: #f87171; }
+.n-icon.warn    { background: rgba(245,158,11,.14); color: #fbbf24; }
+.n-icon.info    { background: rgba(59,130,246,.14); color: #60a5fa; }
+.n-icon.success { background: rgba(34,197,94,.14);  color: #4ade80; }
+.n-body { flex: 1; min-width: 0; }
+.n-title { font-size: 12px; font-weight: 500; line-height: 1.35; color: var(--text); margin-bottom: 3px; }
+.n-desc  { font-size: 11px; color: var(--muted); line-height: 1.3; margin-bottom: 3px; }
+.n-time  { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.n-dot   { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+
+/* ════════════════════════════════════════════
+   CONTENT AREA
+════════════════════════════════════════════ */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 22px 30px;
+  background: var(--bg);
+}
+
+/* Alert bar */
+.alert-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.alert-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: filter .12s;
+}
+.alert-chip svg { width: 13px; height: 13px; }
+.alert-chip .chip-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  background: rgba(255,255,255,.12);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.alert-chip.danger { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.22); color: #fca5a5; }
+.alert-chip.warn   { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.22); color: #fcd34d; }
+.alert-chip:hover  { filter: brightness(1.12); }
+
+/* Tabs */
+.tabs-row {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 18px;
+  background: var(--surface);
+  padding: 3px;
+  border-radius: 8px;
+  width: fit-content;
+  border: 1px solid var(--border);
+}
+.tab-btn {
+  padding: 6px 16px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border2);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+
+/* Section label */
+.sec-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 18px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+/* Grids */
+.g6   { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; }
+.g4   { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.g3   { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.g2   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.g21  { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+
+/* ── KPI card (fiel al diseño de la captura) ── */
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--card-r);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: default;
+  transition: border-color .15s;
+  position: relative;
+  overflow: hidden;
+}
+.kpi:hover { border-color: var(--border2); }
+.kpi-icon-box {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.kpi-icon-box svg { width: 20px; height: 20px; }
+.kpi-icon-box.teal   { background: rgba(0,201,167,.12); color: var(--accent); }
+.kpi-icon-box.orange { background: rgba(249,115,22,.12); color: var(--orange); }
+.kpi-icon-box.blue   { background: rgba(59,130,246,.12); color: var(--blue); }
+.kpi-icon-box.green  { background: rgba(34,197,94,.12);  color: var(--green); }
+.kpi-icon-box.warn   { background: rgba(245,158,11,.12); color: var(--warn); }
+.kpi-icon-box.danger { background: rgba(239,68,68,.12);  color: var(--danger); }
+.kpi-body { min-width: 0; }
+.kpi-label { font-size: 11px; color: var(--muted2); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px; font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.5px;
+}
+.kpi-sub { font-size: 10px; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+.trend { font-family: 'DM Mono', monospace; font-size: 9px; padding: 1px 5px; border-radius: 3px; }
+.trend.up   { background: rgba(34,197,94,.12); color: var(--green); }
+.trend.down { background: rgba(239,68,68,.12); color: var(--danger); }
+.trend.neu  { background: rgba(90,102,128,.12); color: var(--muted); }
+/* left accent bar like the original */
+.kpi::before {
+  content:'';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+}
+.kpi.teal::before   { background: var(--accent); }
+.kpi.orange::before { background: var(--orange); }
+.kpi.blue::before   { background: var(--blue); }
+.kpi.green::before  { background: var(--green); }
+.kpi.warn::before   { background: var(--warn); }
+.kpi.danger::before { background: var(--danger); }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--card-r);
+  overflow: hidden;
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+.card-tag   { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); background: var(--surface2); padding: 3px 7px; border-radius: 4px; }
+.card-link  { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--accent); cursor: pointer; letter-spacing: .5px; text-transform: uppercase; }
+.card-body  { padding: 14px 16px; }
+.card-body-flush { padding: 0; }
+
+/* Funnel bars */
+.funnel { display: flex; flex-direction: column; gap: 9px; }
+.f-row  { display: flex; align-items: center; gap: 10px; }
+.f-lbl  { font-size: 11px; color: var(--muted2); width: 86px; flex-shrink: 0; }
+.f-track { flex: 1; height: 26px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
+.f-bar   { height: 100%; border-radius: 5px; display: flex; align-items: center; padding-left: 9px; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
+.f-bar.s1 { background: rgba(59,130,246,.28); color: #93c5fd; }
+.f-bar.s2 { background: rgba(249,115,22,.28); color: #fdba74; }
+.f-bar.s3 { background: rgba(245,158,11,.28); color: #fcd34d; }
+.f-bar.s4 { background: rgba(34,197,94,.28);  color: #86efac; }
+.f-days  { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); width: 48px; text-align: right; flex-shrink: 0; }
+
+/* Table */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; padding: 0 0 9px; text-align: left; border-bottom: 1px solid var(--border); }
+.tbl td { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl th:not(:first-child), .tbl td:not(:first-child) { text-align: right; }
+
+.badge-estado {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500;
+}
+.badge-estado::before { content:''; width:5px; height:5px; border-radius: 50%; flex-shrink:0; }
+.badge-estado.p  { background: rgba(59,130,246,.1); color: #93c5fd; }
+.badge-estado.p::before  { background: #93c5fd; }
+.badge-estado.ep { background: rgba(249,115,22,.1); color: #fdba74; }
+.badge-estado.ep::before { background: #fdba74; }
+.badge-estado.l  { background: rgba(245,158,11,.1); color: #fcd34d; }
+.badge-estado.l::before  { background: #fcd34d; }
+.badge-estado.e  { background: rgba(34,197,94,.1);  color: #86efac; }
+.badge-estado.e::before  { background: #86efac; }
+
+.pill-danger { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:4px; background:rgba(239,68,68,.12); color:#f87171; font-weight:500; }
+.pill-warn   { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:4px; background:rgba(245,158,11,.12); color:#fbbf24; font-weight:500; }
+.pill-alta   { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:4px; background:rgba(239,68,68,.12); color:#f87171; }
+
+/* Progress bar */
+.prog { margin-bottom: 12px; }
+.prog:last-child { margin-bottom: 0; }
+.prog-hd { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+.prog-lbl { font-weight: 500; color: var(--text); }
+.prog-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted2); }
+.prog-track { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.prog-fill  { height: 100%; border-radius: 3px; }
+
+/* Recurrencia big number */
+.rec-big { text-align: center; padding: 8px 0 14px; }
+.rec-pct { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; color: var(--green); line-height: 1; }
+.rec-lbl { font-size: 11px; color: var(--muted2); margin-top: 4px; }
+.rec-split { display: flex; gap: 8px; }
+.rec-box { flex:1; background: var(--surface2); border-radius: 7px; border: 1px solid var(--border); padding: 10px; text-align: center; }
+.rec-box-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+.rec-box-lbl { font-size: 10px; color: var(--muted2); margin-top: 2px; }
+
+/* Conversion funnel */
+.conv-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.conv-step { flex:1; text-align: center; }
+.conv-val  { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.conv-lbl  { font-size: 10px; color: var(--muted2); margin-top: 2px; }
+.conv-arr  { color: var(--border2); font-size: 18px; flex-shrink: 0; }
+.conv-badge { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2); border-radius: 8px; padding: 10px; text-align: center; }
+.conv-badge-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--green); }
+.conv-badge-lbl { font-size: 10px; color: var(--muted2); margin-top: 2px; }
+
+/* Rejection rows */
+.rej-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.rej-row:last-child { border-bottom: none; }
+.rej-medio { font-size: 12px; font-weight: 500; }
+.rej-qty   { font-size: 10px; color: var(--muted); }
+.rej-amt   { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--danger); font-weight: 500; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="logo-row">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    </div>
+    <div class="logo-text">
+      <div class="logo-name">TallerSoft</div>
+      <div class="logo-ver">v1.0</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Clientes
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Órdenes de Trabajo
+      <span class="nav-badge">8</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z"/></svg>
+      Stock
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      Caja y Facturación
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><rect x="8" y="2" width="8" height="6" rx="1"/></svg>
+      Inventario
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Reportes
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Usuarios
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Asistente IA
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="s-avatar">A</div>
+    <div style="min-width:0">
+      <div class="s-user-name">admin</div>
+      <div class="s-user-role">Administrador</div>
+    </div>
+    <div class="s-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ═══════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- ── TOPBAR ──────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="page-title">Dashboard</span>
+      <span class="topbar-date">Miércoles 3 Jun 2026</span>
+    </div>
+
+    <div class="topbar-right">
+
+      <!-- 🔔 Campana -->
+      <div class="bell-btn" id="bellBtn" onclick="toggleNotif(event)" title="Notificaciones">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <div class="bell-dot" id="bellDot"></div>
+      </div>
+
+      <div class="topbar-divider"></div>
+
+      <!-- 👤 Avatar + dropdown -->
+      <div class="avatar-btn" id="avatarBtn" onclick="toggleProfile(event)">
+        <div class="avatar-img">A</div>
+        <span class="avatar-name">admin</span>
+        <div class="avatar-chevron">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+
+        <!-- Dropdown de perfil -->
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="dd-header">
+            <div class="dd-avatar-lg">A</div>
+            <div style="min-width:0">
+              <div class="dd-user-name">admin</div>
+              <div class="dd-user-email">admin@tallersoft.com</div>
+              <div class="dd-role-badge">Administrador</div>
+            </div>
+          </div>
+          <div class="dd-menu">
+            <div class="dd-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Mi perfil
+            </div>
+            <div class="dd-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M21 12h-2M5 12H3M18.66 18.66l-1.41-1.41M6.34 6.34L4.93 4.93"/></svg>
+              Configuración
+            </div>
+            <div class="dd-separator"></div>
+            <div class="dd-item danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Cerrar sesión
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── NOTIFICATION PANEL ──────────────────────────────── -->
+  <div class="notif-overlay" id="notifOverlay" onclick="closeAll()">
+    <div class="notif-panel" onclick="event.stopPropagation()">
+      <div class="notif-head">
+        <span class="notif-head-title">Notificaciones</span>
+        <span class="notif-head-meta">5 sin leer</span>
+      </div>
+      <div class="notif-list">
+        <div class="notif-item unread">
+          <div class="n-icon danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="n-body">
+            <div class="n-title">Orden #204 sin movimiento hace 8 días</div>
+            <div class="n-desc">Samsung Galaxy A54 — Carlos M.</div>
+            <div class="n-time">Hace 2 horas</div>
+          </div>
+          <div class="n-dot"></div>
+        </div>
+        <div class="notif-item unread">
+          <div class="n-icon warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="n-body">
+            <div class="n-title">Stock crítico: Pantalla iPhone 13</div>
+            <div class="n-desc">Quedan 2 unidades (mínimo: 5)</div>
+            <div class="n-time">Hace 4 horas</div>
+          </div>
+          <div class="n-dot"></div>
+        </div>
+        <div class="notif-item unread">
+          <div class="n-icon danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+          <div class="n-body">
+            <div class="n-title">Cobro rechazado — Orden #198</div>
+            <div class="n-desc">MercadoPago · $24.500</div>
+            <div class="n-time">Hace 6 horas</div>
+          </div>
+          <div class="n-dot"></div>
+        </div>
+        <div class="notif-item unread">
+          <div class="n-icon warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+          <div class="n-body">
+            <div class="n-title">3 órdenes ALTA prioridad sin avanzar</div>
+            <div class="n-desc">Más de 48hs sin cambio de estado</div>
+            <div class="n-time">Ayer</div>
+          </div>
+          <div class="n-dot"></div>
+        </div>
+        <div class="notif-item unread">
+          <div class="n-icon info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="n-body">
+            <div class="n-title">Resumen semanal disponible</div>
+            <div class="n-desc">42 órdenes cerradas esta semana</div>
+            <div class="n-time">Lunes</div>
+          </div>
+          <div class="n-dot"></div>
+        </div>
+        <div class="notif-item">
+          <div class="n-icon success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="n-body">
+            <div class="n-title">Meta mensual alcanzada</div>
+            <div class="n-desc">$380.000 en ingresos · Mayo</div>
+            <div class="n-time">Semana pasada</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT ──────────────────────────────────────────── -->
+  <main class="content" onclick="closeAll()">
+
+    <!-- Alert chips -->
+    <div class="alert-bar">
+      <div class="alert-chip danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Sin movimiento <span class="chip-badge">5</span>
+      </div>
+      <div class="alert-chip danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Cobros rechazados <span class="chip-badge">2</span>
+      </div>
+      <div class="alert-chip warn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        Alta prioridad <span class="chip-badge">3</span>
+      </div>
+      <div class="alert-chip warn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
+        Stock crítico <span class="chip-badge">3</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-row">
+      <div class="tab-btn active" onclick="setTab(this,'op')">Operativo</div>
+      <div class="tab-btn" onclick="setTab(this,'fin')">Financiero</div>
+      <div class="tab-btn" onclick="setTab(this,'cli')">Clientes</div>
+      <div class="tab-btn" onclick="setTab(this,'stk')">Stock</div>
+    </div>
+
+    <!-- ══ TAB OPERATIVO ═══════════════════════════════════ -->
+    <div id="t-op">
+      <div class="sec-label">Estado general</div>
+      <div class="g6" style="margin-bottom:10px">
+        <div class="kpi teal">
+          <div class="kpi-icon-box teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Pendientes</div>
+            <div class="kpi-val">14</div>
+            <div class="kpi-sub"><span class="trend up">↑ +2</span></div>
+          </div>
+        </div>
+        <div class="kpi orange">
+          <div class="kpi-icon-box orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">En Proceso</div>
+            <div class="kpi-val">21</div>
+            <div class="kpi-sub"><span class="trend neu">= sin cambio</span></div>
+          </div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-icon-box green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Listas p/ Entregar</div>
+            <div class="kpi-val">12</div>
+            <div class="kpi-sub"><span class="trend up">↑ +3 hoy</span></div>
+          </div>
+        </div>
+        <div class="kpi blue">
+          <div class="kpi-icon-box blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8l5 3-5 3V8z"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Entregadas</div>
+            <div class="kpi-val">87</div>
+            <div class="kpi-sub"><span class="trend up">↑ +5 mes</span></div>
+          </div>
+        </div>
+        <div class="kpi danger">
+          <div class="kpi-icon-box danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Alta Prioridad</div>
+            <div class="kpi-val" style="color:var(--danger)">3</div>
+            <div class="kpi-sub"><span class="trend down">+1 vs ayer</span></div>
+          </div>
+        </div>
+        <div class="kpi warn">
+          <div class="kpi-icon-box warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Sin Movimiento</div>
+            <div class="kpi-val" style="color:var(--warn)">5</div>
+            <div class="kpi-sub"><span class="trend neu">≥ 5 días</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="g21">
+        <!-- Embudo -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Embudo de Reparación</span>
+            <span class="card-tag">tiempo prom. por estado</span>
+          </div>
+          <div class="card-body">
+            <div style="font-size:11px;color:var(--muted2);margin-bottom:12px">Días promedio que una orden permanece en cada estado</div>
+            <div class="funnel">
+              <div class="f-row">
+                <span class="f-lbl">Pendiente</span>
+                <div class="f-track"><div class="f-bar s1" style="width:35%">1.2 días</div></div>
+                <span class="f-days">1.2d</span>
+              </div>
+              <div class="f-row">
+                <span class="f-lbl">En proceso</span>
+                <div class="f-track"><div class="f-bar s2" style="width:80%">3.4 días</div></div>
+                <span class="f-days">3.4d</span>
+              </div>
+              <div class="f-row">
+                <span class="f-lbl">Listo</span>
+                <div class="f-track"><div class="f-bar s3" style="width:52%">2.1 días</div></div>
+                <span class="f-days">2.1d</span>
+              </div>
+              <div class="f-row">
+                <span class="f-lbl" style="color:var(--text);font-weight:500">Total</span>
+                <div class="f-track"><div class="f-bar s4" style="width:100%">6.7 días</div></div>
+                <span class="f-days" style="color:var(--green)">6.7d</span>
+              </div>
+            </div>
+            <div style="margin-top:14px;padding:10px 12px;background:var(--surface2);border-radius:7px;border:1px solid var(--border);font-size:11px;line-height:1.5">
+              <span style="color:var(--warn)">⚠</span>
+              <strong>En proceso</strong> concentra el <strong style="color:var(--orange)">51%</strong> del tiempo total — posible cuello de botella técnico.
+            </div>
+          </div>
+        </div>
+
+        <!-- Sin movimiento -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Sin Movimiento</span>
+            <span class="card-link">Ver todas →</span>
+          </div>
+          <div class="card-body" style="padding-top:8px">
+            <table class="tbl">
+              <thead><tr><th>Orden</th><th>Estado</th><th>Días</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div style="font-weight:600">#204</div><div style="font-size:10px;color:var(--muted)">Samsung A54</div></td>
+                  <td style="text-align:right"><span class="badge-estado ep">En proceso</span></td>
+                  <td style="text-align:right"><span class="pill-danger">8d</span></td>
+                </tr>
+                <tr>
+                  <td><div style="font-weight:600">#196</div><div style="font-size:10px;color:var(--muted)">Notebook HP</div></td>
+                  <td style="text-align:right"><span class="badge-estado p">Pendiente</span></td>
+                  <td style="text-align:right"><span class="pill-danger">7d</span></td>
+                </tr>
+                <tr>
+                  <td><div style="font-weight:600">#189</div><div style="font-size:10px;color:var(--muted)">iPhone 12</div></td>
+                  <td style="text-align:right"><span class="badge-estado l">Listo</span></td>
+                  <td style="text-align:right"><span class="pill-warn">6d</span></td>
+                </tr>
+                <tr>
+                  <td><div style="font-weight:600">#177</div><div style="font-size:10px;color:var(--muted)">Smart TV LG</div></td>
+                  <td style="text-align:right"><span class="badge-estado ep">En proceso</span></td>
+                  <td style="text-align:right"><span class="pill-warn">5d</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alta prioridad -->
+      <div class="sec-label">Alta prioridad — pendientes</div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Órdenes ALTA prioridad sin avanzar</span>
+          <span class="card-link">Ir a órdenes →</span>
+        </div>
+        <div class="card-body" style="padding-top:8px">
+          <table class="tbl">
+            <thead><tr><th>Orden</th><th>Cliente</th><th>Equipo</th><th>Técnico</th><th>Estado</th><th>Días</th><th>Prioridad</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>#201</strong></td>
+                <td>Laura Gómez</td>
+                <td style="color:var(--muted2)">iPhone 14 Pro</td>
+                <td style="color:var(--muted2)">Carlos M.</td>
+                <td style="text-align:right"><span class="badge-estado p">Pendiente</span></td>
+                <td style="text-align:right"><span class="pill-danger">3d</span></td>
+                <td style="text-align:right"><span class="pill-alta">ALTA</span></td>
+              </tr>
+              <tr>
+                <td><strong>#198</strong></td>
+                <td>Roberto Silva</td>
+                <td style="color:var(--muted2)">Notebook Dell</td>
+                <td style="color:var(--muted2)">Ana P.</td>
+                <td style="text-align:right"><span class="badge-estado ep">En proceso</span></td>
+                <td style="text-align:right"><span class="pill-warn">5d</span></td>
+                <td style="text-align:right"><span class="pill-alta">ALTA</span></td>
+              </tr>
+              <tr>
+                <td><strong>#193</strong></td>
+                <td>Martina López</td>
+                <td style="color:var(--muted2)">iPad Air</td>
+                <td style="color:var(--muted2)">Carlos M.</td>
+                <td style="text-align:right"><span class="badge-estado p">Pendiente</span></td>
+                <td style="text-align:right"><span class="pill-danger">4d</span></td>
+                <td style="text-align:right"><span class="pill-alta">ALTA</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB FINANCIERO ══════════════════════════════════ -->
+    <div id="t-fin" style="display:none">
+      <div class="sec-label">Caja de hoy</div>
+      <div class="g4" style="margin-bottom:10px">
+        <div class="kpi green">
+          <div class="kpi-icon-box green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Ingresos del día</div>
+            <div class="kpi-val" style="color:var(--green);font-size:20px">$47.200</div>
+            <div class="kpi-sub">7 cobros aprobados</div>
+          </div>
+        </div>
+        <div class="kpi warn">
+          <div class="kpi-icon-box warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Ticket promedio</div>
+            <div class="kpi-val" style="font-size:20px">$6.743</div>
+            <div class="kpi-sub"><span class="trend down">↓ −8% mes</span></div>
+          </div>
+        </div>
+        <div class="kpi danger">
+          <div class="kpi-icon-box danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Rechazados hoy</div>
+            <div class="kpi-val" style="color:var(--danger);font-size:20px">$31.000</div>
+            <div class="kpi-sub">2 pagos rechazados</div>
+          </div>
+        </div>
+        <div class="kpi blue">
+          <div class="kpi-icon-box blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Conversión ppto.</div>
+            <div class="kpi-val" style="color:var(--blue)">74%</div>
+            <div class="kpi-sub"><span class="trend up">↑ +6% mes</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Conversión presupuesto → cobro</span><span class="card-tag">este mes</span></div>
+          <div class="card-body">
+            <div class="conv-row">
+              <div class="conv-step"><div class="conv-val" style="color:var(--blue)">38</div><div class="conv-lbl">Con presupuesto</div></div>
+              <div class="conv-arr">→</div>
+              <div class="conv-step"><div class="conv-val" style="color:var(--green)">28</div><div class="conv-lbl">Cobradas</div></div>
+              <div class="conv-arr">→</div>
+              <div class="conv-step"><div class="conv-val" style="color:var(--danger)">10</div><div class="conv-lbl">No cobradas</div></div>
+            </div>
+            <div class="conv-badge">
+              <div class="conv-badge-val">73.7%</div>
+              <div class="conv-badge-lbl">tasa de conversión — objetivo: 80%</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Cobros rechazados</span><span class="card-tag">últimos 7 días</span></div>
+          <div class="card-body">
+            <div class="rej-row">
+              <div><div class="rej-medio">MercadoPago</div><div class="rej-qty">3 rechazos</div></div>
+              <div class="rej-amt">−$47.500</div>
+            </div>
+            <div class="rej-row">
+              <div><div class="rej-medio">Tarjeta</div><div class="rej-qty">1 rechazo</div></div>
+              <div class="rej-amt">−$18.000</div>
+            </div>
+            <div class="rej-row" style="padding-top:14px">
+              <div style="font-size:11px;color:var(--muted)">Total perdido esta semana</div>
+              <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--danger)">$65.500</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB CLIENTES ════════════════════════════════════ -->
+    <div id="t-cli" style="display:none">
+      <div class="sec-label">Retención de clientes</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Clientes recurrentes vs nuevos</span><span class="card-tag">este mes</span></div>
+          <div class="card-body">
+            <div class="rec-big">
+              <div class="rec-pct">63%</div>
+              <div class="rec-lbl">de las órdenes son de clientes que ya vinieron antes</div>
+            </div>
+            <div class="rec-split">
+              <div class="rec-box"><div class="rec-box-val" style="color:var(--green)">24</div><div class="rec-box-lbl">Recurrentes</div></div>
+              <div class="rec-box"><div class="rec-box-val" style="color:var(--blue)">14</div><div class="rec-box-lbl">Nuevos</div></div>
+              <div class="rec-box"><div class="rec-box-val">38</div><div class="rec-box-lbl">Total</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Recurrencia histórica</span><span class="card-tag">últimos 6 meses</span></div>
+          <div class="card-body">
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Enero</span><span class="prog-val">58%</span></div><div class="prog-track"><div class="prog-fill" style="width:58%;background:var(--blue)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Febrero</span><span class="prog-val">61%</span></div><div class="prog-track"><div class="prog-fill" style="width:61%;background:var(--blue)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Marzo</span><span class="prog-val">55%</span></div><div class="prog-track"><div class="prog-fill" style="width:55%;background:var(--warn)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Abril</span><span class="prog-val">67%</span></div><div class="prog-track"><div class="prog-fill" style="width:67%;background:var(--green)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Mayo</span><span class="prog-val">70%</span></div><div class="prog-track"><div class="prog-fill" style="width:70%;background:var(--green)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl" style="color:var(--accent)">Junio ↑</span><span class="prog-val" style="color:var(--accent)">63%</span></div><div class="prog-track"><div class="prog-fill" style="width:63%;background:var(--accent)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB STOCK ═══════════════════════════════════════ -->
+    <div id="t-stk" style="display:none">
+      <div class="sec-label">Consumo y alertas</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Top categorías de repuestos</span><span class="card-tag">último mes</span></div>
+          <div class="card-body">
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Pantallas</span><span class="prog-val">34 unidades</span></div><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--orange)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Baterías</span><span class="prog-val">28 unidades</span></div><div class="prog-track"><div class="prog-fill" style="width:82%;background:var(--blue)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Conectores</span><span class="prog-val">19 unidades</span></div><div class="prog-track"><div class="prog-fill" style="width:56%;background:var(--green)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Placas</span><span class="prog-val">11 unidades</span></div><div class="prog-track"><div class="prog-fill" style="width:32%;background:var(--warn)"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="prog-lbl">Otros</span><span class="prog-val">8 unidades</span></div><div class="prog-track"><div class="prog-fill" style="width:24%;background:var(--muted)"></div></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Stock crítico</span><span class="card-link">Reponer →</span></div>
+          <div class="card-body" style="padding-top:8px">
+            <table class="tbl">
+              <thead><tr><th>Repuesto</th><th>Actual</th><th>Mín.</th><th>Déficit</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div style="font-weight:500;font-size:12px">Pantalla iPhone 13</div><div style="font-size:10px;color:var(--muted)">Pantallas</div></td>
+                  <td><span style="color:var(--danger);font-family:'DM Mono',monospace;font-weight:600">2</span></td>
+                  <td><span style="color:var(--muted);font-family:'DM Mono',monospace">5</span></td>
+                  <td><span class="pill-danger">−3</span></td>
+                </tr>
+                <tr>
+                  <td><div style="font-weight:500;font-size:12px">Batería Samsung S21</div><div style="font-size:10px;color:var(--muted)">Baterías</div></td>
+                  <td><span style="color:var(--warn);font-family:'DM Mono',monospace;font-weight:600">3</span></td>
+                  <td><span style="color:var(--muted);font-family:'DM Mono',monospace">5</span></td>
+                  <td><span class="pill-warn">−2</span></td>
+                </tr>
+                <tr>
+                  <td><div style="font-weight:500;font-size:12px">Conector USB-C</div><div style="font-size:10px;color:var(--muted)">Conectores</div></td>
+                  <td><span style="color:var(--warn);font-family:'DM Mono',monospace;font-weight:600">4</span></td>
+                  <td><span style="color:var(--muted);font-family:'DM Mono',monospace">5</span></td>
+                  <td><span class="pill-warn">−1</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /main -->
+
+<script>
+/* ── Tabs ── */
+const tabs = { op:'t-op', fin:'t-fin', cli:'t-cli', stk:'t-stk' };
+function setTab(el, key) {
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  Object.values(tabs).forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById(tabs[key]).style.display = 'block';
+}
+
+/* ── Notif panel ── */
+function toggleNotif(e) {
+  e.stopPropagation();
+  closeProfile();
+  document.getElementById('notifOverlay').classList.toggle('open');
+}
+
+/* ── Profile dropdown ── */
+function toggleProfile(e) {
+  e.stopPropagation();
+  closeNotif();
+  const dd = document.getElementById('profileDropdown');
+  const btn = document.getElementById('avatarBtn');
+  const isOpen = dd.classList.contains('open');
+  dd.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+function closeNotif()   { document.getElementById('notifOverlay').classList.remove('open'); }
+function closeProfile() {
+  document.getElementById('profileDropdown').classList.remove('open');
+  document.getElementById('avatarBtn').classList.remove('open');
+}
+function closeAll() { closeNotif(); closeProfile(); }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+</script>
+</body>
+</html>

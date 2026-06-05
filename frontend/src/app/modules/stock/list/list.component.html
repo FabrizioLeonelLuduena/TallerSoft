@@ -1,12 +1,4 @@
 <div class="stock-container">
-  <!-- Header Section -->
-  <div class="stock-header">
-    <div>
-      <h1 class="page-title">Gestión de Stock</h1>
-      <p class="page-subtitle">Monitorea y gestiona tu inventario de repuestos</p>
-    </div>
-  </div>
-
   <!-- Summary Cards Section -->
   <div class="summary-grid" *ngIf="!loading">
     <div class="summary-card">
@@ -121,7 +113,7 @@
       </thead>
       <tbody>
         <tr class="table-row"
-            *ngFor="let repuesto of filteredStock"
+            *ngFor="let repuesto of pagedStock"
             [class.critical]="repuesto.critico"
             [class.low-stock]="repuesto.stockActual <= repuesto.stockMinimo">
           <td class="col-nombre">
@@ -161,6 +153,18 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="pagination-controls">
+    <button class="pag-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    <span class="pag-label">Página {{ currentPage }} de {{ totalPages }}</span>
+    <button class="pag-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+    <span class="pag-count">{{ pageStart }}–{{ pageEnd }} de {{ filteredStock.length }}</span>
   </div>
 
   <!-- Empty State: sin repuestos en el sistema -->

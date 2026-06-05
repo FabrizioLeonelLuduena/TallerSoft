@@ -9,7 +9,7 @@ Runs on port 8082.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import ordenes, stock, caja, asistente
+from app.routers import ordenes, stock, caja, asistente, clientes, alertas
 
 # Create FastAPI app
 app = FastAPI(
@@ -41,6 +41,8 @@ app.include_router(ordenes.router, prefix="/analytics/ordenes", tags=["Órdenes"
 app.include_router(stock.router, prefix="/analytics/stock", tags=["Stock"])
 app.include_router(caja.router, prefix="/analytics/caja", tags=["Caja"])
 app.include_router(asistente.router, prefix="/analytics/asistente", tags=["Asistente IA"])
+app.include_router(clientes.router, prefix="/analytics/clientes", tags=["Clientes"])
+app.include_router(alertas.router,  prefix="/analytics/alertas",  tags=["Alertas"])
 
 
 @app.get("/", tags=["Health"])

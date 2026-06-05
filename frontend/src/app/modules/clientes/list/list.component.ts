@@ -44,6 +44,29 @@ export class ListComponent implements OnInit {
   filteredClientes$ = new Subject<ClienteResponse[]>();
   private searchSubject = new Subject<string>();
 
+  currentPage = 1;
+  readonly pageSize = 12;
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.clientes.length / this.pageSize));
+  }
+
+  get pagedClientes(): ClienteResponse[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.clientes.slice(start, start + this.pageSize);
+  }
+
+  get pageStart(): number {
+    return this.clientes.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.clientes.length);
+  }
+
+  prevPage() { if (this.currentPage > 1) this.currentPage--; }
+  nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
+
   get currentRole() {
     return this.authService.getCurrentRole();
   }
@@ -72,6 +95,7 @@ export class ListComponent implements OnInit {
       next: (clientes: ClienteResponse[]) => {
         console.log('[ListComponent] Clientes received:', clientes.length, clientes);
         this.clientes = clientes;
+        this.currentPage = 1;
         this.filteredClientes$.next(clientes);
       },
       error: err => {

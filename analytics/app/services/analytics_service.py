@@ -198,24 +198,247 @@ def evolucion_mensual_caja(db, meses: int = 6) -> list:
     ]
 
 
+# ─── NUEVOS KPIs ─────────────────────────────────────────────────────────────
+
+def ordenes_alta_prioridad(db, dias_minimos: int = 1) -> list:
+    result = db.execute(text("""
+        SELECT
+            ot.id,
+            c.nombre  AS cliente_nombre,
+            e.tipo    AS equipo_tipo,
+            e.marca   AS equipo_marca,
+            u.nombre  AS tecnico_nombre,
+            ot.estado,
+            EXTRACT(DAY FROM NOW() - ot.updated_at)::int AS dias_sin_avanzar
+        FROM ordenes_trabajo ot
+        JOIN clientes  c ON c.id = ot.cliente_id
+        JOIN equipos   e ON e.id = ot.equipo_id
+        LEFT JOIN usuarios u ON u.id = ot.tecnico_id
+        WHERE ot.prioridad = 'ALTA'
+          AND ot.estado != 'ENTREGADO'
+          AND EXTRACT(DAY FROM NOW() - ot.updated_at) >= :dias_minimos
+        ORDER BY dias_sin_avanzar DESC
+    """), {"dias_minimos": dias_minimos})
+    return [
+        {
+            "id": r.id,
+            "cliente_nombre": r.cliente_nombre,
+            "equipo_tipo": r.equipo_tipo,
+            "equipo_marca": r.equipo_marca,
+            "tecnico_nombre": r.tecnico_nombre,
+            "estado": r.estado,
+            "dias_sin_avanzar": int(r.dias_sin_avanzar or 0),
+        }
+        for r in result.fetchall()
+    ]
+
+
+def ordenes_sin_movimiento(db, dias_umbral: int = 5) -> list:
+    result = db.execute(text("""
+        SELECT
+            ot.id,
+            c.nombre  AS cliente_nombre,
+            e.tipo    AS equipo_tipo,
+            ot.estado,
+            ot.prioridad,
+            EXTRACT(DAY FROM NOW() - ot.updated_at)::int AS dias_estancada
+        FROM ordenes_trabajo ot
+        JOIN clientes c ON c.id = ot.cliente_id
+        JOIN equipos  e ON e.id = ot.equipo_id
+        WHERE ot.estado != 'ENTREGADO'
+          AND EXTRACT(DAY FROM NOW() - ot.updated_at) >= :dias_umbral
+        ORDER BY dias_estancada DESC
+    """), {"dias_umbral": dias_umbral})
+    return [
+        {
+            "id": r.id,
+            "cliente_nombre": r.cliente_nombre,
+            "equipo_tipo": r.equipo_tipo,
+            "estado": r.estado,
+            "prioridad": r.prioridad,
+            "dias_estancada": int(r.dias_estancada or 0),
+        }
+        for r in result.fetchall()
+    ]
+
+
+def tiempo_promedio_por_estado(db) -> list:
+    result = db.execute(text("""
+        SELECT 'ENTREGADO' AS estado,
+               AVG(EXTRACT(DAY FROM updated_at - created_at)) AS promedio_dias_acum
+        FROM ordenes_trabajo WHERE estado = 'ENTREGADO'
+
+        UNION ALL
+
+        SELECT 'PENDIENTE_actual' AS estado,
+               AVG(EXTRACT(DAY FROM NOW() - created_at)) AS promedio_dias_acum
+        FROM ordenes_trabajo WHERE estado = 'PENDIENTE'
+
+        UNION ALL
+
+        SELECT 'EN_PROCESO_actual' AS estado,
+               AVG(EXTRACT(DAY FROM NOW() - updated_at)) AS promedio_dias_acum
+        FROM ordenes_trabajo WHERE estado = 'EN_PROCESO'
+
+        UNION ALL
+
+        SELECT 'LISTO_actual' AS estado,
+               AVG(EXTRACT(DAY FROM NOW() - updated_at)) AS promedio_dias_acum
+        FROM ordenes_trabajo WHERE estado = 'LISTO'
+    """))
+    rows = [(r.estado, float(r.promedio_dias_acum or 0)) for r in result.fetchall()]
+    total = sum(v for _, v in rows)
+    if total == 0:
+        return []
+    return [
+        {
+            "estado": estado,
+            "promedio_dias": round(dias, 1),
+            "porcentaje_del_total": round(dias / total * 100, 1),
+        }
+        for estado, dias in rows
+    ]
+
+
+def rechazos_cobros(db, dias: int = 7) -> dict:
+    desde = date.today() - timedelta(days=dias)
+    result = db.execute(text("""
+        SELECT medio_pago, monto
+        FROM cobros
+        WHERE estado_pago = 'RECHAZADO'
+          AND created_at >= :desde
+    """), {"desde": desde})
+    rows = result.fetchall()
+
+    if not rows:
+        return {"periodo_dias": dias, "total_rechazado": 0.0, "cantidad_rechazos": 0, "por_medio": []}
+
+    por_medio: dict = {}
+    total = 0.0
+    for r in rows:
+        mp = r.medio_pago
+        if mp not in por_medio:
+            por_medio[mp] = {"medio_pago": mp, "cantidad_rechazos": 0, "monto_total_rechazado": 0.0}
+        por_medio[mp]["cantidad_rechazos"] += 1
+        por_medio[mp]["monto_total_rechazado"] += float(r.monto)
+        total += float(r.monto)
+
+    return {
+        "periodo_dias": dias,
+        "total_rechazado": round(total, 2),
+        "cantidad_rechazos": len(rows),
+        "por_medio": list(por_medio.values()),
+    }
+
+
+def conversion_presupuesto(db) -> dict:
+    result = db.execute(text("""
+        SELECT
+            COUNT(*) AS total_con_presupuesto,
+            COUNT(DISTINCT c.orden_id) AS total_cobradas
+        FROM ordenes_trabajo ot
+        LEFT JOIN cobros c ON c.orden_id = ot.id AND c.estado_pago = 'APROBADO'
+        WHERE ot.presupuesto IS NOT NULL
+    """))
+    r = result.fetchone()
+    total    = int(r.total_con_presupuesto)
+    cobradas = int(r.total_cobradas)
+    tasa     = round(cobradas / total * 100, 1) if total > 0 else 0.0
+    return {
+        "total_con_presupuesto": total,
+        "total_cobradas":        cobradas,
+        "total_no_cobradas":     total - cobradas,
+        "tasa_conversion_pct":   tasa,
+    }
+
+
+def recurrencia_clientes(db, meses: int = 6) -> list:
+    desde = date.today() - timedelta(days=meses * 30)
+    result = db.execute(text("""
+        SELECT
+            TO_CHAR(DATE_TRUNC('month', ot.created_at), 'YYYY-MM') AS mes,
+            COUNT(*) AS total_ordenes,
+            SUM(CASE WHEN (
+                SELECT COUNT(*) FROM ordenes_trabajo prev
+                WHERE prev.cliente_id = ot.cliente_id
+                  AND prev.created_at < ot.created_at
+            ) > 0 THEN 1 ELSE 0 END) AS clientes_recurrentes
+        FROM ordenes_trabajo ot
+        WHERE ot.created_at >= :desde
+        GROUP BY DATE_TRUNC('month', ot.created_at)
+        ORDER BY mes
+    """), {"desde": desde})
+    resultado = []
+    for r in result.fetchall():
+        total      = int(r.total_ordenes)
+        recurrentes = int(r.clientes_recurrentes)
+        pct        = round(recurrentes / total * 100, 1) if total > 0 else 0.0
+        resultado.append({
+            "mes": r.mes,
+            "total_ordenes": total,
+            "clientes_recurrentes": recurrentes,
+            "clientes_nuevos": total - recurrentes,
+            "porcentaje_recurrentes": pct,
+        })
+    return resultado
+
+
+def stock_por_categoria(db) -> list:
+    result = db.execute(text("""
+        SELECT
+            COALESCE(r.categoria, 'Sin categoría') AS categoria,
+            SUM(ore.cantidad) AS total_unidades,
+            COUNT(DISTINCT ore.orden_id) AS ordenes_count,
+            COUNT(DISTINCT r.id) AS tipos_repuesto
+        FROM orden_repuestos ore
+        JOIN repuestos r ON r.id = ore.repuesto_id
+        GROUP BY r.categoria
+        ORDER BY total_unidades DESC
+    """))
+    return [
+        {
+            "categoria": r.categoria,
+            "total_unidades": int(r.total_unidades),
+            "ordenes_count": int(r.ordenes_count),
+            "tipos_repuesto": int(r.tipos_repuesto),
+        }
+        for r in result.fetchall()
+    ]
+
+
+# alias para compatibilidad con alertas_service
+stock_critico = get_stock_critico
+
+
 # ─── CONTEXTO PARA EL ASISTENTE ──────────────────────────────────────────────
 
 def obtener_contexto_taller(db) -> dict:
-    resumen = resumen_ordenes(db)
-    criticos = get_stock_critico(db)
-    caja_hoy = resumen_caja_diario(db)
-    tecnicos = rendimiento_tecnicos(db, mes_actual=True)
+    resumen      = resumen_ordenes(db)
+    criticos     = get_stock_critico(db)
+    caja_hoy     = resumen_caja_diario(db)
+    tecnicos     = rendimiento_tecnicos(db, mes_actual=True)
+    alta_prio    = ordenes_alta_prioridad(db, dias_minimos=2)
+    sin_mov      = ordenes_sin_movimiento(db, dias_umbral=5)
+    conv         = conversion_presupuesto(db)
+    rechazos_hoy = rechazos_cobros(db, dias=1)
+    recurrencia  = recurrencia_clientes(db, meses=1)
 
-    top_tecnico = tecnicos[0]["nombre"] if tecnicos else "N/A"
+    top_tecnico      = tecnicos[0]["nombre"] if tecnicos else "N/A"
     nombres_criticos = [r["nombre"] for r in criticos[:5]]
+    recurrencia_mes  = recurrencia[0] if recurrencia else {}
 
     return {
-        "ordenes_pendientes":   resumen["pendientes"],
-        "ordenes_en_proceso":   resumen["en_proceso"],
-        "ordenes_listas":       resumen["listas"],
-        "ordenes_entregadas":   resumen["entregadas"],
-        "repuestos_criticos":   nombres_criticos,
-        "ingresos_hoy":         caja_hoy["total_ingresos"],
-        "top_tecnico":          top_tecnico,
-        "tecnicos_rendimiento": tecnicos[:3],
+        "ordenes_pendientes":             resumen["pendientes"],
+        "ordenes_en_proceso":             resumen["en_proceso"],
+        "ordenes_listas":                 resumen["listas"],
+        "ordenes_entregadas":             resumen["entregadas"],
+        "repuestos_criticos":             nombres_criticos,
+        "ingresos_hoy":                   caja_hoy["total_ingresos"],
+        "top_tecnico":                    top_tecnico,
+        "tecnicos_rendimiento":           tecnicos[:3],
+        "ordenes_alta_prioridad_paradas": len(alta_prio),
+        "ordenes_sin_movimiento":         len(sin_mov),
+        "conversion_presupuesto_pct":     conv["tasa_conversion_pct"],
+        "rechazos_hoy_monto":             rechazos_hoy["total_rechazado"],
+        "clientes_recurrentes_pct":       recurrencia_mes.get("porcentaje_recurrentes", 0),
     }

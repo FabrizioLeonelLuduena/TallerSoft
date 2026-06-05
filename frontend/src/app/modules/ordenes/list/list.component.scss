@@ -694,6 +694,60 @@
 }
 
 // ───────────────────────────────────────────────────────────
+// PAGINATION
+// ───────────────────────────────────────────────────────────
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) 0;
+  justify-content: center;
+
+  .pag-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: var(--color-text-primary);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  .pag-label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    min-width: 110px;
+    text-align: center;
+  }
+
+  .pag-count {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-left: var(--spacing-sm);
+  }
+}
+
+// ───────────────────────────────────────────────────────────
 // RESPONSIVE
 // ───────────────────────────────────────────────────────────
 

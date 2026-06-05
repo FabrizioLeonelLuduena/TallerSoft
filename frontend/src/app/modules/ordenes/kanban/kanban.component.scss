@@ -350,6 +350,28 @@
 }
 
 // ───────────────────────────────────────────────────────────
+// HIDDEN DELIVERED HINT
+// ───────────────────────────────────────────────────────────
+
+.hidden-delivered-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border-radius: var(--radius-sm);
+  background: rgba(156, 163, 175, 0.07);
+  border: 1px dashed rgba(156, 163, 175, 0.25);
+  color: var(--color-text-muted);
+  font-size: 11px;
+
+  .material-symbols-outlined {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+}
+
+// ───────────────────────────────────────────────────────────
 // RESPONSIVE
 // ───────────────────────────────────────────────────────────
 

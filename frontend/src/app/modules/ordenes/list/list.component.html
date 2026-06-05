@@ -33,7 +33,7 @@
       </div>
 
       <!-- Estado Group Separator & Rows -->
-      <ng-container *ngFor="let orden of ordenesSorted; let i = index">
+      <ng-container *ngFor="let orden of pagedOrdenes; let i = index">
         <!-- Estado Separator -->
         <div *ngIf="shouldShowEstadoSeparator(i)" class="estado-separator">
           <div class="separator-line"></div>
@@ -113,6 +113,18 @@
         </div>
       </ng-container>
     </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && totalPages > 1" class="pagination-controls">
+    <button class="pag-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    <span class="pag-label">Página {{ currentPage }} de {{ totalPages }}</span>
+    <button class="pag-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+    <span class="pag-count">{{ pageStart }}–{{ pageEnd }} de {{ ordenesSorted.length }}</span>
   </div>
 
   <!-- Empty State -->

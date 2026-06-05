@@ -118,7 +118,7 @@
         <span class="column-count">{{ columns[3].ordenes.length }}</span>
       </div>
       <div cdkDropList id="ENTREGADO" [cdkDropListData]="columns[3].ordenes" (cdkDropListDropped)="onDrop($event)" class="cdk-drop-list">
-        <div class="kanban-card completed" cdkDrag *ngFor="let orden of columns[3].ordenes; trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
+        <div class="kanban-card completed" cdkDrag *ngFor="let orden of (columns[3].ordenes | slice:0:3); trackBy: trackByOrdenId" (click)="navigateToDetail(orden.id)">
           <div class="card-header">
             <div class="client-name">#{{ padOrderId(orden.id) }} • {{ orden.clienteNombre }}</div>
             <span class="prioridad-chip" [style.color]="getPrioridadColor(orden.prioridad)">{{ orden.prioridad }}</span>
@@ -136,6 +136,10 @@
         </div>
         <div class="empty-column" *ngIf="columns[3].ordenes.length === 0">
           No hay órdenes completadas
+        </div>
+        <div *ngIf="columns[3].ordenes.length > 3" class="hidden-delivered-hint">
+          <span class="material-symbols-outlined">history</span>
+          +{{ columns[3].ordenes.length - 3 }} más · usá la vista lista para verlas
         </div>
       </div>
     </div>

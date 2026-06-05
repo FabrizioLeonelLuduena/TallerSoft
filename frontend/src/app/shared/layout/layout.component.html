@@ -25,44 +25,47 @@
         <span class="material-symbols-outlined nav-icon">{{ item.icon }}</span>
         <span class="nav-label">{{ item.label }}</span>
       </a>
-    </nav>
 
-    <!-- Sidebar Footer with User Profile Dropdown -->
-    <div class="sidebar-footer">
-      <div class="user-profile" #profileDropdown>
-        <button class="avatar-btn" (click)="toggleProfileDropdown()">
-          <div class="avatar">{{ getUserInitials() }}</div>
-          <div class="user-info">
-            <p class="user-name">{{ getUserName() }}</p>
-            <p class="user-role">{{ getRolLabel() }}</p>
+      <!-- Chat History -->
+      <div class="chat-history" *ngIf="!sidebarCollapsed && chatSessions.length > 0">
+        <div class="chat-history-header">
+          <span class="material-symbols-outlined chat-history-header-icon">history</span>
+          <span class="chat-history-label">Conversaciones recientes</span>
+        </div>
+        <div class="chat-history-list">
+          <div
+            class="chat-history-item"
+            *ngFor="let session of chatSessions"
+            [class.active]="session.id === currentSessionId"
+            (click)="navigateToSession(session.id)">
+            <span class="material-symbols-outlined chat-history-icon">chat_bubble_outline</span>
+            <span class="chat-history-title">{{ session.title }}</span>
+            <div class="chat-history-menu-wrap" (click)="$event.stopPropagation()">
+              <button
+                class="chat-history-dots"
+                (click)="toggleSessionMenu(session.id, $event)"
+                title="Opciones">
+                <span class="material-symbols-outlined">more_vert</span>
+              </button>
+              <div class="chat-history-dropdown" *ngIf="openMenuId === session.id">
+                <button class="chat-dropdown-item delete-action" (click)="deleteSession(session.id, $event)">
+                  <span class="material-symbols-outlined">delete</span>
+                  Eliminar
+                </button>
+              </div>
+            </div>
           </div>
-          <span class="material-symbols-outlined dropdown-arrow">expand_more</span>
-        </button>
-
-        <!-- Profile Dropdown Menu -->
-        <div class="profile-dropdown" *ngIf="profileDropdownOpen">
-          <button class="dropdown-item" (click)="goToProfile()">
-            <span class="material-symbols-outlined">person</span>
-            <span>Mi Perfil</span>
-          </button>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item logout-item" (click)="logout()">
-            <span class="material-symbols-outlined">logout</span>
-            <span>Cerrar Sesión</span>
-          </button>
         </div>
       </div>
+    </nav>
 
-      <!-- Notifications Badge -->
-      <div class="sidebar-notifications" title="Notificaciones">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="notification-badge" *ngIf="hasNotifications">1</span>
-      </div>
-    </div>
   </aside>
 
   <!-- Main Content Area -->
   <div class="main-area">
+    <!-- Global Top Bar -->
+    <app-top-bar></app-top-bar>
+
     <!-- Content Area -->
     <main class="content-area page-enter">
       <router-outlet></router-outlet>
