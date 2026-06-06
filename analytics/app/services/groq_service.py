@@ -30,14 +30,28 @@ def _construir_contexto_texto(contexto: dict) -> str:
         for t in tecnicos
     ) or "  - Sin datos este mes"
 
+    evolucion = contexto.get("evolucion_caja_6_meses", [])
+    evolucion_str = "\n".join(
+        f"  - {m['mes']}: ${m['total_ingresos']:,.2f} ({m['cantidad_cobros']} cobros)"
+        for m in evolucion
+    ) or "  - Sin datos"
+
+    tendencia = contexto.get("tendencia_ordenes_6_meses", [])
+    tendencia_str = "\n".join(
+        f"  - {p['periodo']}: {p['cantidad']} órdenes"
+        for p in tendencia
+    ) or "  - Sin datos"
+
     return f"""
+FECHA DE HOY: {contexto.get('fecha_hoy', 'N/A')}
+
 ESTADO ACTUAL DEL TALLER:
 
 Órdenes de trabajo:
   - Pendientes: {contexto.get('ordenes_pendientes', 0)}
   - En proceso: {contexto.get('ordenes_en_proceso', 0)}
   - Listas para entregar: {contexto.get('ordenes_listas', 0)}
-  - Entregadas (histórico): {contexto.get('ordenes_entregadas', 0)}
+  - Entregadas (histórico total): {contexto.get('ordenes_entregadas', 0)}
 
 Alertas operativas:
   - Órdenes ALTA prioridad paradas (≥2 días): {contexto.get('ordenes_alta_prioridad_paradas', 0)}
@@ -46,10 +60,21 @@ Alertas operativas:
 Stock:
   - Repuestos con stock crítico: {criticos_str}
 
-Finanzas:
-  - Ingresos de hoy: ${contexto.get('ingresos_hoy', 0):,.2f}
+FINANZAS:
+
+Resumen reciente:
+  - Ingresos de hoy ({contexto.get('fecha_hoy', '')}): ${contexto.get('ingresos_hoy', 0):,.2f}
+  - Ingresos de ayer ({contexto.get('fecha_ayer', '')}): ${contexto.get('ingresos_ayer', 0):,.2f}
+  - Ingresos últimos 7 días: ${contexto.get('ingresos_ultimos_7_dias', 0):,.2f}
+  - Ingresos acumulados mes actual: ${contexto.get('ingresos_mes_actual', 0):,.2f}
   - Tasa conversión presupuesto→cobro: {contexto.get('conversion_presupuesto_pct', 0)}%
   - Cobros rechazados hoy: ${contexto.get('rechazos_hoy_monto', 0):,.0f}
+
+Evolución de ingresos (últimos 6 meses):
+{evolucion_str}
+
+TENDENCIA DE ÓRDENES (últimos 6 meses):
+{tendencia_str}
 
 Clientes:
   - % clientes recurrentes este mes: {contexto.get('clientes_recurrentes_pct', 0)}%

@@ -30,7 +30,7 @@
 
 .page-title {
   margin: 0;
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
@@ -86,7 +86,7 @@
   color: var(--color-accent);
 
   mat-icon {
-    font-size: 24px;
+    font-size: 24px; /* icon size — intentional */
     width: 24px;
     height: 24px;
   }
@@ -115,7 +115,7 @@
 }
 
 .summary-value {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
@@ -149,7 +149,7 @@
     transition: var(--transition);
 
     mat-icon {
-      font-size: 18px;
+      font-size: 18px; /* icon size — intentional */
       width: 18px;
       height: 18px;
     }
@@ -220,8 +220,8 @@
   color: #0a0f1e;
   border: none;
   border-radius: 12px;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 24px; /* icon size — intentional */
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 200ms ease;
   box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
@@ -246,8 +246,8 @@
   color: #0a0f1e;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 200ms ease;
   box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
@@ -279,7 +279,7 @@
   border-collapse: collapse;
 
   @media (max-width: 1024px) {
-    font-size: 13px;
+    font-size: var(--font-size-base);
 
     .col-categoria,
     .col-minimo {
@@ -518,14 +518,14 @@
 
       .modal-icon {
         color: #ef4444;
-        font-size: 28px;
+        font-size: 28px; /* icon size — intentional */
         flex-shrink: 0;
       }
 
       .modal-title {
         margin: 0;
-        font-size: 18px;
-        font-weight: 600;
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
         color: var(--color-text-primary);
       }
     }
@@ -533,12 +533,12 @@
     .modal-body {
       padding: 20px 24px;
       color: var(--color-text-secondary);
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-loose);
 
       strong {
         color: var(--color-text-primary);
-        font-weight: 600;
+        font-weight: var(--font-weight-semibold);
       }
     }
 
@@ -553,8 +553,8 @@
       button {
         padding: 10px 20px;
         border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
         cursor: pointer;
         transition: all 150ms ease;
         border: none;
@@ -625,7 +625,7 @@
   min-height: 300px;
 
   mat-icon {
-    font-size: 64px;
+    font-size: 64px; /* icon size — intentional */
     width: 64px;
     height: 64px;
     opacity: 0.3;
@@ -633,7 +633,7 @@
 
   h3 {
     margin: 0;
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
   }
@@ -674,7 +674,7 @@
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 
-    .material-symbols-outlined { font-size: 18px; }
+    .material-symbols-outlined { font-size: 18px; /* icon size — intentional */}
 
     &:hover:not(:disabled) {
       background: rgba(255, 255, 255, 0.08);
@@ -686,14 +686,14 @@
   }
 
   .pag-label {
-    font-size: 13px;
+    font-size: var(--font-size-base);
     color: var(--color-text-secondary);
     min-width: 110px;
     text-align: center;
   }
 
   .pag-count {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     margin-left: var(--spacing-sm);
   }

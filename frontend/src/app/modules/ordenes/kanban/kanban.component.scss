@@ -50,8 +50,8 @@
       display: flex;
       align-items: center;
       gap: var(--spacing-sm);
-      font-weight: 700;
-      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-base);
       text-transform: uppercase;
       letter-spacing: 0.05em;
 
@@ -66,8 +66,8 @@
       background: rgba(255, 255, 255, 0.05);
       padding: 4px 10px;
       border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
       color: rgba(255, 255, 255, 0.4);
     }
   }
@@ -194,8 +194,8 @@
     gap: var(--spacing-sm);
 
     .client-name {
-      font-weight: 600;
-      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-base);
       color: rgba(255, 255, 255, 0.9);
       flex: 1;
       overflow: hidden;
@@ -206,8 +206,8 @@
     .prioridad-chip {
       padding: 3px 8px;
       border-radius: 4px;
-      font-size: 10px;
-      font-weight: 700;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
       text-transform: uppercase;
       letter-spacing: 0.05em;
       white-space: nowrap;
@@ -218,7 +218,7 @@
 
   // Card Equipment
   .card-equipment {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: rgba(255, 255, 255, 0.5);
     padding: 4px 8px;
     background: rgba(255, 255, 255, 0.02);
@@ -233,9 +233,9 @@
 
   // Card Falla
   .card-falla {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: rgba(255, 255, 255, 0.6);
-    line-height: 1.4;
+    line-height: var(--line-height-normal);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -247,7 +247,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 11px;
+    font-size: var(--font-size-sm);
     color: rgba(255, 255, 255, 0.4);
 
     .tecnico-info {
@@ -263,8 +263,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 9px;
-        font-weight: 700;
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-bold);
         color: #0a0f1e;
         box-shadow: 0 0 8px rgba(0, 245, 212, 0.2);
       }
@@ -292,7 +292,7 @@
   border: 2px dashed rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   color: rgba(255, 255, 255, 0.3);
-  font-size: 13px;
+  font-size: var(--font-size-base);
   text-align: center;
   padding: var(--spacing-md);
 }
@@ -363,10 +363,10 @@
   background: rgba(156, 163, 175, 0.07);
   border: 1px dashed rgba(156, 163, 175, 0.25);
   color: var(--color-text-muted);
-  font-size: 11px;
+  font-size: var(--font-size-sm);
 
   .material-symbols-outlined {
-    font-size: 14px;
+    font-size: 14px; /* icon size — intentional */
     opacity: 0.7;
   }
 }
@@ -401,19 +401,19 @@
     gap: 6px;
 
     .card-header {
-      font-size: 12px;
+      font-size: var(--font-size-sm);
     }
 
     .card-equipment {
-      font-size: 11px;
+      font-size: var(--font-size-sm);
     }
 
     .card-falla {
-      font-size: 11px;
+      font-size: var(--font-size-sm);
     }
 
     .card-footer {
-      font-size: 10px;
+      font-size: var(--font-size-xs);
     }
   }
 }

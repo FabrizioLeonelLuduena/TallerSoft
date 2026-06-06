@@ -1,11 +1,4 @@
 <div class="create-container page-enter">
-  <!-- Form Header -->
-  <div class="form-header">
-    <button type="button" class="btn-back" (click)="navigateBack()" title="Volver">
-      <span class="material-symbols-outlined">arrow_back</span>
-    </button>
-  </div>
-
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
     <!-- SECTION 1: Cliente y Equipo -->
     <section class="form-section">
@@ -27,6 +20,7 @@
                 [(ngModel)]="clienteSearchTerm"
                 (focus)="onClienteFocus()"
                 (input)="onClienteSearch($event)"
+                (blur)="onClienteBlur()"
                 [ngModelOptions]="{ standalone: true }"
                 autocomplete="off"
               />
@@ -63,6 +57,7 @@
                 [(ngModel)]="equipoSearchTerm"
                 (focus)="onEquipoFocus()"
                 (input)="onEquipoSearch($event)"
+                (blur)="onEquipoBlur()"
                 [ngModelOptions]="{ standalone: true }"
                 [disabled]="!selectedCliente || isLoadingEquipos"
                 autocomplete="off"
@@ -98,7 +93,7 @@
         <!-- Técnico -->
         <div class="form-column">
           <div class="form-group">
-            <label class="field-label">Técnico (Opcional)</label>
+            <label class="field-label">Técnico</label>
             <div class="search-wrapper">
               <span class="material-symbols-outlined search-icon">engineering</span>
               <input
@@ -108,6 +103,7 @@
                 [(ngModel)]="tecnicoSearchTerm"
                 (focus)="onTecnicoFocus()"
                 (input)="onTecnicoSearch($event)"
+                (blur)="onTecnicoBlur()"
                 [ngModelOptions]="{ standalone: true }"
                 autocomplete="off"
               />

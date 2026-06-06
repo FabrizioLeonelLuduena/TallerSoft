@@ -44,27 +44,10 @@
           </div>
         </div>
 
-        <!-- Action buttons -->
+        <!-- Back button -->
         <div class="header-actions">
-          <button 
+          <button
             class="action-btn"
-            title="Editar cliente"
-            (click)="onEdit()"
-            type="button"
-          >
-            <span class="material-symbols-outlined">edit</span>
-          </button>
-          <button 
-            class="action-btn"
-            title="Eliminar cliente"
-            *ngIf="currentRole === 'ADMIN'"
-            (click)="onDelete()"
-            type="button"
-          >
-            <span class="material-symbols-outlined">delete</span>
-          </button>
-          <button 
-            class="action-btn action-btn-back"
             title="Volver"
             routerLink="/clientes"
             type="button"
@@ -72,6 +55,27 @@
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
         </div>
+      </div>
+
+      <!-- Edit / Delete at bottom-right -->
+      <div class="header-footer">
+        <button
+          class="action-btn"
+          title="Editar cliente"
+          (click)="onEdit()"
+          type="button"
+        >
+          <span class="material-symbols-outlined">edit</span>
+        </button>
+        <button
+          class="action-btn action-btn-danger"
+          title="Eliminar cliente"
+          *ngIf="currentRole === 'ADMIN'"
+          (click)="onDelete()"
+          type="button"
+        >
+          <span class="material-symbols-outlined">delete</span>
+        </button>
       </div>
     </section>
 
@@ -130,16 +134,14 @@
               <div class="equipo-title">
                 <h3>{{ equipo.marca }} {{ equipo.modelo }}</h3>
               </div>
-              <span class="equipo-status">Healthy</span>
             </div>
             <p class="equipo-serial" *ngIf="equipo.numeroSerie">
               Serial: {{ equipo.numeroSerie }}
             </p>
+            <p class="equipo-observaciones" *ngIf="equipo.observaciones">
+              {{ equipo.observaciones }}
+            </p>
             <div class="equipo-footer">
-              <div class="footer-info">
-                <span class="footer-label">Last Service</span>
-                <span class="footer-value">Recent</span>
-              </div>
               <div class="equipo-actions">
                 <button 
                   class="btn-equipo"

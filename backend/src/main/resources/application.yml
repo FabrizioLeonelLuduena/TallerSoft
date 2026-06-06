@@ -62,7 +62,30 @@ mercadopago:
   access-token: ${MP_ACCESS_TOKEN:TEST-placeholder}
   webhook-secret: ${MP_WEBHOOK_SECRET:placeholder}
   sandbox: ${MP_SANDBOX:true}
+  user-id: ${MP_USER_ID:0}
+  pos-external-id: ${MP_POS_EXTERNAL_ID:tallersoftcaja01}
+  qr-image-url: ${MP_QR_IMAGE_URL:}
 
+# ─────────────────────────────────────────────────────────────
+# WEBHOOK LOCAL CON NGROK (sandbox)
+#
+# 1. Instalar ngrok: https://ngrok.com/download
+# 2. Arrancar: ngrok http 8080
+# 3. Copiar la URL HTTPS generada (ej: https://abc123.ngrok-free.app)
+# 4. Setear en .env: WEBHOOK_BASE_URL=https://abc123.ngrok-free.app
+# 5. Reiniciar: docker compose down && docker compose up -d
+# 6. Registrar en el panel de MercadoPago (Developers → Tu app → Webhooks):
+#    URL: https://abc123.ngrok-free.app/api/pagos/webhook
+#    Eventos: payment
+#
+# TESTING EN SANDBOX
+# - Tarjeta Mastercard aprobada: 5031 7557 3453 0604 | CVV: 123 | Venc: 11/25
+# - Tarjeta Visa aprobada:       4509 9535 6623 3704 | CVV: 123 | Venc: 11/25
+# - Tarjeta rechazada:           4000 0000 0000 0002
+# - Flujo: abrir sandboxInitPoint → pagar con tarjeta de prueba →
+#          verificar que el webhook llega y cobros.estado_pago cambia a APROBADO →
+#          verificar que la orden pasa a ENTREGADO
+# ─────────────────────────────────────────────────────────────
 webhook:
   base-url: ${WEBHOOK_BASE_URL:http://localhost:8080}
 

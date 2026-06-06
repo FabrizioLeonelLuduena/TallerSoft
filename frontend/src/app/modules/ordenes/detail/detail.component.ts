@@ -43,6 +43,7 @@ export class DetailComponent implements OnInit {
   isLoading = true;
   isSavingDiagnostico = false;
   isChangingEstado = false;
+  isEditingDiagnostico = false;
   currentRole: string | null = '';
   diagnosticoText = '';
 
@@ -87,6 +88,7 @@ export class DetailComponent implements OnInit {
         next: (updatedOrden) => {
           this.orden = updatedOrden;
           this.isSavingDiagnostico = false;
+          this.isEditingDiagnostico = false;
           this.snackBar.open('Diagnóstico guardado', 'Cerrar', {
             duration: 2000,
             horizontalPosition: 'right',
@@ -116,6 +118,7 @@ export class DetailComponent implements OnInit {
         next: (updatedOrden) => {
           this.orden = updatedOrden;
           this.isChangingEstado = false;
+          this.isEditingDiagnostico = false;
           this.snackBar.open('Estado actualizado', 'Cerrar', {
             duration: 2000,
             horizontalPosition: 'right',
@@ -240,12 +243,38 @@ export class DetailComponent implements OnInit {
 
   canSaveDiagnostico(): boolean {
     return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
-           this.orden?.estado !== 'ENTREGADO';
+           this.orden?.estado !== 'ENTREGADO' &&
+           this.orden?.estado !== 'LISTO';
+  }
+
+  isDiagnosticoEditable(): boolean {
+    if (!this.orden) return false;
+    if (this.currentRole !== 'ADMIN' && this.currentRole !== 'TECNICO') return false;
+    if (this.orden.estado === 'PENDIENTE') {
+      return !this.orden.diagnostico || this.isEditingDiagnostico;
+    }
+    if (this.orden.estado === 'EN_PROCESO') return this.isEditingDiagnostico;
+    return false;
+  }
+
+  isDiagnosticoDisabledInput(): boolean {
+    if (!this.orden) return false;
+    if (this.currentRole !== 'ADMIN' && this.currentRole !== 'TECNICO') return false;
+    if (this.orden.estado === 'PENDIENTE') {
+      return !!this.orden.diagnostico && !this.isEditingDiagnostico;
+    }
+    return (this.orden.estado === 'EN_PROCESO' && !this.isEditingDiagnostico) ||
+           this.orden.estado === 'LISTO';
+  }
+
+  onToggleEditDiagnostico(): void {
+    this.isEditingDiagnostico = true;
   }
 
   canChangeEstado(): boolean {
     return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
-           this.orden?.estado !== 'ENTREGADO';
+           this.orden?.estado !== 'ENTREGADO' &&
+           this.orden?.estado !== 'LISTO';
   }
 
   canAddRepuesto(): boolean {

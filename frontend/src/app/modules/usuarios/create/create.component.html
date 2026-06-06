@@ -1,14 +1,7 @@
 <div class="create-container page-enter">
 
-  <!-- Header -->
-  <div class="form-header">
-    <button type="button" class="btn-back" (click)="onCancel()" title="Volver">
-      <span class="material-symbols-outlined">arrow_back</span>
-    </button>
-  </div>
-
   <!-- Form -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content" autocomplete="off">
 
     <!-- Sección 1: Datos de acceso -->
     <section class="form-section">
@@ -26,6 +19,7 @@
               class="ts-input"
               formControlName="nombre"
               placeholder="Ej: Juan Pérez"
+              autocomplete="off"
               [class.error]="nombreControl?.invalid && nombreControl?.touched"
             />
             <div class="error-text" *ngIf="nombreControl?.invalid && nombreControl?.touched">
@@ -43,6 +37,7 @@
               class="ts-input"
               formControlName="email"
               placeholder="correo@ejemplo.com"
+              autocomplete="off"
               [class.error]="emailControl?.invalid && emailControl?.touched"
             />
             <div class="error-text" *ngIf="emailControl?.invalid && emailControl?.touched">
@@ -63,6 +58,7 @@
                 class="ts-input"
                 formControlName="password"
                 placeholder="Mínimo 8 caracteres"
+                autocomplete="new-password"
                 [class.error]="passwordControl?.invalid && passwordControl?.touched"
               />
               <button

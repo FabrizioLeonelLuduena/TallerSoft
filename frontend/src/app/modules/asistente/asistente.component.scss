@@ -50,7 +50,7 @@
   box-shadow: 0 0 16px rgba(249, 115, 22, 0.35);
 
   mat-icon {
-    font-size: 22px;
+    font-size: 22px; /* icon size — intentional */
     width: 22px;
     height: 22px;
   }
@@ -80,11 +80,11 @@
 }
 
 .header-title {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
-  line-height: 1.2;
+  line-height: var(--line-height-snug);
 }
 
 .header-status {
@@ -165,7 +165,7 @@
   color: #f97316;
 
   mat-icon {
-    font-size: 32px;
+    font-size: 32px; /* icon size — intentional */
     width: 32px;
     height: 32px;
   }
@@ -206,7 +206,7 @@
   font-family: inherit;
 
   mat-icon {
-    font-size: 15px;
+    font-size: 15px; /* icon size — intentional */
     width: 15px;
     height: 15px;
     color: #f97316;
@@ -214,7 +214,7 @@
     margin-top: 1px;
   }
 
-  span { line-height: 1.4; }
+  span { line-height: var(--line-height-normal); }
 
   &:hover:not(:disabled) {
     border-color: rgba(249, 115, 22, 0.4);
@@ -294,7 +294,7 @@
   flex-shrink: 0;
 
   mat-icon {
-    font-size: 16px;
+    font-size: 16px; /* icon size — intentional */
     width: 16px;
     height: 16px;
   }
@@ -330,14 +330,14 @@
   margin: 0 0 3px;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: var(--line-height-loose);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .msg-time {
   display: block;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: right;
 }
@@ -401,7 +401,7 @@
   font-family: inherit;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  line-height: 1.55;
+  line-height: var(--line-height-loose);
   padding: var(--spacing-sm) 0;
   max-height: 140px;
   overflow-y: auto;
@@ -418,7 +418,7 @@
 }
 
 .char-count {
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   transition: color 0.15s ease;
 
@@ -439,7 +439,7 @@
   transition: var(--transition);
   flex-shrink: 0;
 
-  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  mat-icon { font-size: 18px; /* icon size — intentional */  width: 18px; height: 18px; }
 
   &--active {
     background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
@@ -457,7 +457,7 @@
 }
 
 .input-hint {
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   text-align: center;
   margin: 0;

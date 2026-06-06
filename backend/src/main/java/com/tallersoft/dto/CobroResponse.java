@@ -19,5 +19,7 @@ public class CobroResponse {
     private MedioPago medioPago;
     private EstadoPago estadoPago;
     private String mpLinkPago;
+    private String mpQrBase64;
+    private String mpQrImageUrl;
     private LocalDateTime createdAt;
 }

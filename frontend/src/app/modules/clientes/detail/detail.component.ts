@@ -14,6 +14,7 @@ import { finalize } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ClienteService, ClienteResponse } from '../services/cliente.service';
 import { EquipoService, EquipoResponse } from '@modules/ordenes/services/equipo.service';
+import { OrdenesService } from '@modules/ordenes/services/ordenes.service';
 import { AuthService } from '@core/auth/auth.service';
 import { ConfirmDialogComponent } from '@shared/dialogs/confirm-dialog.component';
 import { DeleteConfirmModal } from '../modals/delete-confirm/delete-confirm.modal';
@@ -49,6 +50,7 @@ export class DetailComponent implements OnInit {
   private router = inject(Router);
   private clienteService = inject(ClienteService);
   private equipoService = inject(EquipoService);
+  private ordenesService = inject(OrdenesService);
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
@@ -160,6 +162,28 @@ export class DetailComponent implements OnInit {
 
   setActiveTab(tab: 'equipos' | 'historial') {
     this.activeTab = tab;
+    if (tab === 'historial' && this.cliente && this.ordenes.length === 0 && !this.loadingOrdenes) {
+      this.loadOrdenes(this.cliente.id);
+    }
+  }
+
+  loadOrdenes(clienteId: number) {
+    this.loadingOrdenes = true;
+    this.ordenesService.listarOrdenesPorCliente(clienteId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.loadingOrdenes = false)
+    ).subscribe({
+      next: (ordenes) => {
+        this.ordenes = ordenes;
+      },
+      error: (err) => {
+        this.snackBar.open(
+          err.error?.message || 'Error al cargar el historial',
+          'Cerrar',
+          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
+        );
+      }
+    });
   }
 
   onAddEquipo() {
@@ -241,12 +265,13 @@ export class DetailComponent implements OnInit {
   }
 
   getEstadoClass(estado: string): string {
-    const estadoLower = estado?.toLowerCase() || '';
-    if (estadoLower.includes('pendiente')) return 'pending';
-    if (estadoLower.includes('progreso') || estadoLower.includes('progress')) return 'progress';
-    if (estadoLower.includes('completada') || estadoLower.includes('completed')) return 'completed';
-    if (estadoLower.includes('cancelada') || estadoLower.includes('cancelled')) return 'cancelled';
-    return 'pending';
+    switch (estado) {
+      case 'PENDIENTE': return 'pending';
+      case 'EN_PROCESO': return 'progress';
+      case 'LISTO': return 'completed';
+      case 'ENTREGADO': return 'completed';
+      default: return 'pending';
+    }
   }
 
   formatCurrency(value: number | undefined): string {

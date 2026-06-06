@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -33,7 +33,6 @@ export class CreateComponent implements OnInit {
   private equipoService = inject(EquipoService);
   private usuariosService = inject(UsuariosService);
   private destroyRef = inject(DestroyRef);
-  private el = inject(ElementRef);
 
   form!: FormGroup;
 
@@ -61,15 +60,6 @@ export class CreateComponent implements OnInit {
 
   isLoading = false;
   isSubmitting = false;
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    if (!this.el.nativeElement.contains(event.target)) {
-      this.showClienteDropdown = false;
-      this.showEquipoDropdown = false;
-      this.showTecnicoDropdown = false;
-    }
-  }
 
   get equipoIdControl() {
     return this.form.get('equipoId');
@@ -116,6 +106,12 @@ export class CreateComponent implements OnInit {
         }
       });
   }
+
+  // ── Blur (cierra dropdown al salir del campo) ────────────
+
+  onClienteBlur()  { setTimeout(() => { this.showClienteDropdown  = false; }, 200); }
+  onEquipoBlur()   { setTimeout(() => { this.showEquipoDropdown   = false; }, 200); }
+  onTecnicoBlur()  { setTimeout(() => { this.showTecnicoDropdown  = false; }, 200); }
 
   // ── Cliente ──────────────────────────────────────────────
 

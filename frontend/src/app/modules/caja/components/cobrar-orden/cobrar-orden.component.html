@@ -140,19 +140,41 @@
   <div class="modal-content">
     <div class="modal-header">
       <mat-icon class="modal-icon-mp">qr_code_2</mat-icon>
-      <h2 class="modal-title">Link de pago generado</h2>
+      <h2 class="modal-title">Cobro con QR</h2>
     </div>
-    <div class="modal-body">
-      <p class="mp-info">Compartí este link con el cliente para que realice el pago.</p>
-      <div class="link-box">
-        <span class="link-text">{{ mpLinkPago }}</span>
+
+    <div class="modal-body modal-body--qr">
+      <div class="qr-container">
+        <img class="qr-image" [src]="mpQrImageUrl" alt="QR de pago" />
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-copy" (click)="copiarLink()" type="button">
-        <mat-icon>{{ linkCopiado ? 'check' : 'content_copy' }}</mat-icon>
-        {{ linkCopiado ? 'Copiado!' : 'Copiar link' }}
+      <p class="qr-wallets-text">Escaneá con Mercado Pago, Modo, Ualá u otra billetera virtual</p>
+
+      <!-- Estado de espera / aprobado -->
+      <div class="payment-status" [class.payment-status--approved]="pagoAprobado">
+        <ng-container *ngIf="!pagoAprobado">
+          <span class="pulse-dot"></span>
+          <span class="status-text">Esperando pago...</span>
+        </ng-container>
+        <ng-container *ngIf="pagoAprobado">
+          <mat-icon class="status-icon-ok">check_circle</mat-icon>
+          <span class="status-text">¡Pago aprobado!</span>
+        </ng-container>
+      </div>
+
+      <!-- Botón manual como fallback -->
+      <button
+        *ngIf="!pagoAprobado"
+        class="btn-verificar"
+        (click)="verificarPago(true)"
+        [disabled]="isVerificandoPago"
+        type="button">
+        <mat-icon *ngIf="!isVerificandoPago" class="btn-icon">refresh</mat-icon>
+        <mat-icon *ngIf="isVerificandoPago" class="spinning btn-icon">autorenew</mat-icon>
+        {{ isVerificandoPago ? 'Verificando...' : 'Verificar ahora' }}
       </button>
+    </div>
+
+    <div class="modal-footer">
       <button class="btn-primary" (click)="cerrarMpModal()" type="button">
         <mat-icon>arrow_back</mat-icon>
         Volver a la orden

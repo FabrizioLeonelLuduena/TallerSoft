@@ -19,8 +19,8 @@
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
   letter-spacing: -0.02em;
@@ -51,7 +51,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   transition: all 200ms ease;
 
   &:hover {
@@ -69,7 +69,7 @@
   }
 
   .material-symbols-outlined {
-    font-size: 18px;
+    font-size: 18px; /* icon size — intentional */
     transition: color 200ms ease;
   }
 }
@@ -84,8 +84,8 @@
   color: #0a0f1e;
   border: none;
   border-radius: var(--radius-lg);
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 28px; /* icon size — intentional */
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -128,7 +128,7 @@
   }
 
   .page-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-xl);
   }
 
   .header-right {

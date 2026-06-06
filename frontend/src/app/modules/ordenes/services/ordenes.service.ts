@@ -97,6 +97,10 @@ export class OrdenesService {
     return this.http.delete<OrdenTrabajoResponse>(`${this.api}/${ordenId}/repuestos/${ordenRepuestoId}`);
   }
 
+  listarOrdenesPorCliente(clienteId: number): Observable<OrdenTrabajoResponse[]> {
+    return this.http.get<OrdenTrabajoResponse[]>(`${this.api}/cliente/${clienteId}`);
+  }
+
   eliminarOrden(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }

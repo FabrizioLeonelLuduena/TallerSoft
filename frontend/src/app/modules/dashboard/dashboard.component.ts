@@ -25,6 +25,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   resumenAlertas: any = { total: 0, sin_leer: 0, por_tipo: {} };
   panelAbierto = false;
 
+  // Modal de alertas
+  modalAbierto = false;
+  modalTipo: 'danger' | 'warn' = 'danger';
+
   // Tab Operativo
   resumenOrdenes: any;
   ordenesAltaPrioridad: any[] = [];
@@ -107,6 +111,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   togglePanel(): void { this.panelAbierto = !this.panelAbierto; }
   closeAll(): void { this.panelAbierto = false; }
   reintentar(): void { this.cargarDashboard(); }
+
+  abrirModal(tipo: 'danger' | 'warn'): void {
+    this.modalTipo = tipo;
+    this.modalAbierto = true;
+  }
+
+  cerrarModal(): void { this.modalAbierto = false; }
+
+  get modalAlertas(): any[] {
+    return this.alertasActivas.filter(a => a.tipo === this.modalTipo && !a.leida);
+  }
 
   marcarLeida(id: string): void {
     this.analytics.marcarAlertaLeida(id).subscribe(() => {

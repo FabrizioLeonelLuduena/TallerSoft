@@ -18,13 +18,44 @@
 
     <!-- Barra de alertas -->
     <div class="alert-bar" *ngIf="alertasDanger.length || alertasWarn.length">
-      <div class="alert-chip danger" *ngIf="alertasDanger.length">
+      <div class="alert-chip danger" *ngIf="alertasDanger.length" (click)="abrirModal('danger')">
         <mat-icon>error</mat-icon>
         Alertas críticas <span class="chip-badge">{{ alertasDanger.length }}</span>
       </div>
-      <div class="alert-chip warn" *ngIf="alertasWarn.length">
+      <div class="alert-chip warn" *ngIf="alertasWarn.length" (click)="abrirModal('warn')">
         <mat-icon>warning</mat-icon>
         Advertencias <span class="chip-badge">{{ alertasWarn.length }}</span>
+      </div>
+    </div>
+
+    <!-- Modal de alertas -->
+    <div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+      <div class="modal-panel" [class.modal-danger]="modalTipo === 'danger'" [class.modal-warn]="modalTipo === 'warn'" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div class="modal-title">
+            <mat-icon>{{ modalTipo === 'danger' ? 'error' : 'warning' }}</mat-icon>
+            {{ modalTipo === 'danger' ? 'Alertas críticas' : 'Advertencias' }}
+            <span class="chip-badge">{{ modalAlertas.length }}</span>
+          </div>
+          <button class="modal-close" (click)="cerrarModal()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-alerta-item" *ngFor="let a of modalAlertas">
+            <div class="modal-alerta-icon" [class.icon-danger]="a.tipo === 'danger'" [class.icon-warn]="a.tipo === 'warn'">
+              <mat-icon>{{ a.tipo === 'danger' ? 'error' : 'warning' }}</mat-icon>
+            </div>
+            <div class="modal-alerta-txt">
+              <div class="modal-alerta-titulo">{{ a.titulo }}</div>
+              <div class="modal-alerta-desc">{{ a.descripcion }}</div>
+            </div>
+          </div>
+          <div class="no-data" *ngIf="modalAlertas.length === 0">
+            <mat-icon>check_circle</mat-icon>
+            <span>Sin alertas activas</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -520,7 +551,7 @@
                     <div class="tbl-sub">{{ r.categoria }}</div>
                   </td>
                   <td>
-                    <span style="color: var(--ds-danger); font-weight: 600">{{ r.stock_actual }}</span>
+                    <span class="value-semibold" style="color: var(--ds-danger)">{{ r.stock_actual }}</span>
                   </td>
                   <td>
                     <span class="tbl-muted">{{ r.stock_minimo }}</span>

@@ -54,6 +54,13 @@ public class OrdenTrabajoController {
         return ResponseEntity.ok(ordenes);
     }
     
+    @GetMapping("/cliente/{clienteId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
+    public ResponseEntity<List<OrdenTrabajoResponse>> listarOrdenesPorCliente(@PathVariable Long clienteId) {
+        log.info("Listando órdenes del cliente {}", clienteId);
+        return ResponseEntity.ok(ordenTrabajoService.listarOrdenesPorCliente(clienteId));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
     public ResponseEntity<OrdenTrabajoResponse> obtenerOrden(@PathVariable Long id) {

@@ -148,6 +148,8 @@ CREATE TABLE cobros (
     estado_pago         VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
     mp_payment_id       VARCHAR(100),
     mp_link_pago        VARCHAR(500),
+    mp_qr_base64        TEXT,
+    mp_qr_image_url     VARCHAR(500),
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_cobro_orden FOREIGN KEY (orden_id)

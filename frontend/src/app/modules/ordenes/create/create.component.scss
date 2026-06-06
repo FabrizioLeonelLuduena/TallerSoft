@@ -12,47 +12,6 @@
 }
 
 // ───────────────────────────────────────────────────────────
-// FORM HEADER
-// ───────────────────────────────────────────────────────────
-
-.form-header {
-  display: flex;
-  justify-content: flex-end;
-}
-
-// ───────────────────────────────────────────────────────────
-// BACK BUTTON
-// ───────────────────────────────────────────────────────────
-
-.btn-back {
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  color: var(--color-on-surface);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-
-  .material-symbols-outlined {
-    font-size: 20px;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(0, 245, 212, 0.3);
-    color: var(--color-accent);
-  }
-
-  &:active {
-    transform: scale(0.96);
-  }
-}
-
-// ───────────────────────────────────────────────────────────
 // FORM CONTENT
 // ───────────────────────────────────────────────────────────
 
@@ -77,8 +36,8 @@
 
   .section-title {
     margin: 0 0 var(--spacing-sm) 0;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-accent);
@@ -97,7 +56,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
+  font-size: var(--font-size-base);
   font-family: inherit;
   transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
@@ -130,8 +89,8 @@
   gap: 6px;
 
   .field-label {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: rgba(255, 255, 255, 0.5);
@@ -141,13 +100,13 @@
 
     .required {
       color: #ef4444;
-      font-size: 14px;
-      line-height: 1;
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-tight);
     }
   }
 
   .error-text {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: #ef4444;
     margin-top: 2px;
   }
@@ -219,7 +178,7 @@ select.ts-input {
     top: 50%;
     transform: translateY(-50%);
     color: rgba(255, 255, 255, 0.35);
-    font-size: 18px;
+    font-size: 18px; /* icon size — intentional */
     pointer-events: none;
     transition: color 150ms ease;
   }
@@ -278,8 +237,8 @@ select.ts-input {
       }
 
       .item-nombre {
-        font-size: 13px;
-        font-weight: 600;
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
         color: rgba(255, 255, 255, 0.9);
         white-space: nowrap;
         overflow: hidden;
@@ -287,12 +246,12 @@ select.ts-input {
 
         &.muted {
           color: rgba(255, 255, 255, 0.4);
-          font-weight: 500;
+          font-weight: var(--font-weight-medium);
         }
       }
 
       .item-sub {
-        font-size: 11px;
+        font-size: var(--font-size-sm);
         color: rgba(255, 255, 255, 0.4);
         white-space: nowrap;
         overflow: hidden;
@@ -300,7 +259,7 @@ select.ts-input {
       }
 
       .item-check {
-        font-size: 16px;
+        font-size: 16px; /* icon size — intentional */
         color: #00f5d4;
         flex-shrink: 0;
       }
@@ -322,7 +281,7 @@ select.ts-input {
     position: absolute;
     left: var(--spacing-md);
     color: rgba(255, 255, 255, 0.4);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     pointer-events: none;
   }
 
@@ -359,12 +318,12 @@ select.ts-input {
   transition: all 200ms ease;
   min-height: 90px;
   color: rgba(255, 255, 255, 0.5);
-  font-weight: 600;
-  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
   letter-spacing: 0.04em;
 
   span.material-symbols-outlined {
-    font-size: 26px;
+    font-size: 26px; /* icon size — intentional */
     color: rgba(255, 255, 255, 0.25);
     transition: color 200ms ease;
   }
@@ -421,8 +380,8 @@ select.ts-input {
 .textarea-input {
   min-height: 120px;
   padding: var(--spacing-md) !important;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
   resize: vertical;
 }
 
@@ -439,8 +398,8 @@ select.ts-input {
   button {
     flex: 1;
     padding: 12px 24px;
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
     border-radius: var(--radius-md);
     border: none;
     cursor: pointer;
@@ -487,7 +446,7 @@ select.ts-input {
       gap: 6px;
 
       .loading-icon {
-        font-size: 18px;
+        font-size: 18px; /* icon size — intentional */
         animation: spin 1s linear infinite;
       }
     }

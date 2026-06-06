@@ -38,6 +38,12 @@ public class CobrosController {
         return ResponseEntity.ok(cobrosService.getCajaDiaria(fechaConsulta));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    public ResponseEntity<CobroResponse> getCobro(@PathVariable Long id) {
+        return ResponseEntity.ok(cobrosService.getCobro(id));
+    }
+
     @PostMapping("/{id}/confirmar")
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ResponseEntity<CobroResponse> confirmarPagoManual(@PathVariable Long id) {

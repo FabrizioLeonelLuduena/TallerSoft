@@ -48,19 +48,29 @@
           <h3 class="card-title">Diagnóstico</h3>
         </div>
         <textarea
-          *ngIf="canSaveDiagnostico()"
+          *ngIf="isDiagnosticoEditable()"
           [(ngModel)]="diagnosticoText"
           placeholder="Describí el diagnóstico..."
           class="diagnostico-textarea"
         ></textarea>
-        <div *ngIf="!canSaveDiagnostico() && diagnosticoText" class="diagnostico-readonly">
+        <textarea
+          *ngIf="isDiagnosticoDisabledInput()"
+          [value]="diagnosticoText"
+          class="diagnostico-textarea diagnostico-textarea--disabled"
+          disabled
+          placeholder="Sin diagnóstico registrado"
+        ></textarea>
+        <div *ngIf="!isDiagnosticoEditable() && !isDiagnosticoDisabledInput() && diagnosticoText" class="diagnostico-readonly">
           {{ diagnosticoText }}
         </div>
-        <div *ngIf="!diagnosticoText && !canSaveDiagnostico()" class="empty-state">
+        <div *ngIf="!isDiagnosticoEditable() && !isDiagnosticoDisabledInput() && !diagnosticoText" class="empty-state">
           Sin diagnóstico registrado
         </div>
-        <button *ngIf="canSaveDiagnostico()" class="btn-save" (click)="onSaveDiagnostico()" [disabled]="isSavingDiagnostico">
+        <button *ngIf="isDiagnosticoEditable()" class="btn-save" (click)="onSaveDiagnostico()" [disabled]="isSavingDiagnostico">
           {{ isSavingDiagnostico ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button *ngIf="isDiagnosticoDisabledInput() && orden?.estado !== 'LISTO'" class="btn-save btn-edit" (click)="onToggleEditDiagnostico()">
+          Editar
         </button>
       </div>
 

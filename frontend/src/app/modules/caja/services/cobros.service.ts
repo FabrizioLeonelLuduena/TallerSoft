@@ -23,6 +23,8 @@ export interface CobroResponse {
   medioPago: MedioPago;
   estadoPago: EstadoPago;
   mpLinkPago?: string;
+  mpQrBase64?: string;
+  mpQrImageUrl?: string;
   createdAt: string;
 }
 
@@ -61,6 +63,10 @@ export class CobrosService {
     if (anio) params = params.set('anio', anio.toString());
     if (mes)  params = params.set('mes',  mes.toString());
     return this.http.get<CajaDiariaResponse[]>(`${this.api}/historial`, { params });
+  }
+
+  getCobro(cobroId: number): Observable<CobroResponse> {
+    return this.http.get<CobroResponse>(`${this.api}/${cobroId}`);
   }
 
   generarPresupuesto(ordenId: number): Observable<Blob> {

@@ -96,6 +96,13 @@ public class OrdenTrabajoService {
     }
     
     @Transactional(readOnly = true)
+    public List<OrdenTrabajoResponse> listarOrdenesPorCliente(Long clienteId) {
+        return ordenTrabajoRepository.findByClienteIdOrderByCreatedAtDesc(clienteId).stream()
+                .map(ordenTrabajoMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<OrdenTrabajoResponse> listarOrdenesActivas() {
         List<OrdenTrabajo> ordenes = ordenTrabajoRepository.findByEstadoNot(EstadoOrden.ENTREGADO);
         return ordenes.stream()

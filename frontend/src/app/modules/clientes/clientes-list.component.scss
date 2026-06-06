@@ -36,7 +36,7 @@
 
     .search-icon {
       color: var(--color-text-secondary);
-      font-size: 20px;
+      font-size: 20px; /* icon size — intentional */
       width: 20px;
       height: 20px;
       margin-right: var(--spacing-sm);
@@ -48,7 +48,7 @@
       background: transparent;
       border: none;
       color: var(--color-text-primary);
-      font-size: 0.9375rem;
+      font-size: var(--font-size-md);
       outline: none;
 
       &::placeholder {
@@ -64,7 +64,7 @@
     padding: 0 var(--spacing-lg) !important;
     height: 44px !important;
     border-radius: var(--radius-md) !important;
-    font-weight: 500 !important;
+    font-weight: var(--font-weight-medium) !important;
     transition: var(--transition) !important;
 
     &:hover {
@@ -200,8 +200,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 600;
-      font-size: 1rem;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-md);
       flex-shrink: 0;
     }
 
@@ -213,10 +213,10 @@
 
       .client-name {
         margin: 0;
-        font-size: 1.0625rem;
-        font-weight: 600;
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
         color: var(--color-text-primary);
-        line-height: 1.4;
+        line-height: var(--line-height-normal);
       }
 
       .client-contact {
@@ -224,13 +224,13 @@
         align-items: center;
         gap: var(--spacing-xs);
         color: var(--color-text-secondary);
-        font-size: 0.875rem;
-        line-height: 1.4;
+        font-size: var(--font-size-base);
+        line-height: var(--line-height-normal);
 
         .contact-icon {
           width: 16px;
           height: 16px;
-          font-size: 16px;
+          font-size: 16px; /* icon size — intentional */
           flex-shrink: 0;
           color: var(--color-text-muted);
         }
@@ -256,8 +256,8 @@
         color: var(--color-info);
         padding: 4px 12px;
         border-radius: var(--radius-full);
-        font-size: 0.8125rem;
-        font-weight: 500;
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-medium);
         white-space: nowrap;
       }
 
@@ -286,7 +286,7 @@
     animation: fadeInUp 0.4s ease;
 
     .empty-icon {
-      font-size: 64px;
+      font-size: 64px; /* icon size — intentional */
       width: 64px;
       height: 64px;
       color: var(--color-text-secondary);
@@ -295,15 +295,15 @@
 
     .empty-title {
       margin: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
       color: var(--color-text-primary);
     }
 
     .empty-text {
       margin: 0;
       color: var(--color-text-secondary);
-      font-size: 0.9375rem;
+      font-size: var(--font-size-md);
       max-width: 300px;
     }
 
@@ -473,7 +473,7 @@
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
   color: white;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   flex-shrink: 0;
 }
@@ -497,7 +497,7 @@
 
 .cliente-name {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   display: -webkit-box;
@@ -522,7 +522,7 @@
   .info-icon {
     width: 16px;
     height: 16px;
-    font-size: 16px;
+    font-size: 16px; /* icon size — intentional */
     flex-shrink: 0;
   }
 
@@ -595,7 +595,7 @@
   min-height: 300px;
 
   mat-icon {
-    font-size: 64px;
+    font-size: 64px; /* icon size — intentional */
     width: 64px;
     height: 64px;
     opacity: 0.3;
@@ -603,7 +603,7 @@
 
   h3 {
     margin: 0;
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
   }

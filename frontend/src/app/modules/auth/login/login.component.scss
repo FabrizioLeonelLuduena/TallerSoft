@@ -58,21 +58,21 @@
     width: 40px;
     height: 40px;
     color: var(--color-primary);
-    font-size: 32px;
+    font-size: 32px; /* icon size — intentional */
   }
 
   .logo-title {
     margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
     letter-spacing: -0.02em;
     color: var(--color-on-surface);
   }
 
   .logo-subtitle {
     margin: 0;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.08em;
     color: var(--color-secondary);
     text-transform: uppercase;
@@ -111,18 +111,18 @@
 
   .card-title {
     margin: 0 0 var(--spacing-xs) 0;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
     letter-spacing: -0.01em;
     color: var(--color-on-surface);
   }
 
   .card-description {
     margin: 0;
-    font-size: 12px;
-    font-weight: 400;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-regular);
     color: var(--color-secondary);
-    line-height: 1.5;
+    line-height: var(--line-height-relaxed);
   }
 }
 
@@ -142,9 +142,9 @@
   }
 
   .error-text {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--color-error);
-    line-height: 1.4;
+    line-height: var(--line-height-normal);
   }
 }
 
@@ -160,8 +160,8 @@
   gap: 4px;
 
   .form-label {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
     letter-spacing: 0.05em;
     color: var(--color-secondary);
     text-transform: uppercase;
@@ -182,7 +182,7 @@
       color: var(--color-secondary);
 
       .material-symbols-outlined {
-        font-size: 20px;
+        font-size: 20px; /* icon size — intentional */
       }
     }
 
@@ -217,7 +217,7 @@
       }
 
       .material-symbols-outlined {
-        font-size: 20px;
+        font-size: 20px; /* icon size — intentional */
       }
     }
   }
@@ -245,8 +245,8 @@
   }
 
   .checkbox-label {
-    font-size: 12px;
-    font-weight: 400;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-regular);
     color: var(--color-secondary);
     cursor: pointer;
     user-select: none;
@@ -265,12 +265,12 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 
     .material-symbols-outlined {
-      font-size: 18px;
+      font-size: 18px; /* icon size — intentional */
     }
   }
 
@@ -309,15 +309,15 @@
 
   .footer-text {
     margin: 0;
-    font-size: 12px;
-    font-weight: 400;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-regular);
     color: var(--color-secondary);
-    line-height: 1.5;
+    line-height: var(--line-height-relaxed);
 
     .footer-link {
       color: var(--color-primary);
       text-decoration: none;
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
 
       &:hover {
         text-decoration: underline;
@@ -337,8 +337,8 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.08em;
     color: var(--color-secondary);
     text-transform: uppercase;
@@ -353,8 +353,8 @@
   }
 
   .status-text {
-    font-size: 10px;
-    font-weight: 700;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.08em;
     color: var(--color-secondary);
     text-transform: uppercase;

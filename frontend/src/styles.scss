@@ -2,9 +2,6 @@
    TALLERSOFT - GLOBAL DARK THEME STYLES
    ======================================== */
 
-/* Import fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-
 /* ========================================
    DESIGN SYSTEM - CSS CUSTOM PROPERTIES
    ======================================== */
@@ -40,15 +37,25 @@
   
   /* Typography */
   --font-family:            'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-size-sm:           0.75rem;
-  --font-size-base:         0.875rem;
-  --font-size-lg:           1rem;
-  --font-size-xl:           1.125rem;
-  --font-size-2xl:          1.5rem;
+  --font-family-mono:       'Courier New', Courier, monospace;
+  --font-size-xs:           0.625rem;  /* 10px */
+  --font-size-sm:           0.75rem;   /* 12px */
+  --font-size-base:         0.875rem;  /* 14px */
+  --font-size-md:           1rem;      /* 16px */
+  --font-size-lg:           1.125rem;  /* 18px */
+  --font-size-xl:           1.5rem;    /* 24px */
+  --font-size-2xl:          1.75rem;   /* 28px */
+  --font-size-3xl:          2rem;      /* 32px */
   --font-weight-regular:    400;
   --font-weight-medium:     500;
   --font-weight-semibold:   600;
   --font-weight-bold:       700;
+  --font-weight-extrabold:  800;
+  --line-height-tight:      1;
+  --line-height-snug:       1.2;
+  --line-height-normal:     1.4;
+  --line-height-relaxed:    1.5;
+  --line-height-loose:      1.6;
   
   /* Spacing */
   --spacing-xs:             4px;
@@ -96,7 +103,7 @@ html, body {
   font-weight: var(--font-weight-regular);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
-  line-height: 1.5;
+  line-height: var(--line-height-relaxed);
 }
 
 app-root {
@@ -294,9 +301,9 @@ app-root {
 .text-danger { color: var(--color-danger); }
 
 .text-sm { font-size: var(--font-size-sm); }
-.text-lg { font-size: var(--font-size-lg); }
-.text-xl { font-size: var(--font-size-xl); }
-.text-2xl { font-size: var(--font-size-2xl); }
+.text-lg { font-size: var(--font-size-md); }
+.text-xl { font-size: var(--font-size-lg); }
+.text-2xl { font-size: var(--font-size-xl); }
 
 .w-full { width: 100%; }
 .h-full { height: 100%; }
@@ -403,7 +410,7 @@ app-root {
 
 .btn-lg {
   padding: 12px 24px;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
 }
 
 /* ========================================
@@ -595,8 +602,8 @@ app-root {
   align-items: center;
   padding: 4px 12px;
   border-radius: var(--radius-full);
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
 }
 
@@ -605,7 +612,7 @@ app-root {
 .estado-chip.listo { background: rgba(34, 197, 94, 0.1); color: var(--color-success); }
 .estado-chip.entregado { background: rgba(75, 85, 99, 0.1); color: var(--color-text-secondary); }
 
-.rol-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font: 500 0.75rem inherit; white-space: nowrap; }
+.rol-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-weight: var(--font-weight-medium); font-size: var(--font-size-sm); white-space: nowrap; }
 .rol-badge.admin { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
 .rol-badge.tecnico { background: rgba(59, 130, 246, 0.15); color: var(--color-info); }
 .rol-badge.recepcion { background: rgba(34, 197, 94, 0.15); color: var(--color-success); }
@@ -630,13 +637,13 @@ app-root {
 }
 @media (max-width: 768px) {
   body {
-    font-size: 14px;
+    font-size: var(--font-size-base);
   }
 }
 
 @media (max-width: 480px) {
   body {
-    font-size: 13px;
+    font-size: var(--font-size-base);
   }
 }
 

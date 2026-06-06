@@ -12,6 +12,7 @@ import java.util.List;
 public class OrdenTrabajoResponse {
     private Long id;
     private Long equipoId;
+    private String equipoNombre;
     private String clienteNombre;
     private Long clienteId;
     private Long tecnicoId;

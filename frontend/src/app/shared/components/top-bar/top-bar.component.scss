@@ -26,15 +26,15 @@
 
 .tb-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   letter-spacing: -0.2px;
 }
 
 .tb-date {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   background: var(--color-surface-2, rgba(255,255,255,0.05));
   border: 1px solid var(--color-border);
@@ -81,7 +81,7 @@
   transition: all 200ms ease;
 
   .material-symbols-outlined {
-    font-size: 22px;
+    font-size: 22px; /* icon size — intentional */
   }
 
   &:hover,
@@ -100,14 +100,14 @@
   background: var(--color-danger);
   color: #fff;
   border-radius: 9px;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--color-surface);
   padding: 0 2px;
-  line-height: 1;
+  line-height: var(--line-height-tight);
 }
 
 /* ── User button ──────────────────────── */
@@ -138,8 +138,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
   flex-shrink: 0;
   box-shadow: 0 0 10px rgba(0, 245, 212, 0.25);
   overflow: hidden;
@@ -155,13 +155,13 @@
 
 .tb-username {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   white-space: nowrap;
 }
 
 .tb-chevron {
-  font-size: 18px;
+  font-size: 18px; /* icon size — intentional */
   color: var(--color-text-muted);
   transition: transform 200ms ease;
 
@@ -203,13 +203,13 @@
   padding: 12px var(--spacing-md);
   border-bottom: 1px solid var(--color-border);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
 .td-count {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   color: var(--color-accent);
   background: rgba(0, 245, 212, 0.12);
   border-radius: 12px;
@@ -244,7 +244,7 @@
 }
 
 .alerta-icon {
-  font-size: 20px;
+  font-size: 20px; /* icon size — intentional */
   flex-shrink: 0;
   margin-top: 1px;
   color: var(--color-text-muted);
@@ -258,7 +258,7 @@
 .alerta-title {
   margin: 0 0 3px;
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -267,7 +267,7 @@
 
 .alerta-desc {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -294,7 +294,7 @@
     color: var(--color-accent);
   }
 
-  .material-symbols-outlined { font-size: 14px; }
+  .material-symbols-outlined { font-size: 14px; /* icon size — intentional */}
 }
 
 .td-empty {
@@ -307,7 +307,7 @@
   font-size: var(--font-size-sm);
 
   .material-symbols-outlined {
-    font-size: 32px;
+    font-size: 32px; /* icon size — intentional */
     color: var(--color-accent);
     opacity: 0.45;
   }
@@ -335,21 +335,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
   flex-shrink: 0;
   overflow: hidden;
 }
 
 .td-user-name {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
 }
 
 .td-user-role {
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin: 0;
   text-transform: uppercase;
@@ -373,10 +373,10 @@
   cursor: pointer;
   transition: all 150ms ease;
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-align: left;
 
-  .material-symbols-outlined { font-size: 18px; }
+  .material-symbols-outlined { font-size: 18px; /* icon size — intentional */ }
 
   &:hover {
     background: rgba(0, 245, 212, 0.08);

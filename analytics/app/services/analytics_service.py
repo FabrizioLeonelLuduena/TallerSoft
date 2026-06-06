@@ -383,6 +383,16 @@ def recurrencia_clientes(db, meses: int = 6) -> list:
     return resultado
 
 
+def ingresos_rango(db, desde: date, hasta: date) -> float:
+    result = db.execute(text("""
+        SELECT COALESCE(SUM(monto), 0) AS total
+        FROM cobros
+        WHERE estado_pago = 'APROBADO'
+          AND DATE(created_at) BETWEEN :desde AND :hasta
+    """), {"desde": desde, "hasta": hasta})
+    return float(result.scalar())
+
+
 def stock_por_categoria(db) -> list:
     result = db.execute(text("""
         SELECT
@@ -413,9 +423,15 @@ stock_critico = get_stock_critico
 # ─── CONTEXTO PARA EL ASISTENTE ──────────────────────────────────────────────
 
 def obtener_contexto_taller(db) -> dict:
+    hoy    = date.today()
+    ayer   = hoy - timedelta(days=1)
+    inicio_semana = hoy - timedelta(days=6)
+    inicio_mes    = hoy.replace(day=1)
+
     resumen      = resumen_ordenes(db)
     criticos     = get_stock_critico(db)
     caja_hoy     = resumen_caja_diario(db)
+    caja_ayer    = resumen_caja_diario(db, ayer)
     tecnicos     = rendimiento_tecnicos(db, mes_actual=True)
     alta_prio    = ordenes_alta_prioridad(db, dias_minimos=2)
     sin_mov      = ordenes_sin_movimiento(db, dias_umbral=5)
@@ -423,11 +439,17 @@ def obtener_contexto_taller(db) -> dict:
     rechazos_hoy = rechazos_cobros(db, dias=1)
     recurrencia  = recurrencia_clientes(db, meses=1)
 
+    ingresos_7d    = ingresos_rango(db, inicio_semana, hoy)
+    ingresos_mes   = ingresos_rango(db, inicio_mes, hoy)
+    evolucion_6m   = evolucion_mensual_caja(db, meses=6)
+    tendencia_6m   = ordenes_por_periodo(db, agrupacion="mes", meses_atras=6)
+
     top_tecnico      = tecnicos[0]["nombre"] if tecnicos else "N/A"
     nombres_criticos = [r["nombre"] for r in criticos[:5]]
     recurrencia_mes  = recurrencia[0] if recurrencia else {}
 
     return {
+        # snapshot actual
         "ordenes_pendientes":             resumen["pendientes"],
         "ordenes_en_proceso":             resumen["en_proceso"],
         "ordenes_listas":                 resumen["listas"],
@@ -441,4 +463,12 @@ def obtener_contexto_taller(db) -> dict:
         "conversion_presupuesto_pct":     conv["tasa_conversion_pct"],
         "rechazos_hoy_monto":             rechazos_hoy["total_rechazado"],
         "clientes_recurrentes_pct":       recurrencia_mes.get("porcentaje_recurrentes", 0),
+        # datos históricos
+        "fecha_hoy":                      str(hoy),
+        "ingresos_ayer":                  caja_ayer["total_ingresos"],
+        "fecha_ayer":                     str(ayer),
+        "ingresos_ultimos_7_dias":        round(ingresos_7d, 2),
+        "ingresos_mes_actual":            round(ingresos_mes, 2),
+        "evolucion_caja_6_meses":         evolucion_6m,
+        "tendencia_ordenes_6_meses":      tendencia_6m,
     }

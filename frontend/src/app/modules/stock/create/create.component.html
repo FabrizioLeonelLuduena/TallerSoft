@@ -1,11 +1,4 @@
 <div class="create-container page-enter">
-  <!-- Header -->
-  <div class="form-header">
-    <button type="button" class="btn-back" (click)="onCancel()" title="Volver">
-      <span class="material-symbols-outlined">arrow_back</span>
-    </button>
-  </div>
-
   <!-- Form -->
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
 
@@ -123,7 +116,7 @@
 
         <div class="form-field">
           <label class="field-label">Nota</label>
-          <p style="font-size: 13px; color: var(--color-secondary); line-height: 1.6; margin: 0; padding: var(--spacing-md); background: rgba(0, 245, 212, 0.04); border: 1px solid rgba(0, 245, 212, 0.1); border-radius: var(--radius-md);">
+          <p class="text-small-loose" style="color: var(--color-secondary); margin: 0; padding: var(--spacing-md); background: rgba(0, 245, 212, 0.04); border: 1px solid rgba(0, 245, 212, 0.1); border-radius: var(--radius-md);">
             Se mostrará una alerta cuando el stock actual sea menor o igual al mínimo.
           </p>
         </div>

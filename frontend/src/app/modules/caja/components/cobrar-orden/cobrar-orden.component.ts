@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,7 @@ import { CobrosService, CobroResponse, MedioPago } from '../../services/cobros.s
   templateUrl: './cobrar-orden.component.html',
   styleUrls: ['./cobrar-orden.component.scss']
 })
-export class CobrarOrdenComponent implements OnInit {
+export class CobrarOrdenComponent implements OnInit, OnDestroy {
   private route       = inject(ActivatedRoute);
   private router      = inject(Router);
   private ordenesService = inject(OrdenesService);
@@ -31,9 +31,14 @@ export class CobrarOrdenComponent implements OnInit {
   montoRecibido: number | null = null;
 
   // Modal de MercadoPago
-  showMpModal    = false;
-  mpLinkPago: string | null = null;
-  linkCopiado    = false;
+  showMpModal       = false;
+  mpQrImageUrl: string | null = null;
+  cobroId: number | null = null;
+  isVerificandoPago = false;
+  pagoAprobado      = false;
+
+  private pollInterval: ReturnType<typeof setInterval> | null = null;
+  private readonly POLL_INTERVAL_MS = 4000;
 
   get vuelto(): number {
     if (this.medioPago !== 'EFECTIVO' || !this.montoRecibido || !this.orden) return 0;
@@ -86,8 +91,11 @@ export class CobrarOrdenComponent implements OnInit {
         next: (cobro) => {
           this.isSubmitting = false;
           if (cobro.medioPago === 'MERCADOPAGO') {
-            this.mpLinkPago = cobro.mpLinkPago ?? null;
-            this.showMpModal = true;
+            this.cobroId      = cobro.id;
+            this.mpQrImageUrl = cobro.mpQrImageUrl ?? null;
+            this.pagoAprobado = false;
+            this.showMpModal  = true;
+            this.startPolling();
           } else {
             this.snackBar.open('Cobro registrado exitosamente', '', { duration: 3000 });
             this.router.navigate(['/ordenes', this.orden!.id]);
@@ -100,17 +108,54 @@ export class CobrarOrdenComponent implements OnInit {
       });
   }
 
-  copiarLink(): void {
-    if (!this.mpLinkPago) return;
-    navigator.clipboard.writeText(this.mpLinkPago).then(() => {
-      this.linkCopiado = true;
-      setTimeout(() => { this.linkCopiado = false; }, 2000);
-    });
+  verificarPago(manual = false): void {
+    if (!this.cobroId || this.isVerificandoPago || this.pagoAprobado) return;
+    this.isVerificandoPago = true;
+    this.cobrosService.getCobro(this.cobroId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (cobro) => {
+          this.isVerificandoPago = false;
+          if (cobro.estadoPago === 'APROBADO') {
+            this.pagoAprobado = true;
+            this.stopPolling();
+            setTimeout(() => {
+              this.showMpModal = false;
+              this.router.navigate(['/ordenes', this.orden!.id]);
+            }, 1500);
+          } else if (manual) {
+            this.snackBar.open('El pago aún no fue acreditado. Esperá unos segundos.', 'Cerrar', { duration: 4000 });
+          }
+        },
+        error: () => {
+          this.isVerificandoPago = false;
+          if (manual) {
+            this.snackBar.open('Error al verificar el pago', 'Cerrar', { duration: 3000 });
+          }
+        }
+      });
+  }
+
+  private startPolling(): void {
+    this.stopPolling();
+    this.pollInterval = setInterval(() => this.verificarPago(false), this.POLL_INTERVAL_MS);
+  }
+
+  private stopPolling(): void {
+    if (this.pollInterval !== null) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
   }
 
   cerrarMpModal(): void {
+    this.stopPolling();
     this.showMpModal = false;
     this.router.navigate(['/ordenes', this.orden?.id]);
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 
   navigateBack(): void {
@@ -129,7 +174,7 @@ export class CobrarOrdenComponent implements OnInit {
     const labels: Record<string, string> = {
       EFECTIVO:    'Registrar cobro en efectivo',
       TARJETA:     'Confirmar cobro con tarjeta',
-      MERCADOPAGO: 'Generar link de pago'
+      MERCADOPAGO: 'Generar QR de pago'
     };
     return labels[this.medioPago];
   }

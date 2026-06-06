@@ -11,15 +11,15 @@
 
   .page-title {
     margin: 0;
-    font-size: 28px;
-    font-weight: 900;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-extrabold);
     color: var(--color-on-surface);
-    line-height: 1.2;
+    line-height: var(--line-height-snug);
   }
 
   .page-subtitle {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--font-size-base);
     color: var(--color-secondary);
   }
 }
@@ -40,7 +40,7 @@
       position: absolute;
       left: var(--spacing-md);
       color: var(--color-text-muted);
-      font-size: 20px;
+      font-size: 20px; /* icon size — intentional */
       pointer-events: none;
       transition: color 200ms ease;
     }
@@ -71,8 +71,8 @@
     color: #0a0f1e;
     border: none;
     border-radius: 12px;
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 24px; /* icon size — intentional */
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
     transition: all 200ms ease;
     box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
@@ -214,9 +214,9 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-weight: 700;
+      font-weight: var(--font-weight-bold);
       color: #0a0f1e;
-      font-size: 14px;
+      font-size: var(--font-size-base);
       box-shadow: 0 0 12px rgba(0, 245, 212, 0.2);
     }
 
@@ -226,8 +226,8 @@
 
       .client-name {
         margin: 0 0 4px 0;
-        font-size: 16px;
-        font-weight: 600;
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-semibold);
         color: var(--color-text-primary);
         white-space: nowrap;
         overflow: hidden;
@@ -235,14 +235,14 @@
       }
 
       .client-status {
-        font-size: 12px;
+        font-size: var(--font-size-sm);
         color: var(--color-text-secondary);
         display: flex;
         align-items: center;
         gap: 4px;
 
         .material-symbols-outlined {
-          font-size: 14px;
+          font-size: 14px; /* icon size — intentional */
         }
       }
     }
@@ -251,8 +251,8 @@
       background: rgba(0, 245, 212, 0.1);
       color: var(--color-text-secondary);
       border: 1px solid rgba(0, 245, 212, 0.2);
-      font-size: 10px;
-      font-weight: 700;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
       padding: 4px 8px;
       border-radius: var(--radius-sm);
       text-transform: uppercase;
@@ -278,11 +278,11 @@
       display: flex;
       align-items: center;
       gap: var(--spacing-sm);
-      font-size: 12px;
+      font-size: var(--font-size-sm);
       color: var(--color-text-secondary);
 
       .material-symbols-outlined {
-        font-size: 18px;
+        font-size: 18px; /* icon size — intentional */
         flex-shrink: 0;
       }
 
@@ -311,8 +311,8 @@
       display: flex;
       align-items: center;
       gap: var(--spacing-xs);
-      font-size: 12px;
-      font-weight: 700;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
       color: var(--color-accent);
       transition: all 200ms ease;
 
@@ -322,7 +322,7 @@
       }
 
       .material-symbols-outlined {
-        font-size: 16px;
+        font-size: 16px; /* icon size — intentional */
       }
     }
   }
@@ -349,20 +349,20 @@
     color: var(--color-text-secondary);
 
     .material-symbols-outlined {
-      font-size: 32px;
+      font-size: 32px; /* icon size — intentional */
     }
   }
 
   .empty-title {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
   }
 
   .empty-text {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--font-size-base);
     color: var(--color-text-secondary);
     max-width: 300px;
   }
@@ -404,7 +404,7 @@
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 
-    .material-symbols-outlined { font-size: 18px; }
+    .material-symbols-outlined { font-size: 18px; /* icon size — intentional */}
 
     &:hover:not(:disabled) {
       background: rgba(255, 255, 255, 0.08);
@@ -416,14 +416,14 @@
   }
 
   .pag-label {
-    font-size: 13px;
+    font-size: var(--font-size-base);
     color: var(--color-text-secondary);
     min-width: 110px;
     text-align: center;
   }
 
   .pag-count {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     margin-left: var(--spacing-sm);
   }

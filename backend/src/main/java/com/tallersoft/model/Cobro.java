@@ -45,6 +45,12 @@ public class Cobro {
     @Column(name = "mp_link_pago", length = 500)
     private String mpLinkPago;
 
+    @Column(name = "mp_qr_base64", columnDefinition = "TEXT")
+    private String mpQrBase64;
+
+    @Column(name = "mp_qr_image_url", length = 500)
+    private String mpQrImageUrl;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

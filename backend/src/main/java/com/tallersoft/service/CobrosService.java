@@ -82,11 +82,40 @@ public class CobrosService {
                 log.info("Cobro TARJETA aprobado para orden {}", orden.getId());
             }
             case MERCADOPAGO -> {
-                String link = mercadoPagoService.generarLinkPago(
-                        orden.getId(), request.getMonto(), "Reparación orden #" + orden.getId());
-                cobro.setMpLinkPago(link);
+                String desc = "Reparación orden #" + orden.getId();
+                String qrImageUrl = mercadoPagoService.cargarOrdenEnCaja(orden.getId(), request.getMonto(), desc);
+                cobro.setMpQrImageUrl(qrImageUrl);
                 cobrosRepository.save(cobro);
                 log.info("Cobro MERCADOPAGO pendiente creado para orden {}", orden.getId());
+            }
+        }
+
+        return cobroMapper.toResponse(cobro);
+    }
+
+    @Transactional
+    public CobroResponse getCobro(Long cobroId) {
+        Cobro cobro = cobrosRepository.findById(cobroId)
+                .orElseThrow(() -> new EntityNotFoundException("Cobro no encontrado con id: " + cobroId));
+
+        // Reconciliación activa: si el cobro MP sigue PENDIENTE, consultar MP directamente
+        if (cobro.getMedioPago() == MedioPago.MERCADOPAGO
+                && cobro.getEstadoPago() == EstadoPago.PENDIENTE) {
+            try {
+                Map<String, Object> resultado =
+                        mercadoPagoService.buscarPagoPorOrden(cobro.getOrden().getId());
+                if (resultado != null && "approved".equals(resultado.get("status"))) {
+                    cobro.setEstadoPago(EstadoPago.APROBADO);
+                    cobro.setMpPaymentId((String) resultado.get("mpPaymentId"));
+                    cobrosRepository.save(cobro);
+                    OrdenTrabajo orden = cobro.getOrden();
+                    orden.setEstado(EstadoOrden.ENTREGADO);
+                    ordenTrabajoRepository.save(orden);
+                    log.info("Cobro {} actualizado a APROBADO via reconciliación activa (MP payment: {})",
+                            cobroId, resultado.get("mpPaymentId"));
+                }
+            } catch (Exception e) {
+                log.warn("Error en reconciliación activa para cobro {}: {}", cobroId, e.getMessage());
             }
         }
 

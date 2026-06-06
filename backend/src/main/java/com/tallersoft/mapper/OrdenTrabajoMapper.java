@@ -11,6 +11,7 @@ import com.tallersoft.mapper.OrdenRepuestoMapper;
 public interface OrdenTrabajoMapper {
     
     @Mapping(source = "equipo.id", target = "equipoId")
+    @Mapping(target = "equipoNombre", expression = "java((orden.getEquipo().getMarca() != null ? orden.getEquipo().getMarca() : \"\") + (orden.getEquipo().getMarca() != null && orden.getEquipo().getModelo() != null ? \" \" : \"\") + (orden.getEquipo().getModelo() != null ? orden.getEquipo().getModelo() : \"\"))")
     @Mapping(source = "cliente.id", target = "clienteId")
     @Mapping(source = "cliente.nombre", target = "clienteNombre")
     @Mapping(source = "tecnico.id", target = "tecnicoId")
