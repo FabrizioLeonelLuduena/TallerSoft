@@ -43,7 +43,12 @@ public class OrdenTrabajoService {
         
         Cliente cliente = clienteRepository.findById(request.getClienteId())
                 .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado"));
-        
+
+        if (!cliente.isActivo()) {
+            throw new IllegalStateException(
+                    "No se puede crear una orden para un cliente dado de baja (inactivo)");
+        }
+
         Usuario tecnico = null;
         if (request.getTecnicoId() != null) {
             tecnico = usuarioRepository.findById(request.getTecnicoId())
