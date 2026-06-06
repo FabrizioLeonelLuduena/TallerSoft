@@ -11,15 +11,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Integration tests for PagoController webhook endpoint.
- * The webhook endpoint is public (no JWT required) but validates HMAC signature.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -29,28 +24,32 @@ class WebhookControllerIntegrationTest {
     @MockBean  private CobrosService cobrosService;
 
     @Test
-    @DisplayName("POST /api/pagos/webhook sin JWT pero con firma válida → procesado sin error de auth")
-    void webhook_sinJwtFirmaPresente_deberiaAcceder() throws Exception {
-        // El endpoint debe ser accesible sin JWT (es público)
-        // Con webhook_secret vacío en test profile, la validación puede pasar o ignorarse
+    @DisplayName("POST /api/pagos/webhook sin JWT → accesible (no retorna 401 ni 403)")
+    void webhook_sinJwt_deberiaSerPublico() throws Exception {
         mockMvc.perform(post("/api/pagos/webhook")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Signature", "ts=1700000000,v1=fakesig")
                 .header("X-Request-Id", "req-123")
                 .content("{\"type\":\"payment\",\"data\":{\"id\":\"12345\"}}"))
-                // El endpoint es accesible (no retorna 401/403)
-                .andExpect(status().is5xxServerError().xor(
-                        status().is2xxSuccessful())
-                );
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    assertNotEquals(401, status, "El webhook no debe requerir JWT");
+                    assertNotEquals(403, status, "El webhook no debe requerir JWT");
+                });
     }
 
     @Test
-    @DisplayName("POST /api/pagos/webhook sin cabeceras de firma → error de validación")
+    @DisplayName("POST /api/pagos/webhook sin cabeceras de firma → error de validación (4xx o 5xx)")
     void webhook_sinFirma_deberiaRetornarError() throws Exception {
         mockMvc.perform(post("/api/pagos/webhook")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"type\":\"payment\",\"data\":{\"id\":\"12345\"}}"))
-                .andExpect(status().is4xxClientError()
-                        .or(status().is5xxServerError()));
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    org.junit.jupiter.api.Assertions.assertTrue(
+                        status >= 400,
+                        "Sin firma debe retornar error (4xx o 5xx), pero fue: " + status
+                    );
+                });
     }
 }

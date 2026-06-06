@@ -35,11 +35,10 @@ MP_USER_ID=tu-user-id-mp
 MP_POS_EXTERNAL_ID=tallersoftcaja01
 MP_QR_IMAGE_URL=https://api.mercadopago.com/instore/qr/seller/...
 
-# Anthropic Claude (o Groq para analytics)
-ANTHROPIC_API_KEY=sk-ant-tu-clave-de-produccion
+# Groq API (asistente IA — implementación activa)
 GROQ_API_KEY=gsk_tu-clave-groq-produccion
-CLAUDE_MODEL=claude-sonnet-4-20250514
-CLAUDE_MAX_TOKENS=1024
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MAX_TOKENS=1024
 
 # URLs
 WEBHOOK_BASE_URL=https://tudominio.com
@@ -59,7 +58,7 @@ ANALYTICS_DATABASE_URL=postgresql://analytics_readonly:pass_readonly@db:5432/tal
   openssl rand -base64 32
   ```
 - [ ] `DB_PASSWORD` es una contraseña segura (no la del desarrollo)
-- [ ] `ANTHROPIC_API_KEY` o `GROQ_API_KEY` válida y con créditos suficientes
+- [ ] `GROQ_API_KEY` válida y con créditos suficientes
 - [ ] `MP_ACCESS_TOKEN` en modo producción (no sandbox): `MP_SANDBOX=false`
 - [ ] El archivo `.env` está en `.gitignore` y no fue commiteado (`git log --all -- .env`)
 - [ ] El dominio de producción está configurado en el CORS del Analytics Service (`app/main.py`)

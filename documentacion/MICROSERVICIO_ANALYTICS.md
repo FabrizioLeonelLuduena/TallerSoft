@@ -6,7 +6,7 @@ El Analytics Service existe separado del Core Service por tres razones:
 
 1. **Separación de responsabilidades:** El Core Service maneja transacciones críticas del negocio. Las operaciones analíticas (GROUP BY, agregaciones, reportes) son costosas y no deben afectar la latencia del core.
 2. **Aislamiento de datos:** El Analytics Service tiene permisos de solo lectura sobre la base de datos. Esto garantiza que ningún bug en el código de análisis pueda modificar datos de producción.
-3. **Flexibilidad tecnológica:** Python con Pandas y SQLAlchemy es más expresivo para análisis de datos y más fácil de integrar con la Anthropic Claude API que Java.
+3. **Flexibilidad tecnológica:** Python con Pandas y SQLAlchemy es más expresivo para análisis de datos y más fácil de integrar con APIs de IA (Groq, Anthropic) que Java.
 
 ---
 

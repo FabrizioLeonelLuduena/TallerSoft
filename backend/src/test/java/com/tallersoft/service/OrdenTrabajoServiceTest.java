@@ -60,7 +60,7 @@ class OrdenTrabajoServiceTest {
     
     @BeforeEach
     void setUp() {
-        cliente = Cliente.builder().id(1L).nombre("Cliente Test").build();
+        cliente = Cliente.builder().id(1L).nombre("Cliente Test").activo(true).build();
         equipo = Equipo.builder().id(1L).cliente(cliente).tipo("Equipo Test").build();
         tecnico = Usuario.builder().id(1L).nombre("Tecnico Test").build();
         repuesto = Repuesto.builder()

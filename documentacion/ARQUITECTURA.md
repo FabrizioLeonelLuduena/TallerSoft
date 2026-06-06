@@ -11,13 +11,13 @@ TallerSoft es un ERP web para talleres de servicio técnico, compuesto por tres 
 ```
                          ┌─────────────────────────────────────────┐
                          │            CLIENTE (Browser)             │
-                         │         Angular 17 PWA (puerto 80)       │
+                         │         Angular 18 PWA (puerto 80)       │
                          └───────────────────┬─────────────────────┘
                                              │ HTTP/HTTPS
                                              ▼
                          ┌─────────────────────────────────────────┐
                          │          API GATEWAY (puerto 8080)       │
-                         │        Spring Cloud Gateway 4.x          │
+                         │       Spring Cloud Gateway 2024.0.1      │
                          │   Único punto de entrada al sistema      │
                          └──────┬──────────────────────┬───────────┘
                                 │                      │
@@ -30,7 +30,7 @@ TallerSoft es un ERP web para talleres de servicio técnico, compuesto por tres 
                │  Spring Boot 3    │        │  FastAPI            │
                │  Spring Security  │        │  Pandas             │
                │  JPA/Hibernate    │        │  SQLAlchemy         │
-               │  JWT              │        │  Anthropic Claude   │
+               │  JWT              │        │  Groq API           │
                └────────┬──────────┘        └──────────┬──────────┘
                         │ R/W                           │ R (solo lectura)
                         └──────────────┬────────────────┘
@@ -46,9 +46,9 @@ TallerSoft es un ERP web para talleres de servicio técnico, compuesto por tres 
 
 ## Descripción de Cada Servicio
 
-### Frontend — Angular 17 PWA (puerto 80)
+### Frontend — Angular 18 PWA (puerto 80)
 - **Responsabilidad:** Interfaz de usuario, SPA (Single Page Application) con soporte offline.
-- **Tecnología:** Angular 17, Angular Material, ApexCharts, CDK Drag and Drop.
+- **Tecnología:** Angular 18.2, Angular Material 18.2, CDK Drag and Drop (Kanban), gráficos CSS personalizados.
 - **Comunicación:** Solo habla con el API Gateway en puerto 8080. Nunca llama directamente al Core (8081) ni al Analytics (8082).
 - **Autenticación:** Almacena el JWT en `sessionStorage` (nunca `localStorage`).
 
@@ -66,7 +66,7 @@ TallerSoft es un ERP web para talleres de servicio técnico, compuesto por tres 
 
 ### Analytics Service — FastAPI (puerto 8082)
 - **Responsabilidad:** KPIs, reportes, alertas y asistente IA. Solo lectura sobre la BD.
-- **Tecnología:** Python 3.11, FastAPI, Pandas, SQLAlchemy, Anthropic Claude API.
+- **Tecnología:** Python 3.11, FastAPI, Pandas, SQLAlchemy, Groq API (llama-3.3-70b-versatile).
 - **Restricción crítica:** Solo tiene permisos `SELECT` sobre la base de datos. Nunca escribe datos.
 
 ### Base de Datos — PostgreSQL 16 (puerto 5432)
@@ -134,7 +134,7 @@ Ejemplo: el usuario consulta las órdenes de trabajo desde el Kanban.
    │    (órdenes por estado, cobros del día, stock crítico, etc.)
    │  - Construye el prompt con el contexto real del taller
    │
-5. Analytics llama a Anthropic Claude API (claude-sonnet-4-20250514)
+5. Analytics llama a Groq API (llama-3.3-70b-versatile)
    │  con el SYSTEM_PROMPT + contexto + pregunta del usuario
    │
 6. Claude responde en español con datos precisos del taller

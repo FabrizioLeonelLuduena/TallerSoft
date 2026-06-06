@@ -41,15 +41,18 @@ def test_consulta_asistente_metodo_get_no_permitido(client):
     assert response.status_code == 405
 
 
-def test_groq_error_devuelve_500(client):
+def test_groq_error_devuelve_respuesta_amigable(client):
+    """Cuando el asistente IA falla, el router devuelve 200 con mensaje de fallback
+    (no propaga el error como 500 crudo — bug fix Sprint 6)."""
     with patch("app.routers.asistente.consultar_asistente", side_effect=Exception("Groq unavailable")):
         with patch("app.routers.asistente.obtener_contexto_taller", return_value={}):
             response = client.post(
                 "/analytics/asistente/consulta",
                 json={"pregunta": "¿Cuántas órdenes hay?"},
             )
-    assert response.status_code == 500
-    assert "Error al consultar el asistente" in response.json()["detail"]
+    assert response.status_code == 200
+    assert "respuesta" in response.json()
+    assert len(response.json()["respuesta"]) > 0
 
 
 def test_contexto_error_devuelve_500(client):

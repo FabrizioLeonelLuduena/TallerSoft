@@ -4,12 +4,11 @@
 
 | Tecnología | Versión | Propósito |
 |-----------|---------|-----------|
-| Angular | 17 | Framework frontend (Standalone Components) |
-| Angular Material | 17 | Componentes UI (Material Design) |
-| Angular CDK | 17 | Drag and Drop (Kanban) |
-| ApexCharts | 3.x | Gráficos del Dashboard |
-| RxJS | 7.x | Programación reactiva |
-| TypeScript | 5.x | Tipado estático |
+| Angular | 18.2 | Framework frontend (Standalone Components) |
+| Angular Material | 18.2 | Componentes UI (Material Design) |
+| Angular CDK | 18.2 | Drag and Drop (Kanban) |
+| RxJS | 7.8 | Programación reactiva |
+| TypeScript | 5.4 | Tipado estático |
 | Karma + Jasmine | — | Tests unitarios del frontend |
 
 ---
@@ -191,7 +190,7 @@ El historial de chat persiste entre sesiones de la pestaña.
 
 ---
 
-## Dashboard — KPIs con ApexCharts
+## Dashboard — KPIs
 
 El Dashboard muestra los siguientes indicadores en tiempo real (consultando el Analytics Service):
 

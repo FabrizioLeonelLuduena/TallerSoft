@@ -182,7 +182,7 @@ Verificar antes de cada deploy:
 | TD-01 | Backend | Refresh token: implementar endpoint `/auth/refresh` para renovar JWT sin re-login | Alta |
 | TD-02 | Backend | `@Lock(PESSIMISTIC_WRITE)` en repositorio de repuestos para prevenir race conditions en alta concurrencia | Media |
 | TD-03 | Frontend | Tests de componentes de creación de órdenes (`create.component.spec.ts`) | Media |
-| TD-04 | Frontend | Tests de `dashboard.component.spec.ts` con mocks de ApexCharts | Media |
+| TD-04 | Frontend | Tests de `dashboard.component.spec.ts` (gráficos CSS personalizados) | Media |
 | TD-05 | Analytics | Rate limiting en `/analytics/asistente/consulta` para evitar costos excesivos de API | Alta |
 | TD-06 | Integración | Tests de integración con `@SpringBootTest` y base de datos H2 (requiere `application-test.yml`) | Media |
 | TD-07 | Backend | WebSockets para actualización en tiempo real del Kanban entre múltiples usuarios | Baja |

@@ -35,7 +35,7 @@ El sistema está compuesto por tres capas principales que se comunican entre sí
 ```
 ┌─────────────────────────────────────────────┐
 │             FRONTEND (Angular)              │
-│  PWA · Angular Material · ApexCharts        │
+│         Angular 18 PWA                      │
 └────────────────┬────────────────────────────┘
                  │ HTTP/REST (JSON)
 ┌────────────────▼────────────────────────────┐
@@ -71,22 +71,22 @@ El sistema está compuesto por tres capas principales que se comunican entre sí
 
 | Capa | Tecnología | Versión |
 |---|---|---|
-| Frontend | Angular | 17+ |
-| UI Components | Angular Material | 17+ |
-| Gráficos | ApexCharts | latest |
-| Backend principal | Java + Spring Boot | 21 / 3.x |
-| Seguridad | Spring Security + JWT | 3.x |
-| ORM | Spring Data JPA + Hibernate | 3.x |
-| API Gateway | Spring Cloud Gateway | 4.x |
+| Frontend | Angular | 18.2 |
+| UI Components | Angular Material + CDK | 18.2 |
+| Backend principal | Java + Spring Boot | 21 / 3.2.5 |
+| Seguridad | Spring Security + JWT | 3.2.5 |
+| ORM | Spring Data JPA + Hibernate | 3.2.5 |
+| API Gateway | Spring Cloud Gateway | 2024.0.1 |
 | Microservicio analítica | Python + FastAPI | 3.11 / latest |
 | Análisis de datos | Pandas + SQLAlchemy | latest |
 | Base de datos | PostgreSQL | 16 |
-| Asistente IA | Anthropic Claude API | claude-sonnet-4-20250514 |
+| Asistente IA | Groq API + llama-3.3-70b-versatile | 0.9.0 |
 | Pagos | MercadoPago API | latest |
 | Exportación PDF | iText | 7.x |
 | Build backend | Maven | 3.9+ |
 | Contenedores | Docker + Docker Compose | latest |
 | Testing backend | JUnit 5 + Mockito | - |
+| Testing analytics | pytest + httpx | 8.x |
 | Testing frontend | Jasmine + Karma | - |
 | Testing API | Postman | - |
 
@@ -146,6 +146,7 @@ tallersoft/
 ├── analytics/                       # Microservicio Python
 │   ├── app/
 │   │   ├── main.py                  # Entry point FastAPI
+│   │   ├── config.py                # Settings (pydantic-settings)
 │   │   ├── routers/                 # Endpoints por dominio
 │   │   │   ├── ordenes.py
 │   │   │   ├── stock.py
@@ -153,12 +154,36 @@ tallersoft/
 │   │   │   └── asistente.py         # Endpoint del chat IA
 │   │   ├── services/
 │   │   │   ├── analytics_service.py # Lógica de análisis con Pandas
-│   │   │   └── claude_service.py    # Integración con Anthropic API
+│   │   │   ├── alertas_service.py   # Alertas operativas (stock crítico, prioridad)
+│   │   │   ├── groq_service.py      # Integración con Groq API (implementación activa)
+│   │   │   └── claude_service.py    # Integración con Anthropic API (referencia alternativa)
 │   │   ├── db/
 │   │   │   └── database.py          # Conexión SQLAlchemy (solo lectura)
 │   │   └── schemas/                 # Pydantic models
+│   ├── tests/                       # Suite de tests pytest
+│   │   ├── conftest.py              # SQLite in-memory + TestClient
+│   │   ├── test_ordenes.py
+│   │   ├── test_stock.py
+│   │   ├── test_caja.py
+│   │   ├── test_asistente.py
+│   │   └── test_claude_service.py
 │   ├── requirements.txt
 │   └── Dockerfile
+│
+├── documentacion/                   # Documentación técnica completa (Sprint 6)
+│   ├── README.md                    # Índice y guía de lectura por rol
+│   ├── ARQUITECTURA.md              # Diagramas, flujos, decisiones de diseño
+│   ├── BACKEND.md                   # Core Service: JWT, módulos, endpoints
+│   ├── FRONTEND.md                  # Angular PWA: módulos, guards, Kanban
+│   ├── MICROSERVICIO_ANALYTICS.md   # FastAPI Python: endpoints y asistente IA
+│   ├── BASE_DE_DATOS.md             # Esquema, índices, DDL completo, seed
+│   ├── API_ENDPOINTS.md             # Referencia completa de endpoints (estilo Postman)
+│   ├── DEPLOY.md                    # Variables de entorno, Docker, checklist
+│   ├── TESTING.md                   # Estrategia, cómo correr tests, deuda técnica
+│   └── *.sql                        # Scripts SQL (init, seed, migraciones)
+│
+├── scripts/
+│   └── run_tests.sh                 # Corre los tres suites de tests (mvn + pytest + ng)
 │
 ├── docker-compose.yml               # Orquestación completa
 ├── docker-compose.dev.yml           # Solo servicios de infraestructura (BD)
@@ -252,10 +277,10 @@ DB_PASSWORD=tu_password_seguro
 JWT_SECRET=clave_secreta_minimo_256_bits
 JWT_EXPIRATION_MS=86400000
 
-# ── Anthropic Claude API ───────────────────────
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxx
-CLAUDE_MODEL=claude-sonnet-4-20250514
-CLAUDE_MAX_TOKENS=1000
+# ── Groq API (asistente IA) ───────────────────
+GROQ_API_KEY=gsk_xxxxxxxxxxxx
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MAX_TOKENS=1024
 
 # ── MercadoPago ────────────────────────────────
 MP_ACCESS_TOKEN=APP_USR-xxxxxxxxxxxx
@@ -296,6 +321,7 @@ CREATE TABLE clientes (
     telefono    VARCHAR(20),
     email       VARCHAR(150),
     direccion   VARCHAR(200),
+    activo      BOOLEAN DEFAULT TRUE,
     created_at  TIMESTAMP DEFAULT NOW()
 );
 
@@ -542,13 +568,17 @@ def get_db():
 
 ```
 fastapi==0.111.0
-uvicorn==0.30.0
+uvicorn[standard]==0.30.0
 sqlalchemy==2.0.30
-pandas==2.2.2
 psycopg2-binary==2.9.9
-anthropic==0.28.0
+pandas==2.2.2
+groq==0.9.0
 python-dotenv==1.0.1
 pydantic==2.7.1
+pydantic-settings==2.3.4
+pytest==8.2.2
+httpx==0.27.0
+pytest-asyncio==0.23.7
 ```
 
 ---
@@ -574,67 +604,58 @@ analytics/asistente.py recopila contexto:
           ↓
 Se construye el prompt enriquecido con el contexto
           ↓
-Se llama a la Anthropic API (claude-sonnet-4-20250514)
+Se llama a la Groq API (llama-3.3-70b-versatile)
           ↓
 Se devuelve la respuesta al frontend
 ```
 
-### Implementación del servicio Claude
+### Implementación del servicio (Groq)
+
+El asistente usa la API de **Groq** con el modelo `llama-3.3-70b-versatile` como implementación activa. Existe también `claude_service.py` como referencia alternativa con la API de Anthropic.
 
 ```python
-# app/services/claude_service.py
-import anthropic
-import os
+# app/services/groq_service.py
+from groq import Groq
+from app.config import settings
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+_client = Groq(api_key=settings.groq_api_key)
 
 SYSTEM_PROMPT = """
 Sos el asistente inteligente de TallerSoft, un sistema de gestión para talleres de servicio técnico.
 Tu rol es ayudar al dueño y empleados del taller a entender el estado de su negocio respondiendo
-preguntas sobre órdenes de trabajo, stock de repuestos, ingresos y rendimiento del equipo.
+preguntas sobre órdenes de trabajo, stock de repuestos, ingresos y rendimiento del equipo técnico.
 
-Reglas:
-- Respondé siempre en español, de forma clara y concisa.
-- Usá los datos del contexto que se te proveen. No inventes información.
-- Si no tenés suficiente información para responder, decilo claramente.
-- Podés hacer cálculos simples con los datos disponibles.
+Reglas estrictas:
+- Respondé siempre en español rioplatense, de forma clara y concisa.
+- Usá exclusivamente los datos del CONTEXTO que se te proveen. No inventes ni estimes información.
+- Si los datos no son suficientes para responder, decílo con claridad.
+- Podés hacer cálculos simples con los datos disponibles (promedios, porcentajes, comparaciones).
 - Nunca menciones detalles técnicos de implementación al usuario.
 """
 
 def consultar_asistente(pregunta: str, contexto: dict) -> str:
-    contexto_texto = f"""
-    DATOS ACTUALES DEL TALLER:
-    - Órdenes pendientes: {contexto.get('ordenes_pendientes', 0)}
-    - Órdenes en proceso: {contexto.get('ordenes_en_proceso', 0)}
-    - Órdenes listas para entregar: {contexto.get('ordenes_listas', 0)}
-    - Repuestos con stock crítico: {contexto.get('repuestos_criticos', [])}
-    - Ingresos del día: ${contexto.get('ingresos_hoy', 0)}
-    - Técnico con más cierres este mes: {contexto.get('top_tecnico', 'N/A')}
-    """
+    contexto_texto = _construir_contexto_texto(contexto)  # formatea el dict en texto estructurado
 
-    mensaje = client.messages.create(
-        model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
-        max_tokens=int(os.getenv("CLAUDE_MAX_TOKENS", 1000)),
-        system=SYSTEM_PROMPT,
+    chat = _client.chat.completions.create(
+        model=settings.groq_model,
+        max_tokens=settings.groq_max_tokens,
         messages=[
-            {
-                "role": "user",
-                "content": f"{contexto_texto}\n\nPREGUNTA DEL USUARIO: {pregunta}"
-            }
-        ]
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"{contexto_texto}\n\nPREGUNTA: {pregunta}"},
+        ],
     )
 
-    return mensaje.content[0].text
+    return chat.choices[0].message.content
 ```
 
 ### Endpoint del chat
 
 ```python
 # app/routers/asistente.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.services.claude_service import consultar_asistente
+from app.services.groq_service import consultar_asistente
 from app.services.analytics_service import obtener_contexto_taller
 from pydantic import BaseModel
 
@@ -643,11 +664,22 @@ router = APIRouter()
 class ConsultaRequest(BaseModel):
     pregunta: str
 
-@router.post("/consulta")
+class ConsultaResponse(BaseModel):
+    respuesta: str
+    contexto_utilizado: dict
+
+@router.post("/consulta", response_model=ConsultaResponse)
 def chat_asistente(request: ConsultaRequest, db: Session = Depends(get_db)):
-    contexto = obtener_contexto_taller(db)
-    respuesta = consultar_asistente(request.pregunta, contexto)
-    return {"respuesta": respuesta}
+    try:
+        contexto = obtener_contexto_taller(db)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error al obtener el contexto del taller")
+    try:
+        respuesta = consultar_asistente(request.pregunta, contexto)
+        return ConsultaResponse(respuesta=respuesta, contexto_utilizado=contexto)
+    except Exception:
+        mensaje_fallback = "Lo siento, el asistente no está disponible en este momento. Intentá de nuevo en unos segundos."
+        return ConsultaResponse(respuesta=mensaje_fallback, contexto_utilizado=contexto)
 ```
 
 ---
@@ -898,33 +930,62 @@ docker compose up --build
 
 ## Testing
 
+Para la estrategia completa, casos de prueba manuales y deuda técnica ver [documentacion/TESTING.md](documentacion/TESTING.md).
+
+### Correr todos los tests de una vez
+
+```bash
+# Script unificado (requiere backend, analytics y frontend instalados)
+bash scripts/run_tests.sh
+```
+
 ### Backend (JUnit 5 + Mockito)
 
 ```bash
 cd backend
-mvn test                    # Correr todos los tests
-mvn test -Dtest=OrdenTest   # Correr un test específico
-mvn verify                  # Tests + integración
+mvn test                                       # Todos los tests
+mvn test -Dtest=CajaServiceTest                # Una sola clase
+mvn verify                                     # Tests + integración
 ```
 
-**Convención de tests:**
-- Tests unitarios en `src/test/java/` espejando la estructura de `src/main/java/`
-- Nombre de clase: `NombreClaseTest.java`
-- Mockear siempre las dependencias externas (repositorios, servicios externos)
-- Cada método de servicio debe tener al menos: test de caso exitoso y test de caso de error
+**Suite de tests unitarios:** `AuthServiceTest`, `UsuarioServiceTest`, `ClienteServiceTest`, `OrdenTrabajoServiceTest`, `RepuestoServiceTest`, `CajaServiceTest`, `MercadoPagoServiceTest`, `JwtUtilTest`
+
+**Tests de integración:** `AuthControllerIntegrationTest`, `WebhookControllerIntegrationTest`
+
+**Convenciones:**
+- Patrón `// Arrange / Act / Assert` en cada test
+- `@ExtendWith(MockitoExtension.class)` en unitarios; `@SpringBootTest + @AutoConfigureMockMvc` en integración
+- Nombre de método: `metodo_escenario_resultadoEsperado()`
+- Mínimo dos tests por método de servicio: caso exitoso y caso de error
+
+### Analytics (pytest)
+
+```bash
+cd analytics
+source .venv/bin/activate
+python -m pytest tests/ -v --tb=short         # Todos los tests
+python -m pytest tests/test_ordenes.py -v     # Un archivo
+python -m pytest tests/ --cov=app             # Con cobertura
+```
+
+**Suite:** `test_ordenes.py`, `test_stock.py`, `test_caja.py`, `test_asistente.py`, `test_claude_service.py`
+
+`conftest.py` configura SQLite in-memory con `StaticPool` para correr sin PostgreSQL.
 
 ### Frontend (Jasmine + Karma)
 
 ```bash
 cd frontend
-ng test                     # Modo watch
-ng test --watch=false        # Una sola ejecución (CI)
-ng test --code-coverage      # Con reporte de cobertura
+ng test                                        # Modo watch
+ng test --watch=false --browsers=ChromeHeadless  # Una sola ejecución (CI)
+ng test --code-coverage                        # Reporte en coverage/index.html
 ```
+
+**Suite:** `auth.service.spec.ts`, `ordenes.service.spec.ts`, `jwt.interceptor.spec.ts`, `auth.guard.spec.ts`, `kanban.component.spec.ts`, `cobrar-orden.component.spec.ts`, `repuesto.service.spec.ts`
 
 ### API (Postman)
 
-Importar la colección `tallersoft.postman_collection.json` de la raíz del repositorio. La colección incluye todos los endpoints con variables de entorno preconfiguradas para desarrollo local.
+Crear un environment `TallerSoft Local` con `baseUrl = http://localhost:8080` y usar la referencia completa de endpoints en [documentacion/API_ENDPOINTS.md](documentacion/API_ENDPOINTS.md).
 
 ---
 
@@ -972,8 +1033,8 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      CLAUDE_MODEL: ${CLAUDE_MODEL}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL}
     depends_on:
       - db
     ports:
@@ -1014,17 +1075,17 @@ volumes:
 
 ## Planificación de sprints
 
-| Sprint | Duración | Contenido |
-|---|---|---|
-| **Sprint 0** | 1 semana | Entorno de desarrollo, configuración de herramientas, spikes técnicos |
-| **Sprint 1** | 2 semanas | Autenticación + JWT + Roles + Módulo Clientes |
-| **Sprint 2** | 2 semanas | Módulo Órdenes de Trabajo (Kanban, estados, repuestos) |
-| **Sprint 3** | 2 semanas | Stock de Repuestos + Caja + Medios de pago (Efectivo, Tarjeta, MercadoPago) |
-| **Sprint 4** | 2 semanas | Microservicio Python + Dashboard con KPIs |
-| **Sprint 5** | 2 semanas | Asistente IA conversacional |
-| **Sprint 6** | 2 semanas | Testing, bug fixing, documentación y deploy |
+| Sprint | Duración | Contenido | Estado |
+|---|---|---|---|
+| **Sprint 0** | 1 semana | Entorno de desarrollo, configuración de herramientas, spikes técnicos | ✅ Completado |
+| **Sprint 1** | 2 semanas | Autenticación + JWT + Roles + Módulo Clientes | ✅ Completado |
+| **Sprint 2** | 2 semanas | Módulo Órdenes de Trabajo (Kanban, estados, repuestos) | ✅ Completado |
+| **Sprint 3** | 2 semanas | Stock de Repuestos + Caja + Medios de pago (Efectivo, Tarjeta, MercadoPago) | ✅ Completado |
+| **Sprint 4** | 2 semanas | Microservicio Python + Dashboard con KPIs + Alertas | ✅ Completado |
+| **Sprint 5** | 2 semanas | Asistente IA conversacional (Groq) | ✅ Completado |
+| **Sprint 6** | 2 semanas | Testing (JUnit + pytest + Jasmine), bug fixing, documentación técnica completa | ✅ Completado |
 
-**Duración total estimada:** 13 semanas
+**Duración total:** 13 semanas
 
 ---
 

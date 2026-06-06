@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:tallersoft_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: false
+
+  h2:
+    console:
+      enabled: false
+
+mercadopago:
+  access-token: TEST-placeholder
+  webhook-secret: test-secret
+  sandbox: true
+  user-id: 0
+  pos-external-id: test-pos
+  qr-image-url: ""
+
+webhook:
+  base-url: http://localhost:8080
+
+jwt:
+  secret: test-secret-key-for-junit-integration-tests-minimum-256-bits-long
+  expiration: 86400000
+
+taller:
+  nombre: TallerSoft Test
+  direccion: Test 123
+  telefono: 000-0000
+  email: test@tallersoft.com
+
+logging:
+  level:
+    root: WARN
+    com.tallersoft: WARN
