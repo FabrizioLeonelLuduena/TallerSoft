@@ -50,7 +50,7 @@ class UsuarioServiceTest {
                 .build();
 
         usuarioResponse = new UsuarioResponse(1L, "Carlos Gómez", "carlos@tallersoft.com",
-                "TECNICO", true, LocalDateTime.now());
+                null, "TECNICO", true, LocalDateTime.now());
     }
 
     // ─── crearUsuario ────────────────────────────────────────────────────────

@@ -13,7 +13,9 @@ export interface UsuarioRequest {
 export interface UsuarioUpdateRequest {
   nombre: string;
   email: string;
+  telefono?: string;
   password?: string;
+  currentPassword?: string;
   rol: string;
 }
 
@@ -21,6 +23,7 @@ export interface UsuarioResponse {
   id: number;
   nombre: string;
   email: string;
+  telefono?: string;
   rol: 'ADMIN' | 'TECNICO' | 'RECEPCION';
   activo: boolean;
   createdAt: string;

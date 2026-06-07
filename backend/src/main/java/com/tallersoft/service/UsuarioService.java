@@ -125,9 +125,16 @@ public class UsuarioService {
 
         usuario.setNombre(request.getNombre());
         usuario.setEmail(request.getEmail());
-        
-        // Only update password if provided
+        usuario.setTelefono(request.getTelefono());
+
+        // Only update password if a new one is provided
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            // Validate current password when provided (self-service password change)
+            if (request.getCurrentPassword() != null && !request.getCurrentPassword().isBlank()) {
+                if (!passwordEncoder.matches(request.getCurrentPassword(), usuario.getPassword())) {
+                    throw new IllegalArgumentException("La contraseña actual es incorrecta");
+                }
+            }
             usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         

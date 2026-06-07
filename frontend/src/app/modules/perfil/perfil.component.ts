@@ -7,8 +7,6 @@ import { AuthService } from '@core/auth/auth.service';
 import { ProfileService } from '@core/services/profile.service';
 import { UsuarioService, UsuarioResponse } from '../usuarios/services/usuario.service';
 
-type Section = 'datos' | 'apariencia' | 'seguridad' | 'notificaciones' | 'sesion';
-
 const GRADIENTS = [
   'linear-gradient(135deg, #00f5d4, #0ea5e9)',
   'linear-gradient(135deg, #f97316, #ef4444)',
@@ -25,7 +23,6 @@ const GRADIENTS = [
   styleUrls: ['./perfil.component.scss']
 })
 export class PerfilComponent implements OnInit {
-  activeSection: Section = 'datos';
   usuario: UsuarioResponse | null = null;
   loading = true;
   saving = false;
@@ -41,15 +38,13 @@ export class PerfilComponent implements OnInit {
   pwLabel = 'Ingresá una nueva contraseña';
   pwLabelColor = '';
 
+  showCurrentPw = false;
+  showNewPw = false;
+  showConfirmPw = false;
+
   gradients = GRADIENTS;
   selectedGradient = 0;
   avatarImage: string | null = null;
-
-  notifOrdenesSinMovimiento = true;
-  notifAltaPrioridad = true;
-  notifCobrosRechazados = true;
-  notifStockCritico = true;
-  notifResumenSemanal = true;
 
   constructor(
     private authService: AuthService,
@@ -72,6 +67,7 @@ export class PerfilComponent implements OnInit {
         this.usuario = u;
         this.formNombre = u.nombre;
         this.formEmail = u.email;
+        this.formTelefono = u.telefono ?? '';
         if (!this.profileService.snapshot.nombre) {
           this.profileService.update({ nombre: u.nombre });
         }
@@ -101,13 +97,6 @@ export class PerfilComponent implements OnInit {
   getRolLabel(rol: string): string {
     const map: Record<string, string> = { ADMIN: 'Administrador', TECNICO: 'Técnico', RECEPCION: 'Recepción' };
     return map[rol] ?? rol;
-  }
-
-  setSection(s: Section): void { this.activeSection = s; }
-
-  selectGradient(i: number): void {
-    this.selectedGradient = i;
-    this.profileService.update({ avatarGradient: i });
   }
 
   onFileSelected(event: Event): void {
@@ -163,6 +152,7 @@ export class PerfilComponent implements OnInit {
     this.usuarioService.editarUsuario(this.usuario.id, {
       nombre: this.formNombre,
       email: this.formEmail,
+      telefono: this.formTelefono || undefined,
       rol: this.usuario.rol
     }).subscribe({
       next: (u) => {
@@ -182,7 +172,11 @@ export class PerfilComponent implements OnInit {
     if (this.pwStrength < 2) { this.snackBar.open('La contraseña es demasiado débil', '', { duration: 2500 }); return; }
     this.saving = true;
     this.usuarioService.editarUsuario(this.usuario.id, {
-      nombre: this.usuario.nombre, email: this.usuario.email, rol: this.usuario.rol, password: this.newPassword
+      nombre: this.usuario.nombre,
+      email: this.usuario.email,
+      rol: this.usuario.rol,
+      password: this.newPassword,
+      currentPassword: this.currentPassword || undefined
     }).subscribe({
       next: () => {
         this.saving = false;
@@ -191,12 +185,11 @@ export class PerfilComponent implements OnInit {
         this.pwLabel = 'Ingresá una nueva contraseña';
         this.snackBar.open('Contraseña actualizada', '', { duration: 2500 });
       },
-      error: () => { this.saving = false; this.snackBar.open('Error al cambiar la contraseña', '', { duration: 3000 }); }
+      error: (err) => {
+        this.saving = false;
+        const msg = err?.error?.error || 'Error al cambiar la contraseña';
+        this.snackBar.open(msg, '', { duration: 3500 });
+      }
     });
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
   }
 }

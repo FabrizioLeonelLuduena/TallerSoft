@@ -92,7 +92,8 @@ public class AuthService {
         log.info("Nuevo usuario registrado: {}", request.getEmail());
 
         return new UsuarioResponse(savedUsuario.getId(), savedUsuario.getNombre(),
-                savedUsuario.getEmail(), savedUsuario.getRol().getValue(),
+                savedUsuario.getEmail(), savedUsuario.getTelefono(),
+                savedUsuario.getRol().getValue(),
                 savedUsuario.isActivo(), savedUsuario.getCreatedAt());
     }
 }

@@ -1,314 +1,144 @@
 <div class="perfil-page" *ngIf="!loading">
+  <div class="card">
 
-  <!-- ── Sidenav izquierda ── -->
-  <aside class="perfil-sidenav">
-    <div class="sidenav-header">
-      <div class="avatar-wrap" (click)="setSection('apariencia')" title="Cambiar foto de perfil">
-        <div class="avatar-xl" [style.background]="avatarImage ? 'transparent' : avatarStyle">
+    <!-- ── Foto de perfil ── -->
+    <div class="card-section">
+      <h3 class="section-title">Foto de perfil</h3>
+      <p class="section-subtitle">Subí una foto para personalizar tu perfil</p>
+
+      <div class="avatar-row">
+        <div class="avatar-preview" [style.background]="avatarImage ? 'transparent' : avatarStyle">
           <img *ngIf="avatarImage" [src]="avatarImage" class="avatar-photo" alt="foto de perfil">
           <span *ngIf="!avatarImage">{{ initials }}</span>
         </div>
-        <div class="avatar-overlay">
-          <span class="material-symbols-outlined">photo_camera</span>
+        <div class="avatar-actions">
+          <p class="avatar-hint">JPG, PNG o WebP · Máx. 5 MB · Se recorta en círculo</p>
+          <div class="avatar-btns">
+            <label class="upload-btn" for="photoUpload">
+              <span class="material-symbols-outlined">upload</span>
+              Subir foto
+            </label>
+            <input id="photoUpload" type="file" accept="image/*" (change)="onFileSelected($event)" style="display:none">
+            <button *ngIf="avatarImage" class="btn btn-ghost btn-sm" type="button" (click)="removePhoto()">
+              <span class="material-symbols-outlined">delete</span>
+              Quitar foto
+            </button>
+          </div>
         </div>
       </div>
-      <p class="sidenav-name">{{ usuario?.nombre || formNombre }}</p>
-      <p class="sidenav-email">{{ usuario?.email || formEmail }}</p>
-      <span class="sidenav-badge">{{ getRolLabel(usuario?.rol || '') }}</span>
     </div>
 
-    <nav class="sidenav-menu">
-      <button class="snav-item" [class.active]="activeSection === 'datos'" (click)="setSection('datos')">
-        <span class="material-symbols-outlined">person</span>
-        Datos personales
-      </button>
-      <button class="snav-item" [class.active]="activeSection === 'apariencia'" (click)="setSection('apariencia')">
-        <span class="material-symbols-outlined">palette</span>
-        Apariencia
-      </button>
-      <button class="snav-item" [class.active]="activeSection === 'seguridad'" (click)="setSection('seguridad')">
-        <span class="material-symbols-outlined">lock</span>
-        Seguridad
-      </button>
-      <button class="snav-item" [class.active]="activeSection === 'notificaciones'" (click)="setSection('notificaciones')">
-        <span class="material-symbols-outlined">notifications</span>
-        Notificaciones
-      </button>
-      <div class="snav-sep"></div>
-      <button class="snav-item snav-danger" [class.active]="activeSection === 'sesion'" (click)="setSection('sesion')">
-        <span class="material-symbols-outlined">logout</span>
-        Cerrar Sesión
-      </button>
-    </nav>
-  </aside>
+    <div class="section-sep"></div>
 
-  <!-- ── Contenido derecho ── -->
-  <div class="perfil-content">
+    <!-- ── Datos personales ── -->
+    <div class="card-section">
+      <h3 class="section-title">Datos personales</h3>
+      <p class="section-subtitle">Tu información visible en el sistema</p>
 
-    <!-- DATOS PERSONALES -->
-    <ng-container *ngIf="activeSection === 'datos'">
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <h3 class="card-title">Datos personales</h3>
-            <p class="card-subtitle">Tu información visible en el sistema</p>
-          </div>
+      <div class="form-grid-2">
+        <div class="field">
+          <label class="field-label">Nombre completo</label>
+          <input class="field-input" type="text" [(ngModel)]="formNombre" placeholder="Ej: Juan Pérez" autocomplete="name">
         </div>
-        <div class="card-body">
-          <div class="form-grid-2">
-            <div class="field">
-              <label class="field-label">Nombre completo</label>
-              <input class="field-input" type="text" [(ngModel)]="formNombre" placeholder="Ej: Juan Pérez">
-            </div>
-            <div class="field">
-              <label class="field-label">Correo electrónico</label>
-              <input class="field-input" type="email" [(ngModel)]="formEmail" placeholder="correo@ejemplo.com">
-            </div>
-            <div class="field">
-              <label class="field-label">Teléfono</label>
-              <input class="field-input" type="tel" [(ngModel)]="formTelefono" placeholder="+54 351 000-0000">
-            </div>
-            <div class="field">
-              <label class="field-label">Rol en el sistema</label>
-              <input class="field-input" type="text" [value]="getRolLabel(usuario?.rol || '')" disabled>
-              <span class="field-hint">Solo puede ser modificado por otro administrador</span>
-            </div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" type="button" (click)="formNombre = usuario?.nombre || ''; formEmail = usuario?.email || ''">Cancelar</button>
-            <button class="btn btn-primary" type="button" [disabled]="saving" (click)="saveDatos()">
-              <span class="material-symbols-outlined">check</span>
-              {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+        <div class="field">
+          <label class="field-label">Correo electrónico</label>
+          <input class="field-input" type="email" [(ngModel)]="formEmail" placeholder="correo@ejemplo.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label class="field-label">Teléfono</label>
+          <input class="field-input" type="tel" [(ngModel)]="formTelefono" placeholder="+54 351 000-0000" autocomplete="tel">
+        </div>
+        <div class="field">
+          <label class="field-label">Rol en el sistema</label>
+          <input class="field-input" type="text" [value]="getRolLabel(usuario?.rol || '')" disabled>
+          <span class="field-hint">Solo puede ser modificado por otro administrador</span>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" type="button"
+          (click)="formNombre = usuario?.nombre || ''; formEmail = usuario?.email || ''; formTelefono = usuario?.telefono || ''">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" type="button" [disabled]="saving" (click)="saveDatos()">
+          <span class="material-symbols-outlined">check</span>
+          {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="section-sep"></div>
+
+    <!-- ── Seguridad ── -->
+    <div class="card-section">
+      <h3 class="section-title">Cambiar contraseña</h3>
+      <p class="section-subtitle">Usá una contraseña larga y única</p>
+
+      <div class="form-grid-1">
+        <div class="field">
+          <label class="field-label">Contraseña actual</label>
+          <div class="field-wrap">
+            <input class="field-input" [type]="showCurrentPw ? 'text' : 'password'"
+              [(ngModel)]="currentPassword" placeholder="••••••••••••"
+              autocomplete="current-password">
+            <button class="pw-eye" type="button" (click)="showCurrentPw = !showCurrentPw" tabindex="-1">
+              <span class="material-symbols-outlined">{{ showCurrentPw ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
         </div>
-      </div>
-    </ng-container>
-
-    <!-- APARIENCIA -->
-    <ng-container *ngIf="activeSection === 'apariencia'">
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <h3 class="card-title">Foto de perfil</h3>
-            <p class="card-subtitle">Subí tu propia foto o elegí un color de avatar</p>
-          </div>
-        </div>
-        <div class="card-body">
-
-          <!-- Preview del avatar actual -->
-          <div class="avatar-preview-row">
-            <div class="avatar-preview" [style.background]="avatarImage ? 'transparent' : avatarStyle">
-              <img *ngIf="avatarImage" [src]="avatarImage" class="avatar-photo" alt="foto de perfil">
-              <span *ngIf="!avatarImage">{{ initials }}</span>
-            </div>
-            <div class="avatar-preview-actions">
-              <h4 class="avatar-preview-label">Tu foto actual</h4>
-              <p class="avatar-preview-hint">JPG, PNG o WebP. Máx. 5 MB. Se recorta en círculo.</p>
-              <div class="avatar-upload-row">
-                <label class="upload-btn" for="photoUpload">
-                  <span class="material-symbols-outlined">upload</span>
-                  Subir foto
-                </label>
-                <input id="photoUpload" type="file" accept="image/*" (change)="onFileSelected($event)" style="display:none">
-                <button *ngIf="avatarImage" class="btn btn-ghost btn-sm" type="button" (click)="removePhoto()">
-                  <span class="material-symbols-outlined">delete</span>
-                  Quitar foto
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="avatar-divider">
-            <span>o elegí un color de avatar</span>
-          </div>
-
-          <p class="avatar-section-label">Colores predefinidos</p>
-          <div class="avatar-options">
-            <div
-              *ngFor="let g of gradients; let i = index"
-              class="avatar-opt"
-              [class.selected]="selectedGradient === i && !avatarImage"
-              [style.background]="g"
-              (click)="selectGradient(i); removePhoto()"
-              [title]="'Color ' + (i + 1)"
-            >{{ initials }}</div>
-          </div>
-
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- SEGURIDAD -->
-    <ng-container *ngIf="activeSection === 'seguridad'">
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <h3 class="card-title">Cambiar contraseña</h3>
-            <p class="card-subtitle">Usá una contraseña larga y única</p>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="form-grid-1">
-            <div class="field">
-              <label class="field-label">Contraseña actual</label>
-              <input class="field-input" type="password" [(ngModel)]="currentPassword" placeholder="••••••••••••">
-            </div>
-            <div class="field">
-              <label class="field-label">Nueva contraseña</label>
-              <input class="field-input" type="password" [ngModel]="newPassword" (ngModelChange)="checkPasswordStrength($event)" placeholder="••••••••••••">
-              <div class="pw-strength">
-                <p class="pw-label" [style.color]="pwLabelColor">{{ pwLabel }}</p>
-                <div class="pw-bars">
-                  <div class="pw-bar" [class.filled]="barFilled(0)" [ngClass]="barFilled(0) ? pwStrengthLevel : ''"></div>
-                  <div class="pw-bar" [class.filled]="barFilled(1)" [ngClass]="barFilled(1) ? pwStrengthLevel : ''"></div>
-                  <div class="pw-bar" [class.filled]="barFilled(2)" [ngClass]="barFilled(2) ? pwStrengthLevel : ''"></div>
-                  <div class="pw-bar" [class.filled]="barFilled(3)" [ngClass]="barFilled(3) ? pwStrengthLevel : ''"></div>
-                </div>
-              </div>
-            </div>
-            <div class="field">
-              <label class="field-label">Confirmar nueva contraseña</label>
-              <input class="field-input" type="password" [(ngModel)]="confirmPassword" placeholder="••••••••••••"
-                [class.field-error]="confirmPassword && newPassword !== confirmPassword">
-              <span class="field-hint field-hint-error" *ngIf="confirmPassword && newPassword !== confirmPassword">Las contraseñas no coinciden</span>
-            </div>
-          </div>
-          <div class="btn-row" style="margin-top: 20px">
-            <button class="btn btn-ghost" type="button" (click)="currentPassword=''; newPassword=''; confirmPassword=''; pwStrength=0; pwLabelColor=''">Cancelar</button>
-            <button class="btn btn-primary" type="button" [disabled]="saving" (click)="changePassword()">
-              <span class="material-symbols-outlined">lock</span>
-              Actualizar contraseña
+        <div class="field">
+          <label class="field-label">Nueva contraseña</label>
+          <div class="field-wrap">
+            <input class="field-input" [type]="showNewPw ? 'text' : 'password'"
+              [ngModel]="newPassword" (ngModelChange)="checkPasswordStrength($event)"
+              placeholder="••••••••••••" autocomplete="new-password">
+            <button class="pw-eye" type="button" (click)="showNewPw = !showNewPw" tabindex="-1">
+              <span class="material-symbols-outlined">{{ showNewPw ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- NOTIFICACIONES -->
-    <ng-container *ngIf="activeSection === 'notificaciones'">
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <h3 class="card-title">Preferencias de notificaciones</h3>
-            <p class="card-subtitle">Elegí qué alertas querés recibir</p>
+          <div class="pw-strength">
+            <p class="pw-label" [style.color]="pwLabelColor">{{ pwLabel }}</p>
+            <div class="pw-bars">
+              <div class="pw-bar" [class.filled]="barFilled(0)" [ngClass]="barFilled(0) ? pwStrengthLevel : ''"></div>
+              <div class="pw-bar" [class.filled]="barFilled(1)" [ngClass]="barFilled(1) ? pwStrengthLevel : ''"></div>
+              <div class="pw-bar" [class.filled]="barFilled(2)" [ngClass]="barFilled(2) ? pwStrengthLevel : ''"></div>
+              <div class="pw-bar" [class.filled]="barFilled(3)" [ngClass]="barFilled(3) ? pwStrengthLevel : ''"></div>
+            </div>
           </div>
         </div>
-        <div class="card-body notif-body">
-
-          <div class="notif-row">
-            <div class="notif-left">
-              <div class="notif-icon danger"><span class="material-symbols-outlined">schedule</span></div>
-              <div>
-                <p class="notif-name">Órdenes sin movimiento</p>
-                <p class="notif-desc">Alertas cuando una orden no cambia en 5+ días</p>
-              </div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" [(ngModel)]="notifOrdenesSinMovimiento">
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-
-          <div class="notif-row">
-            <div class="notif-left">
-              <div class="notif-icon danger"><span class="material-symbols-outlined">priority_high</span></div>
-              <div>
-                <p class="notif-name">Alta prioridad pendiente</p>
-                <p class="notif-desc">Órdenes ALTA sin avanzar más de 2 días</p>
-              </div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" [(ngModel)]="notifAltaPrioridad">
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-
-          <div class="notif-row">
-            <div class="notif-left">
-              <div class="notif-icon danger"><span class="material-symbols-outlined">point_of_sale</span></div>
-              <div>
-                <p class="notif-name">Cobros rechazados</p>
-                <p class="notif-desc">Cada vez que un pago es rechazado</p>
-              </div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" [(ngModel)]="notifCobrosRechazados">
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-
-          <div class="notif-row">
-            <div class="notif-left">
-              <div class="notif-icon warn"><span class="material-symbols-outlined">inventory_2</span></div>
-              <div>
-                <p class="notif-name">Stock crítico</p>
-                <p class="notif-desc">Repuestos bajo el mínimo definido</p>
-              </div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" [(ngModel)]="notifStockCritico">
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-
-          <div class="notif-row" style="border-bottom: none">
-            <div class="notif-left">
-              <div class="notif-icon info"><span class="material-symbols-outlined">summarize</span></div>
-              <div>
-                <p class="notif-name">Resumen semanal</p>
-                <p class="notif-desc">Resumen automático todos los lunes</p>
-              </div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" [(ngModel)]="notifResumenSemanal">
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- CERRAR SESIÓN -->
-    <ng-container *ngIf="activeSection === 'sesion'">
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <h3 class="card-title">Cerrar Sesión</h3>
-            <p class="card-subtitle">Finalizá tu sesión actual en este dispositivo</p>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="logout-section">
-            <div class="logout-icon-wrap">
-              <span class="material-symbols-outlined logout-icon">logout</span>
-            </div>
-            <div class="logout-info">
-              <p class="logout-title">¿Cerrar sesión en este dispositivo?</p>
-              <p class="logout-desc">Vas a ser redirigido a la pantalla de inicio de sesión. Tus datos quedan guardados.</p>
-            </div>
-            <button class="btn btn-logout" type="button" (click)="logout()">
-              <span class="material-symbols-outlined">logout</span>
-              Cerrar Sesión
+        <div class="field">
+          <label class="field-label">Confirmar nueva contraseña</label>
+          <div class="field-wrap">
+            <input class="field-input" [type]="showConfirmPw ? 'text' : 'password'"
+              [(ngModel)]="confirmPassword" placeholder="••••••••••••"
+              autocomplete="new-password"
+              [class.field-error]="confirmPassword && newPassword !== confirmPassword">
+            <button class="pw-eye" type="button" (click)="showConfirmPw = !showConfirmPw" tabindex="-1">
+              <span class="material-symbols-outlined">{{ showConfirmPw ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
+          <span class="field-hint field-hint-error" *ngIf="confirmPassword && newPassword !== confirmPassword">
+            Las contraseñas no coinciden
+          </span>
         </div>
       </div>
-    </ng-container>
+
+      <div class="btn-row" style="margin-top: 20px">
+        <button class="btn btn-ghost" type="button"
+          (click)="currentPassword=''; newPassword=''; confirmPassword=''; pwStrength=0; pwLabelColor=''">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" type="button" [disabled]="saving" (click)="changePassword()">
+          <span class="material-symbols-outlined">lock</span>
+          Actualizar contraseña
+        </button>
+      </div>
+    </div>
 
   </div>
 </div>
 
 <!-- Skeleton loader -->
 <div class="perfil-loading" *ngIf="loading">
-  <div class="skeleton-sidenav"></div>
-  <div class="skeleton-content">
-    <div class="skeleton-card"></div>
-  </div>
+  <div class="skeleton-card"></div>
 </div>

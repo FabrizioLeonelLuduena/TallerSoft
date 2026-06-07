@@ -172,6 +172,16 @@
 }
 
 // ─────────────────────────────────────────────────────────────
+// CANTIDAD + PRECIO
+// ─────────────────────────────────────────────────────────────
+
+.cantidad-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ─────────────────────────────────────────────────────────────
 // FORM GROUP
 // ─────────────────────────────────────────────────────────────
 
@@ -201,6 +211,80 @@
     &:focus {
       outline: none;
       border-color: rgba(0, 245, 212, 0.35);
+    }
+  }
+}
+
+.cantidad-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .stepper-btn {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(222, 225, 247, 0.12);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 150ms ease;
+    user-select: none;
+
+    &:hover:not(:disabled) {
+      background: rgba(0, 245, 212, 0.1);
+      border-color: rgba(0, 245, 212, 0.3);
+      color: #00f5d4;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  .cantidad-input {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+.precio-resumen {
+  padding: 12px 14px;
+  background: rgba(9, 14, 28, 0.5);
+  border: 1px solid rgba(222, 225, 247, 0.08);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .precio-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: rgba(255, 255, 255, 0.45);
+
+    &.total {
+      padding-top: 8px;
+      margin-top: 2px;
+      border-top: 1px solid rgba(222, 225, 247, 0.08);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      color: #00f5d4;
     }
   }
 }

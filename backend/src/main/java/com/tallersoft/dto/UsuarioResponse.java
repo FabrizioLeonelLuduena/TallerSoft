@@ -15,9 +15,10 @@ public class UsuarioResponse {
     private Long id;
     private String nombre;
     private String email;
+    private String telefono;
     private String rol;
     private boolean activo;
-    
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 }

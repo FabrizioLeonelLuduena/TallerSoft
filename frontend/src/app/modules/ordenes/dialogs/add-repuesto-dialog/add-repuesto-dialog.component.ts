@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, inject, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +13,7 @@ import { OrdenesService } from '../../services/ordenes.service';
 @Component({
   selector: 'app-add-repuesto-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule, DecimalPipe],
   templateUrl: './add-repuesto-dialog.component.html',
   styleUrls: ['./add-repuesto-dialog.component.scss']
 })
@@ -64,9 +64,17 @@ export class AddRepuestoDialogComponent implements OnInit {
     });
   }
 
+  get totalPrecio(): number {
+    return this.selectedRepuesto ? this.selectedRepuesto.precio * this.cantidad : 0;
+  }
+
   onSearch(event: Event | string) {
     const value = typeof event === 'string' ? event : (event.target as HTMLInputElement).value;
     this.searchTerm = value;
+    if (this.selectedRepuesto) {
+      this.selectedRepuesto = null;
+      this.stockError = '';
+    }
     this.searchSubject.next(value);
   }
 
@@ -74,6 +82,38 @@ export class AddRepuestoDialogComponent implements OnInit {
     this.selectedRepuesto = repuesto;
     this.cantidad = 1;
     this.stockError = '';
+    this.searchTerm = repuesto.nombre;
+    this.filteredRepuestos = [];
+  }
+
+  decrementar() {
+    if (this.cantidad > 1) {
+      this.cantidad--;
+      this.validarStock();
+    }
+  }
+
+  incrementar() {
+    if (this.selectedRepuesto && this.cantidad < this.selectedRepuesto.stockActual) {
+      this.cantidad++;
+      this.validarStock();
+    }
+  }
+
+  onCantidadChange() {
+    this.validarStock();
+  }
+
+  private validarStock() {
+    if (!this.selectedRepuesto) return;
+    if (this.cantidad > this.selectedRepuesto.stockActual) {
+      this.stockError = `Stock insuficiente — disponibles: ${this.selectedRepuesto.stockActual} unidades`;
+    } else if (this.cantidad < 1) {
+      this.cantidad = 1;
+      this.stockError = '';
+    } else {
+      this.stockError = '';
+    }
   }
 
   onSubmit() {

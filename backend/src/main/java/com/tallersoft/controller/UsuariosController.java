@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.tallersoft.model.Rol;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -84,21 +85,38 @@ public class UsuariosController {
     }
 
     /**
-     * Update an existing user
+     * Update an existing user.
+     * Admins can update any user. Non-admins can only update their own profile.
      * PUT /api/usuarios/{id}
-     *
-     * @param id User ID
-     * @param request UsuarioRequest with updated details
-     * @return UsuarioResponse
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UsuarioResponse> editar(
+    public ResponseEntity<?> editar(
             @PathVariable Long id,
-            @Valid @RequestBody UsuarioUpdateRequest request) {
+            @Valid @RequestBody UsuarioUpdateRequest request,
+            Authentication authentication) {
         log.info("Actualizando usuario: {}", id);
-        UsuarioResponse usuario = usuarioService.editarUsuario(id, request);
-        return ResponseEntity.ok(usuario);
+
+        com.tallersoft.model.Usuario principal = (com.tallersoft.model.Usuario) authentication.getPrincipal();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isSelf = principal.getId().equals(id);
+
+        if (!isAdmin && !isSelf) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "No tenés permiso para modificar este usuario"));
+        }
+
+        // Non-admins cannot change their own role
+        if (!isAdmin) {
+            request.setRol(principal.getRol().name());
+        }
+
+        try {
+            UsuarioResponse usuario = usuarioService.editarUsuario(id, request);
+            return ResponseEntity.ok(usuario);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**

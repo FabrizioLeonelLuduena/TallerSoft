@@ -16,9 +16,14 @@ public class UsuarioUpdateRequest {
     @Email(message = "El email debe ser válido")
     private String email;
 
+    private String telefono;
+
     // Optional — only updated when not blank
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
+
+    // Required when changing own password; not needed when admin changes another user's password
+    private String currentPassword;
 
     @NotNull(message = "El rol es requerido")
     private String rol;

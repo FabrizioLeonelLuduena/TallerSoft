@@ -189,15 +189,15 @@
         </div>
       </div>
 
-      <!-- Presupuesto / PDF -->
+      <!-- Presupuesto / Orden PDF -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Presupuesto</h3>
+          <h3 class="card-title">{{ orden.estado === 'PENDIENTE' ? 'Presupuesto' : 'Orden' }}</h3>
         </div>
         <div class="pdf-actions">
           <button class="btn-pdf btn-pdf--preview" (click)="previsualizarPDF()" [disabled]="isPdfLoading">
             <span class="material-symbols-outlined">visibility</span>
-            {{ isPdfLoading ? 'Generando...' : 'Ver presupuesto' }}
+            {{ isPdfLoading ? 'Generando...' : (orden.estado === 'PENDIENTE' ? 'Ver presupuesto' : 'Ver orden') }}
           </button>
           <button class="btn-pdf btn-pdf--download" (click)="descargarPDF()">
             <span class="material-symbols-outlined">download</span>
@@ -214,7 +214,7 @@
 <div class="pdf-modal-overlay" *ngIf="showPdfPreview" (click)="cerrarPdfPreview()">
   <div class="pdf-modal" (click)="$event.stopPropagation()">
     <div class="pdf-modal-header">
-      <span class="pdf-modal-title">Presupuesto {{ padOrderId(orden!.id) }}</span>
+      <span class="pdf-modal-title">{{ orden!.estado === 'PENDIENTE' ? 'Presupuesto' : 'Orden' }} {{ padOrderId(orden!.id) }}</span>
       <button class="pdf-modal-close" (click)="cerrarPdfPreview()">
         <span class="material-symbols-outlined">close</span>
       </button>

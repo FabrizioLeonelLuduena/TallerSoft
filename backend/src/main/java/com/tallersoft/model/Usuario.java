@@ -38,6 +38,9 @@ public class Usuario implements UserDetails {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
+    @Column(name = "telefono", length = 30)
+    private String telefono;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false, length = 20)
     private Rol rol;

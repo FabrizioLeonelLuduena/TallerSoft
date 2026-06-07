@@ -23,7 +23,9 @@ public class UsuarioRequest {
     @NotBlank(message = "La contraseña es requerida")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
-    
+
+    private String telefono;
+
     @NotNull(message = "El rol es requerido")
     private String rol;
 }
