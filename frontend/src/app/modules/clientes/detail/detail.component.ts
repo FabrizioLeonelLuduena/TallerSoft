@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -33,7 +33,6 @@ import { DeleteEquipoModal } from '../modals/delete-equipo/delete-equipo.modal';
     MatButtonModule,
     MatTooltipModule,
     MatTabsModule,
-    MatSnackBarModule,
     MatDialogModule,
     RouterModule,
     DeleteConfirmModal,
@@ -52,7 +51,7 @@ export class DetailComponent implements OnInit {
   private equipoService = inject(EquipoService);
   private ordenesService = inject(OrdenesService);
   private authService = inject(AuthService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
@@ -103,11 +102,7 @@ export class DetailComponent implements OnInit {
         this.populateEditForm();
       },
       error: err => {
-        this.snackBar.open(
-          err.error?.message || 'Error al cargar el cliente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al cargar el cliente');
         this.router.navigate(['/clientes']);
       }
     });
@@ -138,11 +133,6 @@ export class DetailComponent implements OnInit {
 
   onDeleteConfirmed() {
     this.isDeleteModalOpen = false;
-    this.snackBar.open(
-      'Cliente eliminado correctamente',
-      'Cerrar',
-      { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-    );
     this.router.navigate(['/clientes']);
   }
 
@@ -177,11 +167,7 @@ export class DetailComponent implements OnInit {
         this.ordenes = ordenes;
       },
       error: (err) => {
-        this.snackBar.open(
-          err.error?.message || 'Error al cargar el historial',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al cargar el historial');
       }
     });
   }
@@ -203,11 +189,7 @@ export class DetailComponent implements OnInit {
           this.equipos = equipos;
         },
         error: (err) => {
-          this.snackBar.open(
-            err.error?.message || 'Error al cargar equipos',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al cargar equipos');
         }
       });
     }

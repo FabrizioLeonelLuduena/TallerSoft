@@ -2,6 +2,7 @@ package com.tallersoft.controller;
 
 import com.tallersoft.dto.*;
 import com.tallersoft.model.EstadoOrden;
+import com.tallersoft.model.Usuario;
 import com.tallersoft.service.OrdenTrabajoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -47,10 +49,11 @@ public class OrdenTrabajoController {
     @GetMapping("/mis-ordenes")
     @PreAuthorize("hasRole('TECNICO')")
     public ResponseEntity<List<OrdenTrabajoResponse>> misPropias(
-            @RequestParam(required = false) EstadoOrden estado) {
-        log.info("Listando mis órdenes con estado: {}", estado);
-        // TODO: Inyectar currentUser con @CurrentUser
-        List<OrdenTrabajoResponse> ordenes = ordenTrabajoService.listarOrdenes(estado, null, null, null);
+            @RequestParam(required = false) EstadoOrden estado,
+            Authentication auth) {
+        Usuario usuario = (Usuario) auth.getPrincipal();
+        log.info("Listando órdenes del técnico {} con estado: {}", usuario.getId(), estado);
+        List<OrdenTrabajoResponse> ordenes = ordenTrabajoService.listarOrdenes(estado, usuario.getId(), null, null);
         return ResponseEntity.ok(ordenes);
     }
     

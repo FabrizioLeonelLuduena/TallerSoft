@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EquipoService } from '@modules/ordenes/services/equipo.service';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-delete-equipo-modal',
   standalone: true,
-  imports: [CommonModule, MatSnackBarModule],
+  imports: [CommonModule],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -227,7 +227,7 @@ export class DeleteEquipoModal {
   isLoading = false;
 
   private equipoService = inject(EquipoService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
 
   onCancel() {
     this.cancelled.emit();
@@ -239,20 +239,12 @@ export class DeleteEquipoModal {
     this.isLoading = true;
     this.equipoService.eliminarEquipo(this.equipo.id).subscribe({
       next: () => {
-        this.snackBar.open(
-          'Equipo eliminado correctamente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.success('Equipo eliminado correctamente');
         this.confirmed.emit();
         this.isLoading = false;
       },
       error: (err: any) => {
-        this.snackBar.open(
-          err.error?.message || 'Error al eliminar el equipo',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al eliminar el equipo');
         this.isLoading = false;
       }
     });

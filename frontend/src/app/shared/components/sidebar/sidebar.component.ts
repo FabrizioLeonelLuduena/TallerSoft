@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, CurrentUser } from '@core/auth/auth.service';
+import { Rol } from '@core/models/rol.enum';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -57,14 +58,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const role = this.currentUser?.rol;
 
     this.menuItems = [
-      { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
-      { label: 'Clientes', icon: 'people', route: '/clientes', roles: ['ADMIN', 'RECEPCION'] },
-      { label: 'Órdenes de Trabajo', icon: 'assignment', route: '/ordenes', roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
-      { label: 'Caja y Facturación', icon: 'point_of_sale', route: '/caja/diaria', roles: ['ADMIN', 'RECEPCION'] },
-      { label: 'Inventario', icon: 'inventory_2', route: '/inventario', roles: ['ADMIN', 'TECNICO'] },
-      { label: 'Reportes', icon: 'bar_chart', route: '/reportes', roles: ['ADMIN'] },
-      { label: 'Usuarios', icon: 'admin_panel_settings', route: '/usuarios', roles: ['ADMIN'] }
-    ].filter(item => item.roles.includes(role || ''));
+      { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
+      { label: 'Clientes', icon: 'people', route: '/clientes', roles: [Rol.ADMIN, Rol.RECEPCION] },
+      { label: 'Órdenes de Trabajo', icon: 'assignment', route: '/ordenes', roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
+      { label: 'Caja y Facturación', icon: 'point_of_sale', route: '/caja/diaria', roles: [Rol.ADMIN, Rol.RECEPCION] },
+      { label: 'Inventario', icon: 'inventory_2', route: '/inventario', roles: [Rol.ADMIN, Rol.TECNICO] },
+      { label: 'Reportes', icon: 'bar_chart', route: '/reportes', roles: [Rol.ADMIN] },
+      { label: 'Usuarios', icon: 'admin_panel_settings', route: '/usuarios', roles: [Rol.ADMIN] }
+    ].filter(item => item.roles.includes((role as Rol) || '' as any));
   }
 
   logout(): void {

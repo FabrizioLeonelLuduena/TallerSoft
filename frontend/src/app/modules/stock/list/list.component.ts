@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { RepuestosService, Repuesto } from '../../ordenes/services/repuestos.service';
@@ -21,7 +21,6 @@ type FilterState = 'todos' | 'criticos' | 'bajo';
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule,
     MatTooltipModule,
     FormsModule,
     RepuestoDialogComponent
@@ -70,7 +69,7 @@ export class StockListComponent implements OnInit, OnDestroy {
 
   constructor(
     private repuestosService: RepuestosService,
-    private snackBar: MatSnackBar,
+    private notifications: NotificationService,
     private authService: AuthService,
     private router: Router
   ) {}
@@ -109,7 +108,7 @@ export class StockListComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: () => {
-          this.snackBar.open('Error al cargar repuestos', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al cargar repuestos');
           this.loading = false;
         }
       });
@@ -167,21 +166,12 @@ export class StockListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Repuesto eliminado correctamente', 'Cerrar', {
-            duration: 3000,
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom',
-            panelClass: ['snackbar-success']
-          });
+          this.notifications.success('Repuesto eliminado correctamente');
           this.cancelDeleteRepuesto();
           this.cargarRepuestos();
         },
         error: (err) => {
-          this.snackBar.open(
-            err.error?.message || 'Error al eliminar el repuesto',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al eliminar el repuesto');
         }
       });
   }

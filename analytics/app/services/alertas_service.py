@@ -1,5 +1,12 @@
 from datetime import datetime
 from app.services import analytics_service as svc
+from app.services.analytics_service import (
+    UMBRAL_DIAS_SIN_MOVIMIENTO,
+    UMBRAL_DIAS_ALTA_PRIORIDAD,
+)
+
+_UMBRAL_CONVERSION_PCT = 60
+_MIN_ORDENES_CON_PRESUPUESTO = 5
 
 _alertas_leidas: set[str] = set()
 
@@ -16,8 +23,8 @@ def generar_alertas(db) -> list[dict]:
     alertas: list[dict] = []
     now = datetime.now()
 
-    # 1. Órdenes sin movimiento (≥ 5 días)
-    for o in svc.ordenes_sin_movimiento(db, dias_umbral=5):
+    # 1. Órdenes sin movimiento
+    for o in svc.ordenes_sin_movimiento(db, dias_umbral=UMBRAL_DIAS_SIN_MOVIMIENTO):
         alerta_id = f"sin-movimiento-{o['id']}"
         alertas.append({
             "id":          alerta_id,
@@ -30,8 +37,8 @@ def generar_alertas(db) -> list[dict]:
             "datos_extra": {"orden_id": o["id"]},
         })
 
-    # 2. Alta prioridad paradas (≥ 2 días)
-    for o in svc.ordenes_alta_prioridad(db, dias_minimos=2):
+    # 2. Alta prioridad paradas
+    for o in svc.ordenes_alta_prioridad(db, dias_minimos=UMBRAL_DIAS_ALTA_PRIORIDAD):
         alerta_id = f"alta-prioridad-{o['id']}"
         alertas.append({
             "id":          alerta_id,
@@ -73,9 +80,9 @@ def generar_alertas(db) -> list[dict]:
             "datos_extra": {},
         })
 
-    # 5. Conversión baja (< 60% con al menos 5 órdenes con presupuesto)
+    # 5. Conversión baja
     conv = svc.conversion_presupuesto(db)
-    if conv["tasa_conversion_pct"] < 60 and conv["total_con_presupuesto"] >= 5:
+    if conv["tasa_conversion_pct"] < _UMBRAL_CONVERSION_PCT and conv["total_con_presupuesto"] >= _MIN_ORDENES_CON_PRESUPUESTO:
         alerta_id = f"conversion-baja-{now.strftime('%Y-%m')}"
         alertas.append({
             "id":          alerta_id,

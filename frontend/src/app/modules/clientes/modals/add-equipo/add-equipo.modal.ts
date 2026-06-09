@@ -2,12 +2,12 @@ import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EquipoService } from '@modules/ordenes/services/equipo.service';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-add-equipo-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule],
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -411,7 +411,7 @@ export class AddEquipoModal implements OnInit {
   ];
 
   private equipoService = inject(EquipoService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private fb = inject(FormBuilder);
 
   constructor() {
@@ -466,22 +466,14 @@ export class AddEquipoModal implements OnInit {
 
     this.equipoService.crearEquipo(equipoData).subscribe({
       next: () => {
-        this.snackBar.open(
-          'Equipo agregado correctamente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.success('Equipo agregado correctamente');
         this.equipoAdded.emit();
         this.isLoading = false;
         this.form.reset();
         this.selectedType = null;
       },
       error: (err: any) => {
-        this.snackBar.open(
-          err.error?.message || 'Error al agregar el equipo',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al agregar el equipo');
         this.isLoading = false;
       }
     });

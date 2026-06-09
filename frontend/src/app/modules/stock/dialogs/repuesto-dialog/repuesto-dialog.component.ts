@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { RepuestosService, Repuesto } from '../../../ordenes/services/repuestos.service';
@@ -14,7 +14,6 @@ import { takeUntil } from 'rxjs/operators';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatSnackBarModule,
     MatProgressSpinnerModule,
     MatIconModule
   ],
@@ -34,7 +33,7 @@ export class RepuestoDialogComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private repuestosService: RepuestosService,
-    private snackBar: MatSnackBar
+    private notifications: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -77,20 +76,12 @@ export class RepuestoDialogComponent implements OnInit, OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open(
-            'Repuesto actualizado correctamente',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.success('Repuesto actualizado correctamente');
           this.loading = false;
           this.closed.emit(true);
         },
         error: err => {
-          this.snackBar.open(
-            err.error?.message || 'Error al actualizar el repuesto',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al actualizar el repuesto');
           this.loading = false;
         }
       });

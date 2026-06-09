@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClienteService } from '../../services/cliente.service';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-delete-confirm-modal',
   standalone: true,
-  imports: [CommonModule, MatSnackBarModule],
+  imports: [CommonModule],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -180,7 +180,7 @@ export class DeleteConfirmModal implements OnInit {
   isLoading = false;
 
   private clienteService = inject(ClienteService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
 
   onCancel() {
     this.cancelled.emit();
@@ -192,19 +192,11 @@ export class DeleteConfirmModal implements OnInit {
     this.isLoading = true;
     this.clienteService.eliminarCliente(this.clienteId).subscribe({
       next: () => {
-        this.snackBar.open(
-          'Cliente eliminado correctamente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.success('Cliente eliminado correctamente');
         this.confirmed.emit();
       },
       error: (err) => {
-        this.snackBar.open(
-          err.error?.message || 'Error al eliminar el cliente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al eliminar el cliente');
         this.isLoading = false;
       }
     });

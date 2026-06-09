@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/auth/auth.service';
+import { Rol } from '@core/models/rol.enum';
 import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
 
 @Component({
@@ -19,7 +20,6 @@ import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.servic
     MatIconModule,
     MatButtonModule,
     MatSelectModule,
-    MatSnackBarModule,
     RouterModule
   ],
   templateUrl: './list.component.html',
@@ -28,7 +28,7 @@ import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.servic
 export class ListComponent implements OnInit {
   private authService = inject(AuthService);
   private ordenesService = inject(OrdenesService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -71,11 +71,7 @@ export class ListComponent implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          this.snackBar.open(
-            err.error?.message || 'Error al cargar las órdenes',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al cargar las órdenes');
         }
       });
   }
@@ -92,11 +88,7 @@ export class ListComponent implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          this.snackBar.open(
-            err.error?.message || 'Error al cargar tus órdenes',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al cargar tus órdenes');
         }
       });
   }
@@ -248,11 +240,11 @@ export class ListComponent implements OnInit {
   }
 
   canCreateOrden(): boolean {
-    return this.currentRole === 'ADMIN' || this.currentRole === 'RECEPCION';
+    return this.currentRole === Rol.ADMIN || this.currentRole === Rol.RECEPCION;
   }
 
   isTecnicoRole(): boolean {
-    return this.currentRole === 'TECNICO';
+    return this.currentRole === Rol.TECNICO;
   }
 
   getEstadoColor(estado: string): string {
@@ -292,17 +284,13 @@ export class ListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackBar.open('Orden eliminada exitosamente', 'Cerrar', { duration: 2000 });
+          this.notifications.success('Orden eliminada exitosamente');
           this.loadOrdenes();
           this.closeDeleteOrdenModal();
         },
         error: (err) => {
           this.isDeleting = false;
-          this.snackBar.open(
-            err.error?.message || 'Error al eliminar la orden',
-            'Cerrar',
-            { duration: 3000 }
-          );
+          this.notifications.error(err.error?.message || 'Error al eliminar la orden');
         }
       });
   }

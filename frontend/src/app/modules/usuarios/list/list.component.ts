@@ -2,10 +2,11 @@ import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/auth/auth.service';
+import { Rol } from '@core/models/rol.enum';
 import { ProfileService } from '@core/services/profile.service';
 import { UsuarioService, UsuarioResponse } from '../services/usuario.service';
 import { EditUserDialogComponent } from '../dialogs/edit-user-dialog/edit-user-dialog.component';
@@ -17,7 +18,6 @@ import { EditUserDialogComponent } from '../dialogs/edit-user-dialog/edit-user-d
     CommonModule,
     MatIconModule,
     MatButtonModule,
-    MatSnackBarModule,
     RouterModule,
     EditUserDialogComponent
   ],
@@ -28,7 +28,7 @@ export class ListComponent implements OnInit {
   private authService = inject(AuthService);
   private usuarioService = inject(UsuarioService);
   private profileService = inject(ProfileService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -79,7 +79,7 @@ export class ListComponent implements OnInit {
 
   ngOnInit() {
     this.currentRole = this.authService.getCurrentRole();
-    if (this.currentRole !== 'ADMIN') {
+    if (this.currentRole !== Rol.ADMIN) {
       this.showAccessDenied();
       return;
     }
@@ -105,11 +105,7 @@ export class ListComponent implements OnInit {
         error: (err) => {
           console.error('Error loading usuarios:', err);
           this.isLoading = false;
-          this.snackBar.open(
-            err.error?.message || 'Error al cargar los usuarios',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al cargar los usuarios');
         }
       });
   }
@@ -148,19 +144,21 @@ export class ListComponent implements OnInit {
   }
 
   getRolBadgeClass(rol: string): string {
-    const rolLower = rol.toLowerCase();
-    if (rolLower === 'admin') return 'admin';
-    if (rolLower === 'tecnico') return 'tecnico';
-    if (rolLower === 'recepcion') return 'recepcion';
-    return '';
+    switch (rol.toUpperCase()) {
+      case Rol.ADMIN:     return 'admin';
+      case Rol.TECNICO:   return 'tecnico';
+      case Rol.RECEPCION: return 'recepcion';
+      default:            return '';
+    }
   }
 
   getRolDisplayText(rol: string): string {
-    const rolLower = rol.toLowerCase();
-    if (rolLower === 'admin') return 'ADMIN';
-    if (rolLower === 'tecnico') return 'TÉCNICO';
-    if (rolLower === 'recepcion') return 'RECEPCIÓN';
-    return rol;
+    switch (rol.toUpperCase()) {
+      case Rol.ADMIN:     return 'ADMIN';
+      case Rol.TECNICO:   return 'TÉCNICO';
+      case Rol.RECEPCION: return 'RECEPCIÓN';
+      default:            return rol;
+    }
   }
 
   private showAccessDenied() {
@@ -190,22 +188,13 @@ export class ListComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
-            this.snackBar.open('Usuario eliminado correctamente', 'Cerrar', {
-              duration: 3000,
-              horizontalPosition: 'right',
-              verticalPosition: 'bottom',
-              panelClass: ['snackbar-success']
-            });
+            this.notifications.success('Usuario eliminado correctamente');
             this.loadUsuarios();
             this.cancelDeleteUser();
           },
           error: (err) => {
             console.error('Error deleting usuario:', err);
-            this.snackBar.open(
-              err.error?.message || 'Error al eliminar el usuario',
-              'Cerrar',
-              { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-            );
+            this.notifications.error(err.error?.message || 'Error al eliminar el usuario');
           }
         });
     }

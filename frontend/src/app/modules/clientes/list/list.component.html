@@ -47,13 +47,7 @@
         </div>
         <div class="client-info">
           <h3 class="client-name">{{ cliente.nombre }}</h3>
-          <span class="client-status" *ngIf="getClienteOrdenesCount(cliente.id) > 0">
-            {{ getClienteOrdenesCount(cliente.id) }} Orders
-          </span>
         </div>
-        <span class="client-badge" [ngClass]="{'badge-active': getClienteOrdenesCount(cliente.id) > 0}">
-          {{ getClienteOrdenesCount(cliente.id) }} Orders
-        </span>
       </div>
 
       <div class="card-contacts">

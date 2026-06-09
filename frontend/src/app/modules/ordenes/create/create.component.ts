@@ -2,7 +2,7 @@ import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -27,7 +27,7 @@ interface ClienteResponse {
 export class CreateComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
-  private snackbar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private ordenesService = inject(OrdenesService);
   private clienteService = inject(ClienteService);
   private equipoService = inject(EquipoService);
@@ -90,7 +90,7 @@ export class CreateComponent implements OnInit {
         this.showClienteDropdown = results.length > 0;
       },
       error: () => {
-        this.snackbar.open('Error al buscar clientes', 'Cerrar', { duration: 3000 });
+        this.notifications.error('Error al buscar clientes');
       }
     });
 
@@ -102,7 +102,7 @@ export class CreateComponent implements OnInit {
           this.filteredTecnicos = this.tecnicos;
         },
         error: () => {
-          this.snackbar.open('Error al cargar técnicos', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al cargar técnicos');
         }
       });
   }
@@ -152,7 +152,7 @@ export class CreateComponent implements OnInit {
         },
         error: () => {
           this.isLoadingEquipos = false;
-          this.snackbar.open('Error al cargar equipos del cliente', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al cargar equipos del cliente');
         }
       });
   }
@@ -221,7 +221,7 @@ export class CreateComponent implements OnInit {
   onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.snackbar.open('Completá todos los campos requeridos', 'Cerrar', { duration: 3000 });
+      this.notifications.warning('Completá todos los campos requeridos');
       return;
     }
 
@@ -232,13 +232,13 @@ export class CreateComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (orden) => {
-          this.snackbar.open('Orden creada exitosamente', 'Cerrar', { duration: 2000 });
+          this.notifications.success('Orden creada exitosamente');
           this.router.navigate(['/ordenes', orden.id]);
         },
         error: (err) => {
           this.isSubmitting = false;
           const message = err.error?.message || 'Error al crear la orden';
-          this.snackbar.open(message, 'Cerrar', { duration: 3000 });
+          this.notifications.error(message);
         }
       });
   }

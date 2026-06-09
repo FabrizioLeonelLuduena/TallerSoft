@@ -1,7 +1,7 @@
 import { Component, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule, Router } from '@angular/router';
@@ -11,14 +11,14 @@ import { UsuarioService, UsuarioResponse, UsuarioRequest } from '../services/usu
 @Component({
   selector: 'app-usuarios-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatButtonModule, MatSnackBarModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatButtonModule, RouterModule],
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss']
 })
 export class CreateComponent {
   private fb = inject(FormBuilder);
   private usuarioService = inject(UsuarioService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -81,11 +81,7 @@ export class CreateComponent {
       .subscribe({
         next: (response: UsuarioResponse) => {
           this.isLoading = false;
-          this.snackBar.open(
-            'Usuario creado correctamente',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.success('Usuario creado correctamente');
           this.router.navigate(['/usuarios']);
         },
         error: (err) => {
@@ -95,11 +91,7 @@ export class CreateComponent {
           if (message.toLowerCase().includes('email') || message.toLowerCase().includes('exist')) {
             this.form.get('email')?.setErrors({ duplicate: true });
           } else {
-            this.snackBar.open(
-              message,
-              'Cerrar',
-              { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-            );
+            this.notifications.error(message);
           }
         }
       });

@@ -2,6 +2,10 @@ from sqlalchemy import text
 from datetime import date, timedelta
 from typing import Literal
 
+_DIAS_POR_MES = 30
+UMBRAL_DIAS_SIN_MOVIMIENTO = 5
+UMBRAL_DIAS_ALTA_PRIORIDAD = 2
+
 
 # ─── ÓRDENES ────────────────────────────────────────────────────────────────
 
@@ -27,7 +31,7 @@ def ordenes_por_periodo(
     agrupacion: Literal["semana", "mes"] = "mes",
     meses_atras: int = 6,
 ) -> list:
-    desde = date.today() - timedelta(days=meses_atras * 30)
+    desde = date.today() - timedelta(days=meses_atras * _DIAS_POR_MES)
     if agrupacion == "semana":
         trunc = "week"
         fmt = "IYYY-IW"
@@ -176,7 +180,7 @@ def resumen_caja_diario(db, fecha: date | None = None) -> dict:
 
 
 def evolucion_mensual_caja(db, meses: int = 6) -> list:
-    desde = date.today() - timedelta(days=meses * 30)
+    desde = date.today() - timedelta(days=meses * _DIAS_POR_MES)
     result = db.execute(text("""
         SELECT
             TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') AS mes,
@@ -353,7 +357,7 @@ def conversion_presupuesto(db) -> dict:
 
 
 def recurrencia_clientes(db, meses: int = 6) -> list:
-    desde = date.today() - timedelta(days=meses * 30)
+    desde = date.today() - timedelta(days=meses * _DIAS_POR_MES)
     result = db.execute(text("""
         SELECT
             TO_CHAR(DATE_TRUNC('month', ot.created_at), 'YYYY-MM') AS mes,
@@ -433,8 +437,8 @@ def obtener_contexto_taller(db) -> dict:
     caja_hoy     = resumen_caja_diario(db)
     caja_ayer    = resumen_caja_diario(db, ayer)
     tecnicos     = rendimiento_tecnicos(db, mes_actual=True)
-    alta_prio    = ordenes_alta_prioridad(db, dias_minimos=2)
-    sin_mov      = ordenes_sin_movimiento(db, dias_umbral=5)
+    alta_prio    = ordenes_alta_prioridad(db, dias_minimos=UMBRAL_DIAS_ALTA_PRIORIDAD)
+    sin_mov      = ordenes_sin_movimiento(db, dias_umbral=UMBRAL_DIAS_SIN_MOVIMIENTO)
     conv         = conversion_presupuesto(db)
     rechazos_hoy = rechazos_cobros(db, dias=1)
     recurrencia  = recurrencia_clientes(db, meses=1)

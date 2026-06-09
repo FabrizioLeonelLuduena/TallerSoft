@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrdenesService, OrdenTrabajoResponse } from '../../../ordenes/services/ordenes.service';
 import { CobrosService, CobroResponse, MedioPago } from '../../services/cobros.service';
@@ -11,7 +11,7 @@ import { CobrosService, CobroResponse, MedioPago } from '../../services/cobros.s
 @Component({
   selector: 'app-cobrar-orden',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './cobrar-orden.component.html',
   styleUrls: ['./cobrar-orden.component.scss']
 })
@@ -20,7 +20,7 @@ export class CobrarOrdenComponent implements OnInit, OnDestroy {
   private router      = inject(Router);
   private ordenesService = inject(OrdenesService);
   private cobrosService  = inject(CobrosService);
-  private snackBar    = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private destroyRef  = inject(DestroyRef);
 
   orden: OrdenTrabajoResponse | null = null;
@@ -59,13 +59,13 @@ export class CobrarOrdenComponent implements OnInit, OnDestroy {
           this.orden = orden;
           this.isLoading = false;
           if (orden.estado !== 'LISTO') {
-            this.snackBar.open('Solo se pueden cobrar órdenes en estado LISTO', 'Cerrar', { duration: 4000 });
+            this.notifications.warning('Solo se pueden cobrar órdenes en estado LISTO');
             this.router.navigate(['/ordenes', id]);
           }
         },
         error: () => {
           this.isLoading = false;
-          this.snackBar.open('Error al cargar la orden', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al cargar la orden');
           this.router.navigate(['/ordenes']);
         }
       });
@@ -97,13 +97,13 @@ export class CobrarOrdenComponent implements OnInit, OnDestroy {
             this.showMpModal  = true;
             this.startPolling();
           } else {
-            this.snackBar.open('Cobro registrado exitosamente', '', { duration: 3000 });
+            this.notifications.success('Cobro registrado exitosamente');
             this.router.navigate(['/ordenes', this.orden!.id]);
           }
         },
         error: (err) => {
           this.isSubmitting = false;
-          this.snackBar.open(err.error?.message || 'Error al registrar el cobro', 'Cerrar', { duration: 4000 });
+          this.notifications.error(err.error?.message || 'Error al registrar el cobro');
         }
       });
   }
@@ -124,13 +124,13 @@ export class CobrarOrdenComponent implements OnInit, OnDestroy {
               this.router.navigate(['/ordenes', this.orden!.id]);
             }, 1500);
           } else if (manual) {
-            this.snackBar.open('El pago aún no fue acreditado. Esperá unos segundos.', 'Cerrar', { duration: 4000 });
+            this.notifications.warning('El pago aún no fue acreditado. Esperá unos segundos.');
           }
         },
         error: () => {
           this.isVerificandoPago = false;
           if (manual) {
-            this.snackBar.open('Error al verificar el pago', 'Cerrar', { duration: 3000 });
+            this.notifications.error('Error al verificar el pago');
           }
         }
       });

@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /*
  * DIFERENCIA ENTRE MODALIDADES DE PAGO QR DE MERCADOPAGO
@@ -180,7 +181,7 @@ public class MercadoPagoService {
     // ── Búsqueda de pago por orden (reconciliación activa) ───────────────────
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> buscarPagoPorOrden(Long ordenId) {
+    public Optional<Map<String, Object>> buscarPagoPorOrden(Long ordenId) {
         String url = MP_API_BASE + "/v1/payments/search"
                 + "?external_reference=" + ordenId
                 + "&sort=date_created&criteria=desc&limit=1";
@@ -192,23 +193,23 @@ public class MercadoPagoService {
             ResponseEntity<Map> response = restTemplate.exchange(
                     url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
 
-            if (response.getBody() == null) return null;
+            if (response.getBody() == null) return Optional.empty();
 
             List<Map<String, Object>> results =
                     (List<Map<String, Object>>) response.getBody().get("results");
 
-            if (results == null || results.isEmpty()) return null;
+            if (results == null || results.isEmpty()) return Optional.empty();
 
             Map<String, Object> payment = results.get(0);
             String status = (String) payment.get("status");
             String mpId   = String.valueOf(payment.get("id"));
 
             log.info("Búsqueda pago para orden {}: mp_id={}, status={}", ordenId, mpId, status);
-            return Map.of("status", status, "mpPaymentId", mpId);
+            return Optional.of(Map.of("status", status, "mpPaymentId", mpId));
 
         } catch (Exception e) {
             log.warn("No se pudo buscar pago para orden {}: {}", ordenId, e.getMessage());
-            return null;
+            return Optional.empty();
         }
     }
 

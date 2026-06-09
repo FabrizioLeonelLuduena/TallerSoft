@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CobrosService, CajaDiariaResponse, CobroResponse } from '../../services/cobros.service';
@@ -14,14 +14,14 @@ type ViewMode = 'cobros' | 'caja' | 'historial';
 @Component({
   selector: 'app-caja-diaria',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, MatIconModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, RouterLink, MatIconModule],
   templateUrl: './caja-diaria.component.html',
   styleUrls: ['./caja-diaria.component.scss']
 })
 export class CajaDiariaComponent implements OnInit {
   private cobrosService  = inject(CobrosService);
   private ordenesService = inject(OrdenesService);
-  private snackBar       = inject(MatSnackBar);
+  private notifications  = inject(NotificationService);
   private destroyRef     = inject(DestroyRef);
 
   viewMode: ViewMode = 'cobros';
@@ -108,7 +108,7 @@ export class CajaDiariaComponent implements OnInit {
         },
         error: () => {
           this.isLoading = false;
-          this.snackBar.open('Error al cargar los datos de caja', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al cargar los datos de caja');
         }
       });
   }
@@ -125,7 +125,7 @@ export class CajaDiariaComponent implements OnInit {
         },
         error: () => {
           this.isLoadingHistorial = false;
-          this.snackBar.open('Error al cargar el historial', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al cargar el historial');
         }
       });
   }

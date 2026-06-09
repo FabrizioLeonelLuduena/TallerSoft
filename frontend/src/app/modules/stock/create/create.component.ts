@@ -1,7 +1,7 @@
 import { Component, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,7 +13,6 @@ import { RepuestosService, RepuestoRequest } from '@modules/ordenes/services/rep
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatSnackBarModule,
   ],
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss']
@@ -22,7 +21,7 @@ export class StockCreateComponent {
   private fb = inject(FormBuilder);
   private repuestosService = inject(RepuestosService);
   private router = inject(Router);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private destroyRef = inject(DestroyRef);
 
   isLoading = false;
@@ -62,19 +61,11 @@ export class StockCreateComponent {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: () => {
-        this.snackBar.open(
-          'Repuesto creado correctamente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.success('Repuesto creado correctamente');
         this.router.navigate(['/stock']);
       },
       error: err => {
-        this.snackBar.open(
-          err.error?.message || 'Error al crear el repuesto',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al crear el repuesto');
       }
     });
   }

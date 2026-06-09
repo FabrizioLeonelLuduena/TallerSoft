@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UsuarioService, UsuarioResponse } from '../../services/usuario.service';
@@ -11,7 +11,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-edit-user-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './edit-user-dialog.component.html',
   styleUrls: ['./edit-user-dialog.component.scss']
 })
@@ -22,7 +22,7 @@ export class EditUserDialogComponent implements OnChanges, OnDestroy {
 
   private fb = inject(FormBuilder);
   private usuarioService = inject(UsuarioService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
 
   form!: FormGroup;
   loading = false;
@@ -89,9 +89,7 @@ export class EditUserDialogComponent implements OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Usuario actualizado correctamente', 'Cerrar', {
-            duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom'
-          });
+          this.notifications.success('Usuario actualizado correctamente');
           this.loading = false;
           this.closed.emit(true);
         },
@@ -101,9 +99,7 @@ export class EditUserDialogComponent implements OnChanges, OnDestroy {
             this.form.get('email')?.setErrors({ duplicate: true });
             this.form.markAllAsTouched();
           } else {
-            this.snackBar.open(message, 'Cerrar', {
-              duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom'
-            });
+            this.notifications.error(message);
           }
           this.loading = false;
         }

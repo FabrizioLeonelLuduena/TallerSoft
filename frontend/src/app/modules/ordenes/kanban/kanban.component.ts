@@ -4,7 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
 
@@ -23,14 +23,13 @@ interface KanbanColumn {
     DragDropModule,
     MatIconModule,
     MatButtonModule,
-    MatSnackBarModule
   ],
   templateUrl: './kanban.component.html',
   styleUrls: ['./kanban.component.scss']
 })
 export class KanbanComponent implements OnInit {
   private ordenesService = inject(OrdenesService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -62,7 +61,7 @@ export class KanbanComponent implements OnInit {
         },
         error: () => {
           this.isLoading = false;
-          this.snackBar.open('Error al cargar órdenes', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al cargar órdenes');
         }
       });
   }
@@ -111,13 +110,12 @@ export class KanbanComponent implements OnInit {
               col.ordenes.unshift(orden);
             }
           }
-          this.snackBar.open('Orden actualizada', 'Cerrar', { duration: 2000 });
+          this.notifications.success('Orden actualizada');
         },
         error: (err) => {
           event.previousContainer.data = originalPrevItems;
           event.container.data = originalCurrItems;
-          const message = err.error?.message || 'Error al cambiar estado';
-          this.snackBar.open(message, 'Cerrar', { duration: 3000 });
+          this.notifications.error(err.error?.message || 'Error al cambiar estado');
         }
       });
   }

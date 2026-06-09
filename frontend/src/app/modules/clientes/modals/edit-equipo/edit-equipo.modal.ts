@@ -2,12 +2,12 @@ import { Component, Input, Output, EventEmitter, OnInit, inject, OnChanges, Simp
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EquipoService, EquipoResponse } from '@modules/ordenes/services/equipo.service';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-edit-equipo-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule],
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -406,7 +406,7 @@ export class EditEquipoModal implements OnInit, OnChanges {
   ];
 
   private equipoService = inject(EquipoService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private fb = inject(FormBuilder);
 
   constructor() {
@@ -482,20 +482,12 @@ export class EditEquipoModal implements OnInit, OnChanges {
 
     this.equipoService.editarEquipo(this.equipo.id, updateData).subscribe({
       next: (updatedEquipo: EquipoResponse) => {
-        this.snackBar.open(
-          'Equipo actualizado correctamente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.success('Equipo actualizado correctamente');
         this.saved.emit(updatedEquipo);
         this.isLoading = false;
       },
       error: (err: any) => {
-        this.snackBar.open(
-          err.error?.message || 'Error al actualizar el equipo',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al actualizar el equipo');
         this.isLoading = false;
       }
     });

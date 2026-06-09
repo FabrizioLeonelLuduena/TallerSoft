@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { RouterModule, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -18,7 +18,6 @@ import { EquipoService } from '@modules/ordenes/services/equipo.service';
     ReactiveFormsModule,
     MatIconModule,
     MatButtonModule,
-    MatSnackBarModule,
     RouterModule
   ],
   templateUrl: './create.component.html',
@@ -29,7 +28,7 @@ export class CreateComponent implements OnInit {
   private clienteService = inject(ClienteService);
   private equipoService = inject(EquipoService);
   private router = inject(Router);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private destroyRef = inject(DestroyRef);
 
   form: FormGroup;
@@ -95,37 +94,21 @@ export class CreateComponent implements OnInit {
 
           this.equipoService.crearEquipo(equipoData).subscribe({
             next: () => {
-              this.snackBar.open(
-                'Cliente y equipo creados correctamente',
-                'Cerrar',
-                { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-              );
+              this.notifications.success('Cliente y equipo creados correctamente');
               this.router.navigate(['/clientes', response.id]);
             },
             error: err => {
-              this.snackBar.open(
-                'Cliente creado pero hubo error al crear el equipo',
-                'Cerrar',
-                { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-              );
+              this.notifications.warning('Cliente creado pero hubo error al crear el equipo');
               this.router.navigate(['/clientes', response.id]);
             }
           });
         } else {
-          this.snackBar.open(
-            'Cliente creado correctamente',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.success('Cliente creado correctamente');
           this.router.navigate(['/clientes', response.id]);
         }
       },
       error: err => {
-        this.snackBar.open(
-          err.error?.message || 'Error al crear el cliente',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al crear el cliente');
       }
     });
   }

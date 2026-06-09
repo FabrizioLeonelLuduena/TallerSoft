@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Declaración de Uso de IA — TallerSoft</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ink: #1a1a1a;
+    --ink-muted: #5a5a5a;
+    --ink-faint: #9a9a9a;
+    --rule: #d4d0c8;
+    --paper: #faf8f3;
+    --cream: #f2ede2;
+    --accent: #c0392b;
+    --accent-soft: #f9ece9;
+    --blue: #1a3a5c;
+    --blue-soft: #e8eef5;
+    --green: #1a5c3a;
+    --green-soft: #e8f5ee;
+    --amber: #7a4a00;
+    --amber-soft: #fdf3e3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e8e4da;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  /* Page */
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    background: var(--paper);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.5) inset;
+    border-top: 4px solid var(--accent);
+    position: relative;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    left: 72px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(192,57,43,0.15);
+  }
+
+  .inner {
+    padding: 60px 60px 60px 100px;
+  }
+
+  /* Header */
+  .doc-header {
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .institution {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+
+  .doc-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .doc-title em { color: var(--accent); font-style: italic; }
+
+  .doc-subtitle {
+    font-size: 13px;
+    color: var(--ink-muted);
+    font-weight: 400;
+  }
+
+  .doc-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 20px;
+    border: 1px solid var(--rule);
+    background: var(--cream);
+  }
+
+  .meta-field {
+    padding: 10px 14px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .meta-field:nth-child(even) { border-right: none; }
+  .meta-field:nth-last-child(-n+2) { border-bottom: none; }
+
+  .meta-label {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .meta-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* Intro */
+  .intro {
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.65;
+    text-align: justify;
+    margin-bottom: 36px;
+    padding: 14px 16px;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--rule);
+  }
+
+  /* Section */
+  .section { margin-bottom: 36px; }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    min-width: 28px;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  /* Tool cards */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .tool-card {
+    border: 1px solid var(--rule);
+    padding: 14px;
+    background: var(--cream);
+    position: relative;
+  }
+
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .tool-card.claude::before { background: var(--accent); }
+  .tool-card.stitch::before { background: var(--blue); }
+  .tool-card.gemini::before { background: var(--green); }
+
+  .tool-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .tool-card.claude .tool-name { color: var(--accent); }
+  .tool-card.stitch .tool-name { color: var(--blue); }
+  .tool-card.gemini .tool-name { color: var(--green); }
+
+  .tool-maker {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .tool-desc {
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+
+  /* Use entries */
+  .use-entry {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0;
+    border: 1px solid var(--rule);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .use-tool-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-align: center;
+    padding: 12px 8px;
+  }
+
+  .use-entry.claude .use-tool-label { background: var(--accent-soft); color: var(--accent); }
+  .use-entry.stitch .use-tool-label { background: var(--blue-soft);   color: var(--blue); }
+  .use-entry.gemini .use-tool-label { background: var(--green-soft);  color: var(--green); }
+
+  .use-body {
+    padding: 12px 16px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .use-purpose {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+
+  .use-detail {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+
+  .use-detail ul {
+    margin: 6px 0 0 16px;
+  }
+
+  .use-detail ul li { margin-bottom: 3px; }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .code-block.blue  { border-left-color: var(--blue); }
+  .code-block.green { border-left-color: var(--green); }
+  .code-block.amber { border-left-color: var(--amber); }
+
+  .code-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .code-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .code-desc {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+
+  /* Human entries */
+  .human-entry {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+  }
+
+  .human-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .human-marker svg { width: 10px; height: 10px; fill: white; }
+
+  .human-title {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 3px;
+  }
+
+  .human-desc {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+
+  /* Problem entries */
+  .problem-entry {
+    border: 1px solid var(--rule);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .problem-header {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--cream);
+  }
+
+  .problem-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .problem-badge.resuelto    { background: var(--green-soft); color: var(--green); }
+  .problem-badge.aprendizaje { background: var(--blue-soft);  color: var(--blue); }
+  .problem-badge.limitacion  { background: var(--amber-soft); color: var(--amber); }
+
+  .problem-title { font-weight: 600; font-size: 13px; }
+
+  .problem-body {
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  .problem-resolution {
+    padding: 8px 14px;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--ink-muted);
+    border-top: 1px dashed var(--rule);
+  }
+
+  /* Signature block */
+  .signature-intro {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    text-align: justify;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .signature-block {
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 2px solid var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  .sig-field {
+    border-top: 1px solid var(--ink);
+    padding-top: 8px;
+    margin-top: 40px;
+  }
+
+  .sig-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-note {
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+
+  .doc-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; padding: 0; }
+    .page { box-shadow: none; border-top: none; max-width: 100%; }
+    .page::before { display: none; }
+    .inner { padding: 40px; }
+  }
+
+  @media (max-width: 640px) {
+    .inner { padding: 30px 20px; }
+    .page::before { display: none; }
+    .tool-grid { grid-template-columns: 1fr; }
+    .doc-meta { grid-template-columns: 1fr; }
+    .meta-field { border-right: none; }
+    .signature-block { grid-template-columns: 1fr; gap: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="inner">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="institution">UTN FRC · Tecnicatura Universitaria en Programación · 2026</div>
+    <h1 class="doc-title">Declaración de Uso de<br><em>Inteligencia Artificial</em></h1>
+    <div class="doc-subtitle">Trabajo Final Integrador — TallerSoft: Sistema ERP para Talleres de Servicio Técnico</div>
+
+    <div class="doc-meta">
+      <div class="meta-field">
+        <span class="meta-label">Proyecto</span>
+        <span class="meta-value">TallerSoft</span>
+      </div>
+      <div class="meta-field">
+        <span class="meta-label">Materia / Instancia</span>
+        <span class="meta-value">Trabajo Final Integrador</span>
+      </div>
+      <div class="meta-field">
+        <span class="meta-label">Estudiante</span>
+        <span class="meta-value">Fabrizio Leonel Ludueña</span>
+      </div>
+      <div class="meta-field">
+        <span class="meta-label">Fecha</span>
+        <span class="meta-value">Junio 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intro -->
+  <div class="intro">
+    El presente documento da cumplimiento a la política institucional de transparencia en el uso de
+    herramientas de inteligencia artificial durante el desarrollo de trabajos académicos. Se declaran,
+    con carácter exhaustivo y honesto, las herramientas de IA utilizadas a lo largo del ciclo de vida
+    del proyecto, el propósito concreto de cada una, los fragmentos de código o diseño que tuvieron
+    origen en dichas herramientas, las partes desarrolladas íntegramente por el estudiante, y las
+    limitaciones o problemas encontrados con cada tecnología.
+  </div>
+
+  <!-- 01 · Herramientas -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Herramientas de IA utilizadas</h2>
+    </div>
+
+    <div class="tool-grid">
+      <div class="tool-card claude">
+        <div class="tool-name">Claude</div>
+        <div class="tool-maker">Anthropic</div>
+        <div class="tool-desc">Asistente conversacional utilizado para la conceptualización del sistema, definición de la arquitectura de microservicios, resolución de problemas técnicos y aceleración de tareas repetitivas durante todo el desarrollo.</div>
+      </div>
+      <div class="tool-card stitch">
+        <div class="tool-name">Stitch</div>
+        <div class="tool-maker">Google</div>
+        <div class="tool-desc">Herramienta de generación de interfaces utilizada para producir la base visual de las pantallas del frontend Angular (Kanban, dashboard, formularios, listados).</div>
+      </div>
+      <div class="tool-card gemini">
+        <div class="tool-name">Gemini</div>
+        <div class="tool-maker">Google</div>
+        <div class="tool-desc">Modelo de lenguaje multimodal utilizado para mejorar la distribución y maquetado profesional de los campos en los formularios del frontend.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 · Para qué se usó -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Para qué se utilizó cada herramienta</h2>
+    </div>
+
+    <div class="use-entry claude">
+      <div class="use-tool-label">CLAUDE</div>
+      <div class="use-body">
+        <div class="use-purpose">Conceptualización, arquitectura y decisiones técnicas</div>
+        <div class="use-detail">Se utilizó Claude para dar forma a la idea central de TallerSoft: definir los módulos necesarios y delimitar el alcance del MVP. También se discutió la arquitectura de tres microservicios (Core Service en Java + Analytics Service en Python + API Gateway) y las razones de cada decisión: por qué Python separado para analytics, por qué JWT stateless, por qué un Gateway como punto de entrada único.</div>
+      </div>
+    </div>
+
+    <div class="use-entry claude">
+      <div class="use-tool-label">CLAUDE</div>
+      <div class="use-body">
+        <div class="use-purpose">Resolución de errores y tareas repetitivas de desarrollo</div>
+        <div class="use-detail">Se consultó para resolver errores puntuales: excepciones de Spring Security, configuración de CORS e integración con MercadoPago. Además se utilizó para acelerar tareas repetitivas (generación de DTOs, mappers, métodos CRUD estándar y configuraciones boilerplate) permitiendo focalizarse en la lógica de negocio.</div>
+      </div>
+    </div>
+
+    <div class="use-entry claude">
+      <div class="use-tool-label">CLAUDE</div>
+      <div class="use-body">
+        <div class="use-purpose">Asistencia en queries, tests y corrección de bugs</div>
+        <div class="use-detail">Asistió en la escritura de las consultas SQLAlchemy del Analytics Service (métricas de técnicos, evolución de caja, stock crítico, órdenes sin movimiento), en la generación de la estructura base de la suite de tests (JUnit 5 + Mockito, pytest, Jasmine/Karma), y apoyó la identificación de los tres bugs críticos del Sprint 6 (<code>ExpiredJwtException</code> sin capturar, validación de cliente inactivo, manejo de errores del asistente IA).</div>
+      </div>
+    </div>
+
+    <div class="use-entry stitch">
+      <div class="use-tool-label">STITCH</div>
+      <div class="use-body">
+        <div class="use-purpose">Generación de la base visual del frontend Angular</div>
+        <div class="use-detail">Google Stitch se utilizó para generar el esqueleto inicial de las pantallas del frontend: el panel Kanban de órdenes de trabajo, el dashboard de KPIs, el módulo de clientes y el módulo de stock. Las pantallas generadas (HTML/CSS sin lógica Angular real, con datos hardcodeados) sirvieron como punto de partida visual sobre el que se trabajó la integración con el backend.</div>
+      </div>
+    </div>
+
+    <div class="use-entry gemini">
+      <div class="use-tool-label">GEMINI</div>
+      <div class="use-body">
+        <div class="use-purpose">Distribución de campos en formularios</div>
+        <div class="use-detail">Gemini se utilizó para mejorar la experiencia de usuario en los formularios de alta y edición (clientes, equipos, órdenes de trabajo, repuestos). Se consultó cómo organizar los campos de forma lógica y profesional, qué campos agrupar visualmente en la misma fila, qué validaciones mostrar en línea y cómo ordenar la información para reducir la carga cognitiva del usuario final.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 · Código generado -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Partes del código generadas por IA</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">Claude · Backend Java</div>
+      <div class="code-title">Estructura inicial de entidades JPA, DTOs y configuración de seguridad</div>
+      <div class="code-desc">Se generaron esqueletos de entidades como <code>OrdenTrabajo</code>, <code>Cliente</code>, <code>Repuesto</code> y <code>Cobro</code>, así como sus respectivos DTOs de request y response. También se generó la configuración inicial de <code>SecurityConfig.java</code> y la lógica del <code>JwtAuthenticationFilter</code>.</div>
+    </div>
+
+    <div class="code-block blue">
+      <div class="code-label">Stitch · Frontend Angular</div>
+      <div class="code-title">Componentes visuales base de las pantallas principales</div>
+      <div class="code-desc">Se generaron los templates HTML y estilos base del Kanban de órdenes, el dashboard con tarjetas de KPIs, el layout general de la aplicación (sidebar, header) y las vistas de listado de clientes y stock. Estos componentes fueron el punto de partida visual antes de conectar la lógica real del backend.</div>
+    </div>
+
+    <div class="code-block green">
+      <div class="code-label">Claude · Analytics Service</div>
+      <div class="code-title">Estructura del microservicio Python y system prompt del asistente IA</div>
+      <div class="code-desc">Se generó la estructura de carpetas del servicio FastAPI, la función <code>obtener_contexto_taller()</code> que recopila métricas de la base de datos, y el <code>SYSTEM_PROMPT</code> del asistente que instruye al modelo a responder en español rioplatense usando solo datos reales del taller.</div>
+    </div>
+
+    <div class="code-block amber">
+      <div class="code-label">Gemini · Frontend Angular</div>
+      <div class="code-title">Layout y agrupación de campos en formularios</div>
+      <div class="code-desc">Se generaron propuestas de layout para los formularios de alta de clientes, equipos y órdenes de trabajo: agrupación de campos en grillas, orden de presentación, jerarquía visual y organización de la sección de información del equipo vs. la falla reportada.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">Claude · Boilerplate general</div>
+      <div class="code-title">Código repetitivo y estructural</div>
+      <div class="code-desc">Se utilizó Claude para generar código estructural repetitivo: DTOs adicionales, mappers entre entidades y DTOs, métodos CRUD estándar de repositorios y servicios, y configuraciones boilerplate de Spring Boot (application.yml, beans, excepciones comunes). Este código fue revisado y adaptado antes de integrarse al proyecto.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">Claude · Backend Java</div>
+      <div class="code-title">Generación de presupuesto PDF con iText 7</div>
+      <div class="code-desc">Se generó la estructura inicial del <code>PresupuestoPdfService</code>: secciones del documento (encabezado del taller, datos del cliente y equipo, descripción del trabajo, tabla de repuestos con filas alternadas y total), formateo de moneda local y configuración del documento A4 con <code>iText 7</code>.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">Claude · Backend Java</div>
+      <div class="code-title">Estructura base de los tests de integración</div>
+      <div class="code-desc">Se generó el esqueleto de los tests de integración <code>AuthControllerIntegrationTest</code> y <code>WebhookControllerIntegrationTest</code>: configuración del contexto Spring Boot de prueba, setup de datos, y estructura de escenarios para el flujo de autenticación JWT y la validación de webhook HMAC-SHA256.</div>
+    </div>
+
+    <div class="code-block green">
+      <div class="code-label">Claude · Analytics Service</div>
+      <div class="code-title">Consultas SQLAlchemy extendidas y serialización de contexto</div>
+      <div class="code-desc">Se generaron las consultas SQLAlchemy ampliadas del servicio: <code>rechazos_cobros</code>, <code>conversion_presupuesto</code>, <code>recurrencia_clientes</code>, <code>tiempo_promedio_por_estado</code>, <code>stock_por_categoria</code> y <code>get_repuestos_mas_usados</code>. También se generó la función <code>_construir_contexto_texto()</code> que serializa el diccionario de contexto como texto estructurado antes de enviarlo al modelo Groq.</div>
+    </div>
+
+    <div class="code-block green">
+      <div class="code-label">Claude · Analytics Service</div>
+      <div class="code-title">Sistema de alertas operativas</div>
+      <div class="code-desc">Se generó el <code>alertas_service.py</code>: evalúa 5 condiciones de alerta en tiempo real (órdenes sin movimiento ≥5 días, alta prioridad parada ≥2 días, stock crítico, cobros rechazados del día, tasa de conversión &lt;60%), asigna severidad <code>danger</code>/<code>warn</code>, y mantiene en memoria el estado leído/no leído por ID de alerta.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">Claude · Frontend Angular</div>
+      <div class="code-title">Dashboard con 4 pestañas, polling automático y módulo de usuarios</div>
+      <div class="code-desc">Se generó la estructura del <code>DashboardComponent</code> con 4 tabs (Operativo, Financiero, Clientes, Stock), carga paralela con <code>forkJoin()</code> y actualización automática de alertas cada 2 minutos usando <code>interval()</code> + <code>startWith(0)</code>. También se generó la estructura base del módulo de usuarios del frontend: listado con tabla, y dialogs reutilizables de creación y edición de usuarios.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">Claude · API Gateway</div>
+      <div class="code-title">Filtros globales de seguridad HTTP</div>
+      <div class="code-desc">Se generó la configuración de <code>default-filters</code> en Spring Cloud Gateway: headers de seguridad <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code> y <code>X-XSS-Protection</code> aplicados automáticamente a todas las respuestas del sistema.</div>
+    </div>
+  </div>
+
+  <!-- 04 · Desarrollado por el estudiante -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Partes desarrolladas íntegramente propias</h2>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Lógica de negocio completa del Core Service</div>
+        <div class="human-desc">Toda la lógica de negocio fue escrita y validada manualmente: las reglas de transición de estados de órdenes (PENDIENTE → EN_PROCESO → LISTO → ENTREGADO), la validación de cliente activo al crear una orden, el descuento atómico de stock al agregar repuestos y el cálculo del presupuesto acumulado.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Integración con MercadoPago</div>
+        <div class="human-desc">La integración completa con MercadoPago fue desarrollada manualmente: validación del webhook por firma HMAC-SHA256, idempotencia del cobro y flujo QR de punto de venta.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Integración frontend–backend y guards de seguridad</div>
+        <div class="human-desc">La conexión de los componentes generados por Stitch con los servicios HTTP reales, el <code>JwtInterceptor</code>, el <code>AuthGuard</code> y el <code>RoleGuard</code> fueron implementados manualmente. Lo mismo aplica a la lógica de drag &amp; drop del Kanban con rollback optimista en caso de error.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Módulo de caja (frontend)</div>
+        <div class="human-desc">El módulo de caja del frontend fue desarrollado íntegramente: vista de caja diaria con desglose de ingresos por medio de pago, componente <code>CobrarOrden</code> para iniciar el flujo de cobro desde una orden lista, y consumo de los endpoints de cobros del Core Service.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Chat flotante y persistencia de historial de conversaciones</div>
+        <div class="human-desc">El <code>ChatFlotanteComponent</code> (widget accesible desde cualquier pantalla de la app) y el <code>ChatHistoryService</code> (gestión de sesiones de chat con persistencia en <code>localStorage</code>, creación, eliminación y navegación de conversaciones) fueron diseñados e implementados íntegramente. Representan una capa UX propia sobre la API del asistente IA.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Iteración del system prompt del asistente IA</div>
+        <div class="human-desc">Se realizaron múltiples ajustes manuales al system prompt hasta lograr que el asistente no alucinara datos y respondiera exclusivamente con el contexto provisto por <code>obtener_contexto_taller()</code>.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Arquitectura de excepciones del Core Service</div>
+        <div class="human-desc">Se diseñó e implementó íntegramente la jerarquía de excepciones de dominio: <code>InsufficientStockException</code>, <code>InvalidStateTransitionException</code>, <code>MissingDiagnosticException</code>, <code>EntityNotFoundException</code>, <code>CobrosException</code> e <code>InvalidCredentialsException</code>, junto con el <code>GlobalExceptionHandler</code> que las mapea a respuestas HTTP estructuradas. También se creó la anotación personalizada <code>@CurrentUser</code> para inyectar el usuario autenticado en los controllers sin acoplarse a Spring Security directamente.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Módulo de usuarios completo (backend)</div>
+        <div class="human-desc">El módulo de gestión de usuarios fue desarrollado íntegramente: entidad <code>Usuario</code> con roles (<code>ADMIN</code>, <code>TÉCNICO</code>, <code>RECEPCIONISTA</code>), <code>UsuariosController</code>, <code>UsuarioService</code>, DTOs de request/response/update, mapper, y repositorio JPA. Incluye la lógica de alta, edición y desactivación de usuarios con restricciones por rol.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Modelado de la base de datos</div>
+        <div class="human-desc">El diseño del esquema relacional en PostgreSQL 16 fue realizado íntegramente por el estudiante: definición de entidades, relaciones, restricciones de integridad referencial e índices, tomando decisiones de normalización propias del dominio del taller.</div>
+      </div>
+    </div>
+
+    <div class="human-entry">
+      <div class="human-marker">
+        <svg viewBox="0 0 12 12"><path d="M6 1a2 2 0 1 1 0 4A2 2 0 0 1 6 1zm0 5c2.7 0 5 1.3 5 3v1H1v-1c0-1.7 2.3-3 5-3z"/></svg>
+      </div>
+      <div>
+        <div class="human-title">Docker Compose y configuración de deploy</div>
+        <div class="human-desc">La orquestación de los cinco servicios (db, backend, analytics, gateway, frontend) con Docker Compose, la creación del usuario <code>analytics_readonly</code> con permisos de solo lectura en PostgreSQL, la configuración de variables de entorno de producción y el checklist de deploy fueron elaborados manualmente.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 · Problemas -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Problemas encontrados con el uso de IA</h2>
+    </div>
+
+    <div class="problem-entry">
+      <div class="problem-header">
+        <span class="problem-badge resuelto">RESUELTO</span>
+        <div class="problem-title">El código generado por Stitch no estaba conectado a la lógica real</div>
+      </div>
+      <div class="problem-body">Las pantallas generadas por Stitch eran estáticamente correctas visualmente pero no tenían servicios Angular, no usaban <code>HttpClient</code> ni <code>Observable</code>, y los datos eran hardcodeados. Fue necesario refactorizar cada componente para conectarlo con los servicios reales del backend.</div>
+      <div class="problem-resolution">→ Resolución: se tomó el HTML/CSS generado como base visual y se reemplazó toda la lógica por código propio siguiendo las convenciones del proyecto.</div>
+    </div>
+
+    <div class="problem-entry">
+      <div class="problem-header">
+        <span class="problem-badge resuelto">RESUELTO</span>
+        <div class="problem-title">Claude sugería código de Spring Boot desactualizado (Boot 2.x)</div>
+      </div>
+      <div class="problem-body">Algunas sugerencias de Claude para la configuración de Spring Security usaban la API deprecada de Boot 2.x (encadenado de <code>HttpSecurity</code> con <code>and()</code>), que no compila en Spring Boot 3 / Spring Security 6. Fue necesario identificar el problema y reescribir la configuración con la API de lambdas de Boot 3.</div>
+      <div class="problem-resolution">→ Resolución: se verificó cada fragmento sugerido contra la documentación oficial de Spring Boot 3 antes de integrarlo.</div>
+    </div>
+
+    <div class="problem-entry">
+      <div class="problem-header">
+        <span class="problem-badge aprendizaje">APRENDIZAJE</span>
+        <div class="problem-title">El asistente IA del sistema generaba respuestas inventadas ("alucinaciones")</div>
+      </div>
+      <div class="problem-body">Al integrar el asistente IA del sistema (Groq/llama-3.3-70b), en las primeras pruebas el modelo respondía con datos inventados cuando no tenía suficiente contexto. Fue necesario diseñar un sistema de contexto dinámico que proveyera datos reales de la BD en cada consulta.</div>
+      <div class="problem-resolution">→ Resolución: la función <code>obtener_contexto_taller()</code> recopila métricas reales antes de cada consulta. El prompt indica explícitamente: "No inventes ni estimes información."</div>
+    </div>
+
+    <div class="problem-entry">
+      <div class="problem-header">
+        <span class="problem-badge limitacion">LIMITACIÓN</span>
+        <div class="problem-title">Gemini no conocía el contexto del proyecto al sugerir layouts</div>
+      </div>
+      <div class="problem-body">Las sugerencias de layout de Gemini para los formularios eran genéricas (no conocía que se trataba de un taller de servicio técnico ni los campos específicos de cada entidad). Fue necesario proveer contexto detallado en cada consulta y filtrar sugerencias que no aplicaban al dominio del negocio.</div>
+      <div class="problem-resolution">→ Resolución: se elaboraron prompts con contexto completo del dominio y se seleccionaron manualmente las sugerencias pertinentes.</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <span class="footer-note">Este documento forma parte del Trabajo Final Integrador de la Tecnicatura Universitaria en Programación — UTN FRC</span>
+    <span class="doc-number">FORM-IA-2026</span>
+  </div>
+
+</div>
+</div>
+</body>
+</html>

@@ -2,7 +2,7 @@ import { Component, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -18,7 +18,7 @@ import { UsuarioService, UsuarioResponse, UsuarioRequest } from '../../services/
 export class CreateUserDialogComponent {
   private fb = inject(FormBuilder);
   private usuarioService = inject(UsuarioService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private dialogRef = inject(MatDialogRef<CreateUserDialogComponent>);
   private destroyRef = inject(DestroyRef);
 
@@ -90,11 +90,7 @@ export class CreateUserDialogComponent {
           if (message.toLowerCase().includes('email') || message.toLowerCase().includes('exist')) {
             this.form.get('email')?.setErrors({ duplicate: true });
           } else {
-            this.snackBar.open(
-              message,
-              'Cerrar',
-              { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-            );
+            this.notifications.error(message);
           }
         }
       });

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -23,7 +23,7 @@ import { ConfirmDialogComponent } from '@shared/dialogs/confirm-dialog.component
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
-    MatSnackBarModule,
+
     MatDialogModule,
     RouterModule
   ],
@@ -33,7 +33,7 @@ import { ConfirmDialogComponent } from '@shared/dialogs/confirm-dialog.component
 export class ListComponent implements OnInit {
   private clienteService = inject(ClienteService);
   private authService = inject(AuthService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -100,11 +100,7 @@ export class ListComponent implements OnInit {
       },
       error: err => {
         console.error('[ListComponent] Error loading clientes:', err);
-        this.snackBar.open(
-          err.error?.message || 'Error al cargar los clientes',
-          'Cerrar',
-          { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-        );
+        this.notifications.error(err.error?.message || 'Error al cargar los clientes');
       }
     });
 
@@ -127,10 +123,6 @@ export class ListComponent implements OnInit {
 
   getInitials(name: string): string {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  }
-
-  getClienteOrdenesCount(clienteId: string | number): number {
-    return 0; // TODO: implement based on orders data
   }
 
   navigateToClient(clienteId: string | number): void {
@@ -156,19 +148,11 @@ export class ListComponent implements OnInit {
           takeUntilDestroyed(this.destroyRef)
         ).subscribe({
           next: () => {
-            this.snackBar.open(
-              'Cliente eliminado correctamente',
-              'Cerrar',
-              { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-            );
+            this.notifications.success('Cliente eliminado correctamente');
             this.triggerSearch(this.searchTerm);
           },
           error: err => {
-            this.snackBar.open(
-              err.error?.message || 'Error al eliminar el cliente',
-              'Cerrar',
-              { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-            );
+            this.notifications.error(err.error?.message || 'Error al eliminar el cliente');
           }
         });
       }
@@ -179,9 +163,6 @@ export class ListComponent implements OnInit {
     this.router.navigate(['/clientes/nuevo']);
   }
 
-  onFilterClick(): void {
-    // TODO: Implement filter panel if needed
-    console.log('Filter clicked');
-  }
+  onFilterClick(): void {}
 }
 

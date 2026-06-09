@@ -4,11 +4,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../core/services/notification.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/auth/auth.service';
+import { Rol } from '@core/models/rol.enum';
 import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
 import { CobrosService } from '../../caja/services/cobros.service';
 import { AddRepuestoDialogComponent } from '../dialogs/add-repuesto-dialog/add-repuesto-dialog.component';
@@ -22,7 +23,6 @@ import { AddRepuestoDialogComponent } from '../dialogs/add-repuesto-dialog/add-r
     FormsModule,
     MatIconModule,
     MatButtonModule,
-    MatSnackBarModule,
     MatDialogModule
   ],
   templateUrl: './detail.component.html',
@@ -35,7 +35,7 @@ export class DetailComponent implements OnInit {
   private ordenesService = inject(OrdenesService);
   private cobrosService = inject(CobrosService);
   private sanitizer = inject(DomSanitizer);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
 
@@ -69,11 +69,7 @@ export class DetailComponent implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          this.snackBar.open(
-            err.error?.message || 'Error al cargar la orden',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al cargar la orden');
           setTimeout(() => this.router.navigate(['/ordenes']), 2000);
         }
       });
@@ -89,19 +85,11 @@ export class DetailComponent implements OnInit {
           this.orden = updatedOrden;
           this.isSavingDiagnostico = false;
           this.isEditingDiagnostico = false;
-          this.snackBar.open('Diagnóstico guardado', 'Cerrar', {
-            duration: 2000,
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom'
-          });
+          this.notifications.success('Diagnóstico guardado');
         },
         error: (err) => {
           this.isSavingDiagnostico = false;
-          this.snackBar.open(
-            err.error?.message || 'Error al guardar el diagnóstico',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al guardar el diagnóstico');
         }
       });
   }
@@ -119,20 +107,11 @@ export class DetailComponent implements OnInit {
           this.orden = updatedOrden;
           this.isChangingEstado = false;
           this.isEditingDiagnostico = false;
-          this.snackBar.open('Estado actualizado', 'Cerrar', {
-            duration: 2000,
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom'
-          });
+          this.notifications.success('Estado actualizado');
         },
         error: (err) => {
           this.isChangingEstado = false;
-          const msg = err.error?.message || 'Error al cambiar el estado';
-          this.snackBar.open(msg, 'Cerrar', {
-            duration: 3000,
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom'
-          });
+          this.notifications.error(err.error?.message || 'Error al cambiar el estado');
         }
       });
   }
@@ -144,18 +123,10 @@ export class DetailComponent implements OnInit {
       .subscribe({
         next: (updatedOrden) => {
           this.orden = updatedOrden;
-          this.snackBar.open('Repuesto eliminado', 'Cerrar', {
-            duration: 2000,
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom'
-          });
+          this.notifications.success('Repuesto eliminado');
         },
         error: (err) => {
-          this.snackBar.open(
-            err.error?.message || 'Error al eliminar repuesto',
-            'Cerrar',
-            { duration: 3000, horizontalPosition: 'right', verticalPosition: 'bottom' }
-          );
+          this.notifications.error(err.error?.message || 'Error al eliminar repuesto');
         }
       });
   }
@@ -192,7 +163,7 @@ export class DetailComponent implements OnInit {
         },
         error: () => {
           this.isPdfLoading = false;
-          this.snackBar.open('Error al generar el presupuesto', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al generar el presupuesto');
         }
       });
   }
@@ -209,7 +180,7 @@ export class DetailComponent implements OnInit {
           link.click();
         },
         error: () => {
-          this.snackBar.open('Error al descargar el presupuesto', 'Cerrar', { duration: 3000 });
+          this.notifications.error('Error al descargar el presupuesto');
         }
       });
   }
@@ -242,14 +213,14 @@ export class DetailComponent implements OnInit {
   }
 
   canSaveDiagnostico(): boolean {
-    return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
+    return (this.currentRole === Rol.ADMIN || this.currentRole === Rol.TECNICO) &&
            this.orden?.estado !== 'ENTREGADO' &&
            this.orden?.estado !== 'LISTO';
   }
 
   isDiagnosticoEditable(): boolean {
     if (!this.orden) return false;
-    if (this.currentRole !== 'ADMIN' && this.currentRole !== 'TECNICO') return false;
+    if (this.currentRole !== Rol.ADMIN && this.currentRole !== Rol.TECNICO) return false;
     if (this.orden.estado === 'PENDIENTE') {
       return !this.orden.diagnostico || this.isEditingDiagnostico;
     }
@@ -259,7 +230,7 @@ export class DetailComponent implements OnInit {
 
   isDiagnosticoDisabledInput(): boolean {
     if (!this.orden) return false;
-    if (this.currentRole !== 'ADMIN' && this.currentRole !== 'TECNICO') return false;
+    if (this.currentRole !== Rol.ADMIN && this.currentRole !== Rol.TECNICO) return false;
     if (this.orden.estado === 'PENDIENTE') {
       return !!this.orden.diagnostico && !this.isEditingDiagnostico;
     }
@@ -272,13 +243,13 @@ export class DetailComponent implements OnInit {
   }
 
   canChangeEstado(): boolean {
-    return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
+    return (this.currentRole === Rol.ADMIN || this.currentRole === Rol.TECNICO) &&
            this.orden?.estado !== 'ENTREGADO' &&
            this.orden?.estado !== 'LISTO';
   }
 
   canAddRepuesto(): boolean {
-    return (this.currentRole === 'ADMIN' || this.currentRole === 'TECNICO') &&
+    return (this.currentRole === Rol.ADMIN || this.currentRole === Rol.TECNICO) &&
            this.orden?.estado !== 'ENTREGADO';
   }
 

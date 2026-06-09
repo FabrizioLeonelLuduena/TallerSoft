@@ -3,6 +3,7 @@ package com.tallersoft.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,11 +21,21 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:clave_secreta_minimo_256_bits_para_produccion_cambiar_esto}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration:86400000}")
+    @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    @PostConstruct
+    private void validateJwtSecret() {
+        if (jwtSecret == null || jwtSecret.isBlank() || jwtSecret.length() < 32) {
+            throw new IllegalStateException(
+                "jwt.secret debe estar configurado y tener al menos 32 caracteres. " +
+                "Seteá la variable de entorno JWT_SECRET."
+            );
+        }
+    }
 
     /**
      * Generate a JWT token with user information

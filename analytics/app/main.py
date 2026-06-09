@@ -10,6 +10,7 @@ Runs on port 8082.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import ordenes, stock, caja, asistente, clientes, alertas
+from app.config import settings
 
 # Create FastAPI app
 app = FastAPI(
@@ -24,13 +25,7 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8080",
-        "http://gateway:8080",
-        "http://localhost:4200",
-        "http://localhost",
-        "http://localhost:80",
-    ],
+    allow_origins=settings.allowed_origins.split(","),
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],

@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -102,18 +103,18 @@ public class CobrosService {
         if (cobro.getMedioPago() == MedioPago.MERCADOPAGO
                 && cobro.getEstadoPago() == EstadoPago.PENDIENTE) {
             try {
-                Map<String, Object> resultado =
-                        mercadoPagoService.buscarPagoPorOrden(cobro.getOrden().getId());
-                if (resultado != null && "approved".equals(resultado.get("status"))) {
-                    cobro.setEstadoPago(EstadoPago.APROBADO);
-                    cobro.setMpPaymentId((String) resultado.get("mpPaymentId"));
-                    cobrosRepository.save(cobro);
-                    OrdenTrabajo orden = cobro.getOrden();
-                    orden.setEstado(EstadoOrden.ENTREGADO);
-                    ordenTrabajoRepository.save(orden);
-                    log.info("Cobro {} actualizado a APROBADO via reconciliación activa (MP payment: {})",
-                            cobroId, resultado.get("mpPaymentId"));
-                }
+                mercadoPagoService.buscarPagoPorOrden(cobro.getOrden().getId())
+                        .filter(r -> "approved".equals(r.get("status")))
+                        .ifPresent(r -> {
+                            cobro.setEstadoPago(EstadoPago.APROBADO);
+                            cobro.setMpPaymentId((String) r.get("mpPaymentId"));
+                            cobrosRepository.save(cobro);
+                            OrdenTrabajo orden = cobro.getOrden();
+                            orden.setEstado(EstadoOrden.ENTREGADO);
+                            ordenTrabajoRepository.save(orden);
+                            log.info("Cobro {} actualizado a APROBADO via reconciliación activa (MP payment: {})",
+                                    cobroId, r.get("mpPaymentId"));
+                        });
             } catch (Exception e) {
                 log.warn("Error en reconciliación activa para cobro {}: {}", cobroId, e.getMessage());
             }

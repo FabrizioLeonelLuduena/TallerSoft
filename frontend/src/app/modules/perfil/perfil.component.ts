@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '@core/auth/auth.service';
 import { ProfileService } from '@core/services/profile.service';
 import { UsuarioService, UsuarioResponse } from '../usuarios/services/usuario.service';
@@ -18,7 +18,7 @@ const GRADIENTS = [
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.scss']
 })
@@ -50,7 +50,7 @@ export class PerfilComponent implements OnInit {
     private authService: AuthService,
     private profileService: ProfileService,
     private usuarioService: UsuarioService,
-    private snackBar: MatSnackBar,
+    private notifications: NotificationService,
     private router: Router
   ) {}
 
@@ -105,20 +105,20 @@ export class PerfilComponent implements OnInit {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      this.snackBar.open('Solo se admiten imágenes (JPG, PNG, WebP)', '', { duration: 3000 });
+      this.notifications.warning('Solo se admiten imágenes (JPG, PNG, WebP)');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      this.snackBar.open('El archivo es demasiado grande (máx. 5 MB)', '', { duration: 3000 });
+      this.notifications.warning('El archivo es demasiado grande (máx. 5 MB)');
       return;
     }
 
     this.profileService.compressImage(file).then((base64) => {
       this.avatarImage = base64;
       this.profileService.update({ avatarImage: base64 });
-      this.snackBar.open('Foto de perfil actualizada', '', { duration: 2000 });
+      this.notifications.success('Foto de perfil actualizada');
     }).catch(() => {
-      this.snackBar.open('No se pudo procesar la imagen', '', { duration: 3000 });
+      this.notifications.error('No se pudo procesar la imagen');
     });
 
     input.value = '';
@@ -159,17 +159,17 @@ export class PerfilComponent implements OnInit {
         this.usuario = u;
         this.profileService.update({ nombre: this.formNombre });
         this.saving = false;
-        this.snackBar.open('Datos actualizados', '', { duration: 2500 });
+        this.notifications.success('Datos actualizados');
       },
-      error: () => { this.saving = false; this.snackBar.open('Error al guardar los datos', '', { duration: 3000 }); }
+      error: () => { this.saving = false; this.notifications.error('Error al guardar los datos'); }
     });
   }
 
   changePassword(): void {
     if (!this.usuario) return;
-    if (!this.newPassword) { this.snackBar.open('Ingresá una nueva contraseña', '', { duration: 2500 }); return; }
-    if (this.newPassword !== this.confirmPassword) { this.snackBar.open('Las contraseñas no coinciden', '', { duration: 2500 }); return; }
-    if (this.pwStrength < 2) { this.snackBar.open('La contraseña es demasiado débil', '', { duration: 2500 }); return; }
+    if (!this.newPassword) { this.notifications.warning('Ingresá una nueva contraseña'); return; }
+    if (this.newPassword !== this.confirmPassword) { this.notifications.warning('Las contraseñas no coinciden'); return; }
+    if (this.pwStrength < 2) { this.notifications.warning('La contraseña es demasiado débil'); return; }
     this.saving = true;
     this.usuarioService.editarUsuario(this.usuario.id, {
       nombre: this.usuario.nombre,
@@ -183,12 +183,12 @@ export class PerfilComponent implements OnInit {
         this.currentPassword = ''; this.newPassword = ''; this.confirmPassword = '';
         this.pwStrength = 0; this.pwLabelColor = '';
         this.pwLabel = 'Ingresá una nueva contraseña';
-        this.snackBar.open('Contraseña actualizada', '', { duration: 2500 });
+        this.notifications.success('Contraseña actualizada');
       },
       error: (err) => {
         this.saving = false;
         const msg = err?.error?.error || 'Error al cambiar la contraseña';
-        this.snackBar.open(msg, '', { duration: 3500 });
+        this.notifications.error(msg);
       }
     });
   }

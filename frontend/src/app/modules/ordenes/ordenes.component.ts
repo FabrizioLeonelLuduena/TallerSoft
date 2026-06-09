@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../core/services/notification.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/auth/auth.service';
+import { Rol } from '@core/models/rol.enum';
 import { OrdenesService, OrdenTrabajoResponse } from './services/ordenes.service';
 import { KanbanComponent } from './kanban/kanban.component';
 import { ListComponent } from './list/list.component';
@@ -20,7 +21,6 @@ import { ListComponent } from './list/list.component';
     RouterModule,
     MatIconModule,
     MatButtonModule,
-    MatSnackBarModule,
     KanbanComponent,
     ListComponent
   ],
@@ -30,7 +30,7 @@ import { ListComponent } from './list/list.component';
 export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
   private authService = inject(AuthService);
   private ordenesService = inject(OrdenesService);
-  private snackBar = inject(MatSnackBar);
+  private notifications = inject(NotificationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -60,7 +60,7 @@ export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
 
   private loadOrdenes() {
     this.isLoading = true;
-    const loadObservable = this.currentRole === 'TECNICO' 
+    const loadObservable = this.currentRole === Rol.TECNICO
       ? this.ordenesService.listarMisOrdenes()
       : this.ordenesService.listarOrdenes();
 
@@ -75,11 +75,7 @@ export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
         },
         error: (err) => {
           this.isLoading = false;
-          this.snackBar.open(
-            err.error?.message || 'Error al cargar las órdenes',
-            'Cerrar',
-            { duration: 3000 }
-          );
+          this.notifications.error(err.error?.message || 'Error al cargar las órdenes');
         }
       });
   }
@@ -131,6 +127,6 @@ export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
   }
 
   canCreateOrden(): boolean {
-    return this.currentRole === 'ADMIN' || this.currentRole === 'RECEPCION';
+    return this.currentRole === Rol.ADMIN || this.currentRole === Rol.RECEPCION;
   }
 }

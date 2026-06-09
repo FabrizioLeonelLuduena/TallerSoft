@@ -4,6 +4,7 @@ import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd } fro
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { AuthService, CurrentUser } from '@core/auth/auth.service';
+import { Rol } from '@core/models/rol.enum';
 import { ChatHistoryService, ChatSession } from '@core/services/chat-history.service';
 import { ChatFlotanteComponent } from '@shared/components/chat-flotante/chat-flotante.component';
 import { TopBarComponent } from '@shared/components/top-bar/top-bar.component';
@@ -12,7 +13,7 @@ interface NavItem {
   label: string;
   icon: string;
   route?: string;
-  roles?: string[];
+  roles?: Rol[];
 }
 
 @Component({
@@ -40,13 +41,13 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
 
   navItems: NavItem[] = [
-    { label: 'Dashboard',         icon: 'dashboard',           route: '/dashboard',   roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
-    { label: 'Clientes',          icon: 'people',              route: '/clientes',    roles: ['ADMIN', 'RECEPCION'] },
-    { label: 'Órdenes de Trabajo',icon: 'build',               route: '/ordenes',     roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
-    { label: 'Stock',             icon: 'inventory_2',         route: '/stock',       roles: ['ADMIN', 'TECNICO', 'RECEPCION'] },
-    { label: 'Caja y Facturación',icon: 'point_of_sale',       route: '/caja/diaria', roles: ['ADMIN', 'RECEPCION'] },
-    { label: 'Usuarios',          icon: 'admin_panel_settings',route: '/usuarios',    roles: ['ADMIN'] },
-    { label: 'Asistente IA',      icon: 'smart_toy',           route: '/asistente',   roles: ['ADMIN', 'RECEPCION'] },
+    { label: 'Dashboard',         icon: 'dashboard',           route: '/dashboard',   roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
+    { label: 'Clientes',          icon: 'people',              route: '/clientes',    roles: [Rol.ADMIN, Rol.RECEPCION] },
+    { label: 'Órdenes de Trabajo',icon: 'build',               route: '/ordenes',     roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
+    { label: 'Stock',             icon: 'inventory_2',         route: '/stock',       roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
+    { label: 'Caja y Facturación',icon: 'point_of_sale',       route: '/caja/diaria', roles: [Rol.ADMIN, Rol.RECEPCION] },
+    { label: 'Usuarios',          icon: 'admin_panel_settings',route: '/usuarios',    roles: [Rol.ADMIN] },
+    { label: 'Asistente IA',      icon: 'smart_toy',           route: '/asistente',   roles: [Rol.ADMIN, Rol.RECEPCION] },
   ];
 
   constructor(
@@ -77,7 +78,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   getVisibleNavItems(): NavItem[] {
     if (!this.currentUser) return [];
     return this.navItems.filter(item =>
-      !item.roles || item.roles.includes(this.currentUser!.rol)
+      !item.roles || item.roles.includes(this.currentUser!.rol as Rol)
     );
   }
 
