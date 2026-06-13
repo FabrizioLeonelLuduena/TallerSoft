@@ -56,18 +56,24 @@ public class ClienteService {
     }
 
     /**
-     * List all active clients, optionally filtered by name
+     * List clients optionally filtered by name.
+     * When incluirInactivos=true returns all clients; otherwise only active ones.
      *
-     * @param nombre Optional name filter
+     * @param nombre           Optional name filter
+     * @param incluirInactivos Whether to include inactive clients
      * @return List of ClienteResponse
      */
     @Transactional(readOnly = true)
-    public List<ClienteResponse> listarClientes(String nombre) {
+    public List<ClienteResponse> listarClientes(String nombre, boolean incluirInactivos) {
         List<Cliente> clientes;
-        if (nombre != null && !nombre.isBlank()) {
-            clientes = clienteRepository.findByNombreContainingIgnoreCaseAndActivoTrue(nombre);
+        if (incluirInactivos) {
+            clientes = (nombre != null && !nombre.isBlank())
+                    ? clienteRepository.findByNombreContainingIgnoreCase(nombre)
+                    : clienteRepository.findAll();
         } else {
-            clientes = clienteRepository.findByActivoTrue();
+            clientes = (nombre != null && !nombre.isBlank())
+                    ? clienteRepository.findByNombreContainingIgnoreCaseAndActivoTrue(nombre)
+                    : clienteRepository.findByActivoTrue();
         }
         return clienteMapper.toResponseList(clientes);
     }
@@ -93,6 +99,21 @@ public class ClienteService {
         Cliente updated = clienteRepository.save(cliente);
         log.info("Cliente actualizado: {}", updated.getNombre());
         return clienteMapper.toResponse(updated);
+    }
+
+    /**
+     * Reactivate a client (sets activo=true)
+     *
+     * @param id Client ID
+     * @throws EntityNotFoundException if client not found
+     */
+    @Transactional
+    public void reactivarCliente(Long id) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado con ID: " + id));
+        cliente.setActivo(true);
+        clienteRepository.save(cliente);
+        log.info("Cliente reactivado: {}", cliente.getNombre());
     }
 
     /**

@@ -73,7 +73,7 @@ mvn test -Dtest=OrdenTrabajoServiceTest
 
 - **Ubicación:** `analytics/tests/`
 - `conftest.py` configura SQLite in-memory para tests sin depender de PostgreSQL
-- Se mockean los servicios externos (Claude/Groq) con `unittest.mock.patch`
+- Se mockean los servicios externos (Groq) con `unittest.mock.patch`
 - Una clase o archivo por router testeado
 
 ### Suite de Tests
@@ -84,7 +84,6 @@ mvn test -Dtest=OrdenTrabajoServiceTest
 | `test_stock.py` | `GET /analytics/stock/critico`, `/mas-usados` |
 | `test_caja.py` | `GET /analytics/caja/resumen-diario`, `/evolucion-mensual` |
 | `test_asistente.py` | `POST /analytics/asistente/consulta` — estructura, validación, error handling |
-| `test_claude_service.py` | `consultar_asistente()` — contrato, SYSTEM_PROMPT, manejo de errores de API |
 
 ### Cómo Correr
 

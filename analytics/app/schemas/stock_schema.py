@@ -8,6 +8,17 @@ class RepuestoCritico(BaseModel):
     categoria: Optional[str] = None
     stock_actual: int
     stock_minimo: int
+    stock_bajo: int
+    diferencia: int
+
+
+class RepuestoBajo(BaseModel):
+    id: int
+    nombre: str
+    categoria: Optional[str] = None
+    stock_actual: int
+    stock_minimo: int
+    stock_bajo: int
     diferencia: int
 
 

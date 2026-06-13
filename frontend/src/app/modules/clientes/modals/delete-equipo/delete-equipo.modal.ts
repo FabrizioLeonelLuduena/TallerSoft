@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EquipoService } from '@modules/ordenes/services/equipo.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -8,13 +8,13 @@ import { NotificationService } from '../../../../core/services/notification.serv
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
+    <dialog #d class="confirm-dialog" (click)="onCancel()" (cancel)="onCancel()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <span class="material-symbols-outlined modal-icon">delete_forever</span>
           <h2>¿Eliminar equipo?</h2>
         </div>
-        
+
         <div class="modal-body">
           <p class="confirmation-text">
             Esta acción no se puede deshacer. Se eliminará el equipo del cliente.
@@ -30,7 +30,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
         </div>
 
         <div class="modal-actions">
-          <button 
+          <button
             class="btn-cancel"
             (click)="onCancel()"
             type="button"
@@ -38,7 +38,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
           >
             Cancelar
           </button>
-          <button 
+          <button
             class="btn-delete"
             (click)="onConfirm()"
             type="button"
@@ -49,22 +49,24 @@ import { NotificationService } from '../../../../core/services/notification.serv
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   `,
   styles: [`
-    .modal-overlay {
+    .confirm-dialog {
+      all: unset;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: flex;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: none;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-      backdrop-filter: blur(4px);
-      animation: fadeIn 0.2s ease-out;
+
+      &[open] {
+        display: flex;
+        background: rgba(0, 0, 0, 0.6);
+        animation: fadeIn 0.2s ease-out;
+      }
     }
 
     .modal-content {
@@ -105,7 +107,6 @@ import { NotificationService } from '../../../../core/services/notification.serv
     .modal-body {
       padding: 24px 32px;
       flex: 1;
-      overflow-y: auto;
     }
 
     .confirmation-text {
@@ -198,27 +199,19 @@ import { NotificationService } from '../../../../core/services/notification.serv
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
   `]
 })
-export class DeleteEquipoModal {
+export class DeleteEquipoModal implements OnChanges {
+  @ViewChild('d') private dialogRef!: ElementRef<HTMLDialogElement>;
+
   @Input() isOpen = false;
   @Input() equipo: any = null;
   @Output() confirmed = new EventEmitter<void>();
@@ -228,6 +221,16 @@ export class DeleteEquipoModal {
 
   private equipoService = inject(EquipoService);
   private notifications = inject(NotificationService);
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes['isOpen'] || !this.dialogRef) return;
+    if (changes['isOpen'].currentValue) {
+      this.isLoading = false;
+      this.dialogRef.nativeElement.showModal();
+    } else if (this.dialogRef.nativeElement.open) {
+      this.dialogRef.nativeElement.close();
+    }
+  }
 
   onCancel() {
     this.cancelled.emit();

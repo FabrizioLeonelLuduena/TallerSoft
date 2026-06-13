@@ -40,6 +40,7 @@
           <th>Usuario</th>
           <th>Email</th>
           <th>Rol</th>
+          <th>Estado</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -72,13 +73,24 @@
             </span>
           </td>
 
+          <!-- Estado Column -->
+          <td class="cell-estado">
+            <span class="estado-badge" [class.inactivo]="!usuario.activo">
+              <span class="estado-dot"></span>
+              {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+
           <!-- Acciones Column -->
           <td class="cell-acciones">
             <button (click)="openEditDialog(usuario)" class="btn-icon" type="button" title="Editar usuario">
               <span class="material-symbols-outlined">edit</span>
             </button>
-            <button (click)="openDeleteUserModal(usuario)" class="btn-icon-danger" type="button" title="Eliminar usuario">
+            <button *ngIf="usuario.activo" (click)="openDeleteUserModal(usuario)" class="btn-icon-danger" type="button" title="Desactivar usuario">
               <span class="material-symbols-outlined">delete</span>
+            </button>
+            <button *ngIf="!usuario.activo" (click)="reactivarUsuario(usuario)" class="btn-icon-success" type="button" title="Reactivar usuario">
+              <span class="material-symbols-outlined">restore</span>
             </button>
           </td>
         </tr>
@@ -110,21 +122,21 @@
 </div>
 
 <!-- Delete User Modal -->
-<div class="modal-overlay" *ngIf="showDeleteUserModal">
-  <div class="modal-content">
+<dialog #deleteUserDialog class="confirm-dialog" (click)="cancelDeleteUser()" (cancel)="cancelDeleteUser()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <span class="material-symbols-outlined modal-icon">delete_forever</span>
-      <h2 class="modal-title">¿Eliminar usuario?</h2>
+      <h2 class="modal-title">¿Desactivar usuario?</h2>
     </div>
     <div class="modal-body">
-      <p>Se eliminará la cuenta de <strong>{{ userToDelete?.nombre || userToDelete?.name }}</strong>. Esta acción no se puede deshacer.</p>
+      <p>Se desactivará la cuenta de <strong>{{ userToDelete?.nombre || userToDelete?.name }}</strong>. El usuario no podrá iniciar sesión, pero sus datos históricos se conservarán.</p>
     </div>
     <div class="modal-footer">
       <button (click)="cancelDeleteUser()" class="btn-secondary" type="button">Cancelar</button>
       <button (click)="confirmDeleteUser()" class="btn-danger" type="button">Eliminar</button>
     </div>
   </div>
-</div>
+</dialog>
 <app-edit-user-dialog
   [isOpen]="showEditDialog"
   [usuario]="usuarioToEdit"

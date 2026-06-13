@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, Subscription } from 'rxjs';
+import { filter, interval, startWith, switchMap, Subscription } from 'rxjs';
 import { AuthService, CurrentUser } from '@core/auth/auth.service';
 import { ProfileService, ProfileState } from '@core/services/profile.service';
 import { AnalyticsService } from '@core/services/analytics.service';
+import { NotificationService } from '@core/services/notification.service';
+import { KanbanSyncService } from '@modules/ordenes/services/kanban-sync.service';
 
 @Component({
   selector: 'app-top-bar',
@@ -23,6 +25,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
   profileState: ProfileState = { nombre: '', avatarGradient: 0, avatarImage: null };
 
   private subs = new Subscription();
+  private prevUnreadCount = -1; // -1 = primera carga, no mostrar toast
 
   private readonly GRADIENTS = [
     'linear-gradient(135deg, #00f5d4, #0ea5e9)',
@@ -53,13 +56,29 @@ export class TopBarComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private profileService: ProfileService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private notificationService: NotificationService,
+    private kanbanSyncService: KanbanSyncService
   ) {}
 
   ngOnInit(): void {
     this.updateDate();
     this.updateModuleName(this.router.url);
-    this.loadAlertas();
+
+    // Polling cada 60s + inmediato al arrancar
+    this.subs.add(
+      interval(60_000)
+        .pipe(startWith(0), switchMap(() => this.analyticsService.getAlertasActivas()))
+        .subscribe({
+          next: alerts => this.onAlertasLoaded(alerts),
+          error: () => (this.alertas = []),
+        })
+    );
+
+    // Refrescar al instante cuando cambia el estado de una orden en Kanban
+    this.subs.add(
+      this.kanbanSyncService.kanbanUpdates$().subscribe(() => this.refreshAlertas())
+    );
 
     this.subs.add(
       this.router.events
@@ -100,10 +119,22 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.currentDate = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
   }
 
-  loadAlertas(): void {
+  private onAlertasLoaded(alerts: any[]): void {
+    const newUnread = alerts.filter(a => !a.leida).length;
+    if (this.prevUnreadCount !== -1 && newUnread > this.prevUnreadCount) {
+      const diff = newUnread - this.prevUnreadCount;
+      this.notificationService.warning(
+        diff === 1 ? '¡Hay 1 nueva alerta!' : `¡Hay ${diff} nuevas alertas!`
+      );
+    }
+    this.prevUnreadCount = newUnread;
+    this.alertas = alerts;
+  }
+
+  private refreshAlertas(): void {
     this.analyticsService.getAlertasActivas().subscribe({
-      next: alerts => (this.alertas = alerts),
-      error: () => (this.alertas = []),
+      next: alerts => this.onAlertasLoaded(alerts),
+      error: () => {},
     });
   }
 

@@ -94,6 +94,7 @@ def get_stock_critico(db) -> list:
             categoria,
             stock_actual,
             stock_minimo,
+            stock_bajo,
             (stock_actual - stock_minimo) AS diferencia
         FROM repuestos
         WHERE stock_actual <= stock_minimo
@@ -106,6 +107,35 @@ def get_stock_critico(db) -> list:
             "categoria": r.categoria,
             "stock_actual": r.stock_actual,
             "stock_minimo": r.stock_minimo,
+            "stock_bajo": r.stock_bajo,
+            "diferencia": int(r.diferencia),
+        }
+        for r in result.fetchall()
+    ]
+
+
+def get_stock_bajo(db) -> list:
+    result = db.execute(text("""
+        SELECT
+            id,
+            nombre,
+            categoria,
+            stock_actual,
+            stock_minimo,
+            stock_bajo,
+            (stock_actual - stock_bajo) AS diferencia
+        FROM repuestos
+        WHERE stock_actual > stock_minimo AND stock_actual <= stock_bajo
+        ORDER BY diferencia ASC
+    """))
+    return [
+        {
+            "id": r.id,
+            "nombre": r.nombre,
+            "categoria": r.categoria,
+            "stock_actual": r.stock_actual,
+            "stock_minimo": r.stock_minimo,
+            "stock_bajo": r.stock_bajo,
             "diferencia": int(r.diferencia),
         }
         for r in result.fetchall()
@@ -420,8 +450,9 @@ def stock_por_categoria(db) -> list:
     ]
 
 
-# alias para compatibilidad con alertas_service
+# aliases para compatibilidad con alertas_service
 stock_critico = get_stock_critico
+stock_bajo = get_stock_bajo
 
 
 # ─── CONTEXTO PARA EL ASISTENTE ──────────────────────────────────────────────

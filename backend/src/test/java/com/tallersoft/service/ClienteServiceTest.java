@@ -106,7 +106,7 @@ class ClienteServiceTest {
                                 "cliente@example.com", "Test Address", true, LocalDateTime.now())
                 ));
 
-        List<ClienteResponse> responses = clienteService.listarClientes(null);
+        List<ClienteResponse> responses = clienteService.listarClientes(null, false);
 
         assertNotNull(responses);
         assertEquals(1, responses.size());
@@ -124,7 +124,7 @@ class ClienteServiceTest {
                                 "cliente@example.com", "Test Address", true, LocalDateTime.now())
                 ));
 
-        List<ClienteResponse> responses = clienteService.listarClientes("Test");
+        List<ClienteResponse> responses = clienteService.listarClientes("Test", false);
 
         assertNotNull(responses);
         assertEquals(1, responses.size());

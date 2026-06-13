@@ -47,21 +47,29 @@ export class ListComponent implements OnInit {
   currentPage = 1;
   readonly pageSize = 12;
 
+  get clientesActivos(): ClienteResponse[] {
+    return this.clientes.filter(c => c.activo);
+  }
+
+  get clientesInactivos(): ClienteResponse[] {
+    return this.clientes.filter(c => !c.activo);
+  }
+
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.clientes.length / this.pageSize));
+    return Math.max(1, Math.ceil(this.clientesActivos.length / this.pageSize));
   }
 
   get pagedClientes(): ClienteResponse[] {
     const start = (this.currentPage - 1) * this.pageSize;
-    return this.clientes.slice(start, start + this.pageSize);
+    return this.clientesActivos.slice(start, start + this.pageSize);
   }
 
   get pageStart(): number {
-    return this.clientes.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+    return this.clientesActivos.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
   }
 
   get pageEnd(): number {
-    return Math.min(this.currentPage * this.pageSize, this.clientes.length);
+    return Math.min(this.currentPage * this.pageSize, this.clientesActivos.length);
   }
 
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
@@ -83,7 +91,7 @@ export class ListComponent implements OnInit {
       switchMap(query => {
         console.log('[ListComponent] Executing search query:', query);
         this.isLoading = true;
-        return this.clienteService.listarClientes(query || undefined).pipe(
+        return this.clienteService.listarClientes(query || undefined, true).pipe(
           finalize(() => {
             console.log('[ListComponent] Request finished, isLoading = false');
             this.isLoading = false;

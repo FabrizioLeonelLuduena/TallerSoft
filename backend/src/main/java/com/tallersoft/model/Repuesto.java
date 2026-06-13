@@ -28,10 +28,16 @@ public class Repuesto {
     
     @Column(nullable = false)
     private Integer stockActual = 0;
-    
+
     @Column(nullable = false)
     private Integer stockMinimo = 5;
+
+    @Column(nullable = false)
+    private Integer stockBajo = 10;
     
+    @Column(nullable = false)
+    private boolean activo = true;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
     

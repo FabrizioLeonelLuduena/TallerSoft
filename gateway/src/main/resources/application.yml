@@ -8,6 +8,12 @@ spring:
   cloud:
     gateway:
       routes:
+        # WebSocket route — must be first so /ws/** is matched before /api/**
+        - id: websocket
+          uri: ws://backend:${BACKEND_PORT:8081}
+          predicates:
+            - Path=/ws/**
+
         # API Routes to Core Service — backend ya maneja /api/** paths
         - id: core-api
           uri: http://backend:${BACKEND_PORT:8081}
@@ -25,8 +31,6 @@ spring:
           uri: http://analytics:${ANALYTICS_PORT:8082}
           predicates:
             - Path=/analytics/**
-          filters:
-            - RewritePath=/analytics/(?<segment>.*), /analytics/$\{segment}
 
         # Swagger UI Routes to Core Service
         - id: swagger-ui

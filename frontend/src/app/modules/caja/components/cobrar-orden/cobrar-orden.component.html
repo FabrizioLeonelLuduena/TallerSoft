@@ -161,17 +161,6 @@
         </ng-container>
       </div>
 
-      <!-- Botón manual como fallback -->
-      <button
-        *ngIf="!pagoAprobado"
-        class="btn-verificar"
-        (click)="verificarPago(true)"
-        [disabled]="isVerificandoPago"
-        type="button">
-        <mat-icon *ngIf="!isVerificandoPago" class="btn-icon">refresh</mat-icon>
-        <mat-icon *ngIf="isVerificandoPago" class="spinning btn-icon">autorenew</mat-icon>
-        {{ isVerificandoPago ? 'Verificando...' : 'Verificar ahora' }}
-      </button>
     </div>
 
     <div class="modal-footer">

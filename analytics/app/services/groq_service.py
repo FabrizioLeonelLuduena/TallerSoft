@@ -1,5 +1,6 @@
 from groq import Groq
 from app.config import settings
+from fastapi import HTTPException
 
 _client = Groq(api_key=settings.groq_api_key)
 
@@ -87,16 +88,21 @@ Rendimiento del equipo (mes actual):
 def consultar_asistente(pregunta: str, contexto: dict) -> str:
     contexto_texto = _construir_contexto_texto(contexto)
 
-    chat = _client.chat.completions.create(
-        model=settings.groq_model,
-        max_tokens=settings.groq_max_tokens,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": f"{contexto_texto}\n\nPREGUNTA: {pregunta}",
-            },
-        ],
-    )
-
-    return chat.choices[0].message.content
+    try:
+        chat = _client.chat.completions.create(
+            model=settings.groq_model,
+            max_tokens=settings.groq_max_tokens,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {
+                    "role": "user",
+                    "content": f"{contexto_texto}\n\nPREGUNTA: {pregunta}",
+                },
+            ],
+        )
+        return chat.choices[0].message.content
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Servicio de IA temporalmente no disponible",
+        )

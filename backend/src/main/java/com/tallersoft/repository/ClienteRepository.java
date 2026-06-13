@@ -13,8 +13,10 @@ import java.util.List;
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     
     List<Cliente> findByNombreContainingIgnoreCaseAndActivoTrue(String nombre);
-    
+
+    List<Cliente> findByNombreContainingIgnoreCase(String nombre);
+
     List<Cliente> findByTelefonoContainingAndActivoTrue(String telefono);
-    
+
     List<Cliente> findByActivoTrue();
 }

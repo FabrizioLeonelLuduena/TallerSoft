@@ -429,7 +429,7 @@ analytics/
 │   ├── services/
 │   │   ├── __init__.py
 │   │   ├── analytics_service.py
-│   │   └── claude_service.py
+│   │   └── groq_service.py
 │   ├── schemas/
 │   │   ├── __init__.py
 │   │   ├── ordenes.py

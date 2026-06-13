@@ -86,7 +86,7 @@ CREATE TABLE ordenes_trabajo (
         REFERENCES clientes(id) ON DELETE RESTRICT,
     CONSTRAINT fk_orden_tecnico FOREIGN KEY (tecnico_id) 
         REFERENCES usuarios(id) ON DELETE SET NULL,
-    CONSTRAINT check_estado CHECK (estado IN ('PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO')),
+    CONSTRAINT check_estado CHECK (estado IN ('PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO', 'CANCELADO')),
     CONSTRAINT check_prioridad CHECK (prioridad IN ('BAJA', 'NORMAL', 'ALTA'))
 );
 
@@ -106,15 +106,19 @@ CREATE TABLE repuestos (
     precio              NUMERIC(10,2) NOT NULL,
     stock_actual        INTEGER NOT NULL DEFAULT 0,
     stock_minimo        INTEGER NOT NULL DEFAULT 5,
+    stock_bajo          INTEGER NOT NULL DEFAULT 10,
+    activo              BOOLEAN NOT NULL DEFAULT TRUE,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT check_stock_actual CHECK (stock_actual >= 0),
-    CONSTRAINT check_stock_minimo CHECK (stock_minimo >= 0)
+    CONSTRAINT check_stock_minimo CHECK (stock_minimo >= 0),
+    CONSTRAINT check_stock_bajo   CHECK (stock_bajo >= 0)
 );
 
 CREATE INDEX idx_repuestos_nombre ON repuestos(nombre);
 CREATE INDEX idx_repuestos_categoria ON repuestos(categoria);
 CREATE INDEX idx_repuestos_stock_actual ON repuestos(stock_actual);
+CREATE INDEX idx_repuestos_activo ON repuestos(activo);
 
 -- ================================================================
 -- TABLE: orden_repuestos (Join table: parts used in work orders)

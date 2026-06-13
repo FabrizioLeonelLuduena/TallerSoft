@@ -6,7 +6,7 @@ El Analytics Service existe separado del Core Service por tres razones:
 
 1. **Separación de responsabilidades:** El Core Service maneja transacciones críticas del negocio. Las operaciones analíticas (GROUP BY, agregaciones, reportes) son costosas y no deben afectar la latencia del core.
 2. **Aislamiento de datos:** El Analytics Service tiene permisos de solo lectura sobre la base de datos. Esto garantiza que ningún bug en el código de análisis pueda modificar datos de producción.
-3. **Flexibilidad tecnológica:** Python con Pandas y SQLAlchemy es más expresivo para análisis de datos y más fácil de integrar con APIs de IA (Groq, Anthropic) que Java.
+3. **Flexibilidad tecnológica:** Python con Pandas y SQLAlchemy es más expresivo para análisis de datos y más fácil de integrar con APIs de IA (Groq) que Java.
 
 ---
 
@@ -19,8 +19,7 @@ El Analytics Service existe separado del Core Service por tres razones:
 | SQLAlchemy | 2.x | ORM / queries SQL raw |
 | Pandas | 2.x | Análisis y transformación de datos |
 | Pydantic | 2.x | Validación de schemas |
-| Anthropic SDK | 0.x | Integración con Claude API |
-| Groq SDK | — | LLM alternativo para el asistente |
+| Groq SDK | — | LLM para el asistente IA |
 | Uvicorn | — | Servidor ASGI |
 | pytest | 7+ | Tests |
 | pytest-mock | — | Mocking para tests |
@@ -58,8 +57,7 @@ analytics/
 │   │   └── alertas.py       — Alertas automáticas
 │   ├── services/
 │   │   ├── analytics_service.py — Toda la lógica de queries y cálculos
-│   │   ├── claude_service.py    — Integración con Anthropic Claude (referencia)
-│   │   └── groq_service.py      — Integración con Groq (implementación activa)
+│   │   └── groq_service.py      — Integración con Groq (asistente IA)
 │   └── schemas/
 │       ├── asistente_schema.py  — ConsultaRequest, ConsultaResponse
 │       ├── ordenes_schema.py    — Schemas de órdenes
@@ -70,8 +68,7 @@ analytics/
 │   ├── test_ordenes.py
 │   ├── test_stock.py
 │   ├── test_caja.py
-│   ├── test_asistente.py
-│   └── test_claude_service.py
+│   └── test_asistente.py
 └── wsgi.py                  — Entry point para Gunicorn/Uvicorn
 ```
 
@@ -273,7 +270,7 @@ Restricciones: `pregunta` entre 3 y 500 caracteres.
    │
 3. consultar_asistente(pregunta, contexto):
    │  - Construye el prompt con el SYSTEM_PROMPT + contexto en texto + pregunta
-   │  - Llama a Groq API (o Claude API como alternativa)
+   │  - Llama a Groq API
    │  - Retorna el texto de respuesta
    │
 4. Si la API de IA falla:
@@ -314,7 +311,6 @@ Reglas estrictas:
 |----------|-------------|---------|
 | `DATABASE_URL` | URL de conexión a PostgreSQL | `postgresql://analytics_readonly:pass@db:5432/tallersoft` |
 | `GROQ_API_KEY` | API key de Groq para el asistente | `gsk_...` |
-| `ANTHROPIC_API_KEY` | API key de Claude (alternativa) | `sk-ant-...` |
 
 ---
 

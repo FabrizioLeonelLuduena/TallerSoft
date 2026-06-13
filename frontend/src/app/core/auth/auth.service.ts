@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '@environments/environment';
+import { ProfileService } from '@core/services/profile.service';
+import { ChatHistoryService } from '@core/services/chat-history.service';
 
 export interface LoginResponse {
   token: string;
@@ -30,7 +32,19 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<CurrentUser | null>(this.getCurrentUser());
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private profileService: ProfileService,
+    private chatHistoryService: ChatHistoryService,
+  ) {
+    // Si ya hay sesión activa (recarga de página), inicializar los servicios
+    // con el userId del token existente para que usen la clave correcta de localStorage.
+    const existing = this.getCurrentUser();
+    if (existing) {
+      this.profileService.init(existing.userId);
+      this.chatHistoryService.init(existing.userId);
+    }
+  }
 
   /**
    * Login with email and password
@@ -44,6 +58,8 @@ export class AuthService {
       map(response => {
         console.log('[AuthService] Login response received:', response);
         console.log('[AuthService] Token from response:', response.token?.substring(0, 50) + '...');
+        this.profileService.init(response.userId);
+        this.chatHistoryService.init(response.userId);
         this.setToken(response.token);
         console.log('[AuthService] Token saved to sessionStorage');
         console.log('[AuthService] Token in storage:', sessionStorage.getItem('token')?.substring(0, 50) + '...');
@@ -59,6 +75,8 @@ export class AuthService {
    */
   logout(): void {
     sessionStorage.removeItem('token');
+    this.profileService.reset();
+    this.chatHistoryService.reset();
     this.currentUserSubject.next(null);
   }
 

@@ -42,7 +42,9 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="modal-alerta-item" *ngFor="let a of modalAlertas">
+          <div class="modal-alerta-item" *ngFor="let a of modalAlertas"
+               [class.clickable]="moduloRutas[a.modulo]"
+               (click)="navegarDesdeAlerta(a)">
             <div class="modal-alerta-icon" [class.icon-danger]="a.tipo === 'danger'" [class.icon-warn]="a.tipo === 'warn'">
               <mat-icon>{{ a.tipo === 'danger' ? 'error' : 'warning' }}</mat-icon>
             </div>
@@ -50,6 +52,7 @@
               <div class="modal-alerta-titulo">{{ a.titulo }}</div>
               <div class="modal-alerta-desc">{{ a.descripcion }}</div>
             </div>
+            <mat-icon class="nav-arrow" *ngIf="moduloRutas[a.modulo]">chevron_right</mat-icon>
           </div>
           <div class="no-data" *ngIf="modalAlertas.length === 0">
             <mat-icon>check_circle</mat-icon>

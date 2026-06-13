@@ -44,6 +44,8 @@ export class DetailComponent implements OnInit {
   isSavingDiagnostico = false;
   isChangingEstado = false;
   isEditingDiagnostico = false;
+  isCancelling = false;
+  showCancelConfirm = false;
   currentRole: string | null = '';
   diagnosticoText = '';
 
@@ -215,12 +217,14 @@ export class DetailComponent implements OnInit {
   canSaveDiagnostico(): boolean {
     return (this.currentRole === Rol.ADMIN || this.currentRole === Rol.TECNICO) &&
            this.orden?.estado !== 'ENTREGADO' &&
-           this.orden?.estado !== 'LISTO';
+           this.orden?.estado !== 'LISTO' &&
+           this.orden?.estado !== 'CANCELADO';
   }
 
   isDiagnosticoEditable(): boolean {
     if (!this.orden) return false;
     if (this.currentRole !== Rol.ADMIN && this.currentRole !== Rol.TECNICO) return false;
+    if (this.orden.estado === 'CANCELADO') return false;
     if (this.orden.estado === 'PENDIENTE') {
       return !this.orden.diagnostico || this.isEditingDiagnostico;
     }
@@ -242,15 +246,53 @@ export class DetailComponent implements OnInit {
     this.isEditingDiagnostico = true;
   }
 
+  canRegistrarCobro(): boolean {
+    return this.currentRole === Rol.ADMIN || this.currentRole === Rol.RECEPCION;
+  }
+
   canChangeEstado(): boolean {
     return (this.currentRole === Rol.ADMIN || this.currentRole === Rol.TECNICO) &&
            this.orden?.estado !== 'ENTREGADO' &&
-           this.orden?.estado !== 'LISTO';
+           this.orden?.estado !== 'LISTO' &&
+           this.orden?.estado !== 'CANCELADO';
   }
 
   canAddRepuesto(): boolean {
     return (this.currentRole === Rol.ADMIN || this.currentRole === Rol.TECNICO) &&
-           this.orden?.estado !== 'ENTREGADO';
+           this.orden?.estado !== 'ENTREGADO' &&
+           this.orden?.estado !== 'CANCELADO';
+  }
+
+  canCancelar(): boolean {
+    return (this.currentRole === Rol.ADMIN || this.currentRole === Rol.RECEPCION) &&
+           this.orden?.estado === 'PENDIENTE';
+  }
+
+  onCancelarOrden(): void {
+    this.showCancelConfirm = true;
+  }
+
+  onDismissCancelar(): void {
+    this.showCancelConfirm = false;
+  }
+
+  onConfirmCancelar(): void {
+    if (!this.orden) return;
+    this.isCancelling = true;
+    this.ordenesService.cambiarEstado(this.orden.id, 'CANCELADO')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedOrden) => {
+          this.orden = updatedOrden;
+          this.isCancelling = false;
+          this.showCancelConfirm = false;
+          this.notifications.success('Orden cancelada');
+        },
+        error: (err) => {
+          this.isCancelling = false;
+          this.notifications.error(err.error?.message || 'Error al cancelar la orden');
+        }
+      });
   }
 
   isChangeEstadoDisabled(): boolean {
@@ -314,6 +356,7 @@ export class DetailComponent implements OnInit {
       case 'EN_PROCESO': return 'var(--color-accent)';
       case 'LISTO': return 'var(--color-success)';
       case 'ENTREGADO': return 'var(--color-text-muted)';
+      case 'CANCELADO': return 'var(--color-danger)';
       default: return 'transparent';
     }
   }
@@ -324,6 +367,7 @@ export class DetailComponent implements OnInit {
       case 'EN_PROCESO': return 'rgba(249, 115, 22, 0.15)';
       case 'LISTO': return 'rgba(34, 197, 94, 0.15)';
       case 'ENTREGADO': return 'rgba(75, 85, 99, 0.2)';
+      case 'CANCELADO': return 'rgba(239, 68, 68, 0.15)';
       default: return 'transparent';
     }
   }

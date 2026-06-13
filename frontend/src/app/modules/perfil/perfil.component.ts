@@ -68,9 +68,7 @@ export class PerfilComponent implements OnInit {
         this.formNombre = u.nombre;
         this.formEmail = u.email;
         this.formTelefono = u.telefono ?? '';
-        if (!this.profileService.snapshot.nombre) {
-          this.profileService.update({ nombre: u.nombre });
-        }
+        this.profileService.update({ nombre: u.nombre });
         this.loading = false;
       },
       error: () => {

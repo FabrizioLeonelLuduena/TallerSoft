@@ -4,6 +4,8 @@ import com.tallersoft.security.MercadoPagoWebhookValidator;
 import com.tallersoft.service.CobrosService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,9 @@ public class PagoController {
 
     private final CobrosService cobrosService;
     private final MercadoPagoWebhookValidator webhookValidator;
+
+    @Value("${mercadopago.sandbox}")
+    private boolean sandbox;
 
     /**
      * Endpoint público — sin JWT. MercadoPago lo llama al confirmar o rechazar un pago.
@@ -32,12 +37,17 @@ public class PagoController {
         try {
             if (signature != null && requestId != null) {
                 webhookValidator.validar(signature, requestId, paymentId);
+            } else if (!sandbox) {
+                log.error("Webhook sin headers de firma recibido en producción — rechazado (paymentId={})", paymentId);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             } else {
                 log.warn("Webhook sin headers de firma — aceptado solo en entorno de pruebas");
             }
 
             if ("payment".equals(type)) {
                 cobrosService.procesarPagoAprobadoMercadoPago(paymentId);
+            } else {
+                log.info("Webhook recibido con type no manejado: {}", type);
             }
 
         } catch (SecurityException e) {

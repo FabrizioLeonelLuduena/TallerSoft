@@ -55,7 +55,8 @@ export class RepuestoDialogComponent implements OnInit, OnChanges, OnDestroy {
       categoria:   [this.repuesto?.categoria   || ''],
       precio:      [this.repuesto?.precio      || '', [Validators.required, Validators.min(0.01)]],
       stockActual: [this.repuesto?.stockActual ?? 0,  [Validators.required, Validators.min(0)]],
-      stockMinimo: [this.repuesto?.stockMinimo ?? 5,  [Validators.required, Validators.min(0)]]
+      stockMinimo: [this.repuesto?.stockMinimo ?? 5,  [Validators.required, Validators.min(0)]],
+      stockBajo:   [this.repuesto?.stockBajo   ?? 10, [Validators.required, Validators.min(0)]]
     });
   }
 

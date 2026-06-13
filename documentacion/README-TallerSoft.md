@@ -155,8 +155,7 @@ tallersoft/
 │   │   ├── services/
 │   │   │   ├── analytics_service.py # Lógica de análisis con Pandas
 │   │   │   ├── alertas_service.py   # Alertas operativas (stock crítico, prioridad)
-│   │   │   ├── groq_service.py      # Integración con Groq API (implementación activa)
-│   │   │   └── claude_service.py    # Integración con Anthropic API (referencia alternativa)
+│   │   │   └── groq_service.py      # Integración con Groq API
 │   │   ├── db/
 │   │   │   └── database.py          # Conexión SQLAlchemy (solo lectura)
 │   │   └── schemas/                 # Pydantic models
@@ -165,8 +164,7 @@ tallersoft/
 │   │   ├── test_ordenes.py
 │   │   ├── test_stock.py
 │   │   ├── test_caja.py
-│   │   ├── test_asistente.py
-│   │   └── test_claude_service.py
+│   │   └── test_asistente.py
 │   ├── requirements.txt
 │   └── Dockerfile
 │
@@ -587,7 +585,7 @@ pytest-asyncio==0.23.7
 
 ### Descripción
 
-El asistente es un chat en lenguaje natural que responde preguntas sobre los datos del taller. Funciona enriqueciendo cada mensaje del usuario con contexto real de la base de datos antes de enviarlo a la API de Claude.
+El asistente es un chat en lenguaje natural que responde preguntas sobre los datos del taller. Funciona enriqueciendo cada mensaje del usuario con contexto real de la base de datos antes de enviarlo a la API de Groq.
 
 ### Flujo de una consulta
 
@@ -611,7 +609,7 @@ Se devuelve la respuesta al frontend
 
 ### Implementación del servicio (Groq)
 
-El asistente usa la API de **Groq** con el modelo `llama-3.3-70b-versatile` como implementación activa. Existe también `claude_service.py` como referencia alternativa con la API de Anthropic.
+El asistente usa la API de **Groq** con el modelo `llama-3.3-70b-versatile`.
 
 ```python
 # app/services/groq_service.py
@@ -968,7 +966,7 @@ python -m pytest tests/test_ordenes.py -v     # Un archivo
 python -m pytest tests/ --cov=app             # Con cobertura
 ```
 
-**Suite:** `test_ordenes.py`, `test_stock.py`, `test_caja.py`, `test_asistente.py`, `test_claude_service.py`
+**Suite:** `test_ordenes.py`, `test_stock.py`, `test_caja.py`, `test_asistente.py`
 
 `conftest.py` configura SQLite in-memory con `StaticPool` para correr sin PostgreSQL.
 

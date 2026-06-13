@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -7,6 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { NotificationService } from '../../../core/services/notification.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
+import { KanbanSyncService } from '../services/kanban-sync.service';
+import { Subscription } from 'rxjs';
 
 interface KanbanColumn {
   estado: string;
@@ -27,11 +29,13 @@ interface KanbanColumn {
   templateUrl: './kanban.component.html',
   styleUrls: ['./kanban.component.scss']
 })
-export class KanbanComponent implements OnInit {
+export class KanbanComponent implements OnInit, OnDestroy {
   private ordenesService = inject(OrdenesService);
   private notifications = inject(NotificationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private kanbanSync = inject(KanbanSyncService);
+  private kanbanSub?: Subscription;
 
   columns: KanbanColumn[] = [
     { estado: 'PENDIENTE', label: 'Pendiente', ordenes: [] },
@@ -47,6 +51,27 @@ export class KanbanComponent implements OnInit {
   ngOnInit() {
     // Data is provided by the parent OrdenesPrincipalComponent via setFilteredOrdenes()
     this.isLoading = false;
+
+    this.kanbanSub = this.kanbanSync.kanbanUpdates$().subscribe({
+      next: ({ ordenId, nuevoEstado }) => {
+        for (const col of this.columns) {
+          const idx = col.ordenes.findIndex(o => o.id === ordenId);
+          if (idx !== -1) {
+            const [orden] = col.ordenes.splice(idx, 1);
+            orden.estado = nuevoEstado as OrdenTrabajoResponse['estado'];
+            const target = this.columns.find(c => c.estado === nuevoEstado);
+            if (target) target.ordenes.push(orden);
+            break;
+          }
+        }
+      },
+      error: (err) => console.error('KanbanSync error:', err),
+    });
+  }
+
+  ngOnDestroy() {
+    this.kanbanSub?.unsubscribe();
+    this.kanbanSync.disconnect();
   }
 
   loadOrdenes() {

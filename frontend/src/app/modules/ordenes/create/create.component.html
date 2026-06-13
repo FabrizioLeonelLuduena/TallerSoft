@@ -1,5 +1,6 @@
 <div class="create-container page-enter">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
+    <div class="form-card">
     <!-- SECTION 1: Cliente y Equipo -->
     <section class="form-section">
       <h2 class="section-title">Cliente y Equipo</h2>
@@ -94,7 +95,21 @@
         <div class="form-column">
           <div class="form-group">
             <label class="field-label">Técnico</label>
-            <div class="search-wrapper">
+
+            <!-- Solo lectura para técnico logueado -->
+            <div class="search-wrapper field-disabled" *ngIf="isTecnico">
+              <span class="material-symbols-outlined search-icon">engineering</span>
+              <input
+                type="text"
+                class="ts-input search-input"
+                [value]="tecnicoSearchTerm"
+                [disabled]="true"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Selector interactivo para admin/recepción -->
+            <div class="search-wrapper" *ngIf="!isTecnico">
               <span class="material-symbols-outlined search-icon">engineering</span>
               <input
                 type="text"
@@ -227,6 +242,7 @@
           Creando...
         </span>
       </button>
+    </div>
     </div>
   </form>
 </div>

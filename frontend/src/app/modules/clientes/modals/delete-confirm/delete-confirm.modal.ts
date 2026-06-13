@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClienteService } from '../../services/cliente.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -8,21 +8,20 @@ import { NotificationService } from '../../../../core/services/notification.serv
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
+    <dialog #d class="confirm-dialog" (click)="onCancel()" (cancel)="onCancel()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>¿Eliminar cliente?</h2>
+          <h2>¿Desactivar cliente?</h2>
         </div>
-        
+
         <div class="modal-body">
           <p class="warning-text">
-            Se eliminará permanentemente "{{ clienteName }}" y todos sus datos asociados.
+            Se desactivará a "{{ clienteName }}". El cliente quedará inactivo pero sus órdenes e historial se conservarán.
           </p>
-          <p class="help-text">Esta acción no se puede deshacer.</p>
         </div>
-        
+
         <div class="modal-actions">
-          <button 
+          <button
             class="btn-cancel"
             (click)="onCancel()"
             type="button"
@@ -30,32 +29,35 @@ import { NotificationService } from '../../../../core/services/notification.serv
           >
             Cancelar
           </button>
-          <button 
+          <button
             class="btn-delete"
             (click)="onConfirm()"
             type="button"
             [disabled]="isLoading"
           >
-            <span *ngIf="!isLoading">Eliminar Cliente</span>
-            <span *ngIf="isLoading">Eliminando...</span>
+            <span *ngIf="!isLoading">Desactivar Cliente</span>
+            <span *ngIf="isLoading">Desactivando...</span>
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   `,
   styles: [`
-    .modal-overlay {
+    .confirm-dialog {
+      all: unset;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: flex;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: none;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-      animation: fadeIn 0.2s ease-out;
+
+      &[open] {
+        display: flex;
+        background: rgba(0, 0, 0, 0.6);
+        animation: fadeIn 0.2s ease-out;
+      }
     }
 
     .modal-content {
@@ -92,12 +94,6 @@ import { NotificationService } from '../../../../core/services/notification.serv
       font-size: 14px;
       color: rgba(255, 255, 255, 0.9);
       line-height: 1.5;
-    }
-
-    .help-text {
-      margin: 0;
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.6);
     }
 
     .modal-actions {
@@ -150,27 +146,19 @@ import { NotificationService } from '../../../../core/services/notification.serv
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
   `]
 })
-export class DeleteConfirmModal implements OnInit {
+export class DeleteConfirmModal implements OnChanges {
+  @ViewChild('d') private dialogRef!: ElementRef<HTMLDialogElement>;
+
   @Input() isOpen = false;
   @Input() clienteName = '';
   @Input() clienteId: number | null = null;
@@ -181,6 +169,16 @@ export class DeleteConfirmModal implements OnInit {
 
   private clienteService = inject(ClienteService);
   private notifications = inject(NotificationService);
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes['isOpen'] || !this.dialogRef) return;
+    if (changes['isOpen'].currentValue) {
+      this.isLoading = false;
+      this.dialogRef.nativeElement.showModal();
+    } else if (this.dialogRef.nativeElement.open) {
+      this.dialogRef.nativeElement.close();
+    }
+  }
 
   onCancel() {
     this.cancelled.emit();
@@ -201,6 +199,4 @@ export class DeleteConfirmModal implements OnInit {
       }
     });
   }
-
-  ngOnInit() {}
 }

@@ -7,7 +7,7 @@ Endpoints for retrieving inventory and stock analytics.
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.services.analytics_service import get_stock_critico, get_repuestos_mas_usados
+from app.services.analytics_service import get_stock_critico, get_stock_bajo, get_repuestos_mas_usados
 
 router = APIRouter()
 
@@ -19,6 +19,15 @@ def stock_critico(db: Session = Depends(get_db)):
     (lowest stock_actual - stock_minimo difference).
     """
     return get_stock_critico(db)
+
+
+@router.get("/bajo")
+def stock_bajo(db: Session = Depends(get_db)):
+    """
+    Returns parts in warning state: stock_minimo < stock_actual <= stock_bajo,
+    ordered by closest to the bajo threshold first.
+    """
+    return get_stock_bajo(db)
 
 
 @router.get("/mas-usados")

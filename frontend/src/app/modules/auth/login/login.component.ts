@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '@core/auth/auth.service';
+import { ProfileService } from '@core/services/profile.service';
+import { UsuarioService } from '../../usuarios/services/usuario.service';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -38,6 +40,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private profileService: ProfileService,
+    private usuarioService: UsuarioService,
     private router: Router
   ) {}
 
@@ -74,6 +78,10 @@ export class LoginComponent implements OnInit {
         console.log('[LoginComponent] Login successful, response:', response);
         console.log('[LoginComponent] Token saved:', !!sessionStorage.getItem('token'));
         console.log('[LoginComponent] Token value:', sessionStorage.getItem('token')?.substring(0, 50) + '...');
+        this.usuarioService.obtenerUsuario(response.userId).subscribe({
+          next: (u) => this.profileService.update({ nombre: u.nombre }),
+          error: () => { /* top-bar falls back to email */ }
+        });
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {

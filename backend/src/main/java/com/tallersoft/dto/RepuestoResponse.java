@@ -12,6 +12,9 @@ public class RepuestoResponse {
     private BigDecimal precio;
     private Integer stockActual;
     private Integer stockMinimo;
+    private Integer stockBajo;
     private Boolean critico;
+    private Boolean bajo;
+    private boolean activo;
     private LocalDateTime createdAt;
 }

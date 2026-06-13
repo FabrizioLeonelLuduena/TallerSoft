@@ -7,8 +7,8 @@ BEGIN;
 
 -- ─── USUARIOS ────────────────────────────────────────────────────
 INSERT INTO usuarios (nombre, email, password, rol, activo, created_at) VALUES
-('Carlos Mendez',      'carlos.mendez@tallersoft.com',  '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, NOW() - INTERVAL '180 days'),
-('Lucia Fernandez',    'lucia.fernandez@tallersoft.com','$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'RECEPCION', true, NOW() - INTERVAL '180 days'),
+('Carlos Mendez',      'carlos.mendez@tallersoft.com',  '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, true, NOW() - INTERVAL '180 days'),
+('Lucia Fernandez',    'lucia.fernandez@tallersoft.com','$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'RECEPCION', true, true, NOW() - INTERVAL '180 days'),
 ('Martin Alvarez',     'martin.alvarez@tallersoft.com', '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, NOW() - INTERVAL '150 days'),
 ('Sofia Gutierrez',    'sofia.gutierrez@tallersoft.com','$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'RECEPCION', true, NOW() - INTERVAL '120 days'),
 ('Diego Romero',       'diego.romero@tallersoft.com',   '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, NOW() - INTERVAL '90 days')
@@ -54,42 +54,42 @@ INSERT INTO clientes (nombre, telefono, email, direccion, activo, created_at) VA
 ON CONFLICT DO NOTHING;
 
 -- ─── REPUESTOS ────────────────────────────────────────────────────
-INSERT INTO repuestos (nombre, categoria, precio, stock_actual, stock_minimo, created_at) VALUES
-('Pantalla LCD 6.1" iPhone',          'Pantallas',       45000.00, 8,  3, NOW() - INTERVAL '180 days'),
-('Pantalla OLED Samsung S21',         'Pantallas',       62000.00, 5,  3, NOW() - INTERVAL '180 days'),
-('Pantalla LCD Motorola G54',         'Pantallas',       18500.00, 12, 5, NOW() - INTERVAL '180 days'),
-('Pantalla LCD Xiaomi Redmi 10',      'Pantallas',       14200.00, 10, 5, NOW() - INTERVAL '180 days'),
-('Batería iPhone 12',                 'Baterías',        8500.00,  15, 5, NOW() - INTERVAL '180 days'),
-('Batería Samsung A52',               'Baterías',        6200.00,  18, 5, NOW() - INTERVAL '180 days'),
-('Batería Motorola G30',              'Baterías',        4800.00,  20, 5, NOW() - INTERVAL '180 days'),
-('Batería Xiaomi Redmi 9',            'Baterías',        4200.00,  22, 5, NOW() - INTERVAL '180 days'),
-('Conector de carga USB-C universal', 'Conectores',      1200.00,  30, 10, NOW() - INTERVAL '180 days'),
-('Conector Lightning iPhone',         'Conectores',      2400.00,  25, 8, NOW() - INTERVAL '180 days'),
-('Conector micro USB',                'Conectores',       800.00,  35, 10, NOW() - INTERVAL '180 days'),
-('Flex de cámara trasera Samsung A53','Cámaras',         7800.00,  7,  3, NOW() - INTERVAL '180 days'),
-('Lente de cámara iPhone 13',         'Cámaras',        12000.00, 5,  2, NOW() - INTERVAL '180 days'),
-('Módulo cámara frontal Motorola',    'Cámaras',         3200.00,  10, 4, NOW() - INTERVAL '180 days'),
-('Tapa trasera Xiaomi Redmi 10',      'Carcasas',        2800.00,  14, 5, NOW() - INTERVAL '180 days'),
-('Tapa trasera Samsung A51',          'Carcasas',        3600.00,  11, 5, NOW() - INTERVAL '180 days'),
-('Marco/chasis iPhone 11',            'Carcasas',       22000.00,  4,  2, NOW() - INTERVAL '180 days'),
-('Altavoz principal Samsung',         'Audio',           1800.00,  20, 7, NOW() - INTERVAL '180 days'),
-('Auricular de llamadas iPhone',      'Audio',           2200.00,  18, 6, NOW() - INTERVAL '180 days'),
-('Vibrador universal',                'Mecanismos',       900.00,  25, 8, NOW() - INTERVAL '180 days'),
-('Botón home Samsung',                'Botones',         1400.00,  22, 7, NOW() - INTERVAL '180 days'),
-('Flex botón encendido iPhone',       'Botones',         1600.00,  16, 5, NOW() - INTERVAL '180 days'),
-('Flex volumen Motorola',             'Botones',         1100.00,  18, 6, NOW() - INTERVAL '180 days'),
-('Sensor de proximidad universal',    'Sensores',        1300.00,  14, 5, NOW() - INTERVAL '180 days'),
-('Pasta térmica procesador',          'Insumos',          450.00,  40, 15, NOW() - INTERVAL '180 days'),
-('Adhesivo doble faz pantallas',      'Insumos',          380.00,  50, 15, NOW() - INTERVAL '180 days'),
-('Kit limpieza ultrasonido',          'Insumos',         1200.00,  20, 8, NOW() - INTERVAL '180 days'),
-('Placa de carga Samsung A32',        'Placas',          5400.00,  8,  3, NOW() - INTERVAL '180 days'),
-('IC de carga iPhone 12',             'Placas',          8900.00,  6,  2, NOW() - INTERVAL '180 days'),
-('Chip NFC Samsung',                  'Placas',          3200.00,  9,  3, NOW() - INTERVAL '180 days'),
-('Membrana anti-polvo altavoz',       'Insumos',          280.00,  60, 20, NOW() - INTERVAL '180 days'),
-('Tornillos pentalobe iPhone (set)',  'Insumos',          350.00,  45, 15, NOW() - INTERVAL '180 days'),
-('Pantalla LCD Huawei P20 Lite',      'Pantallas',       16800.00, 7,  3, NOW() - INTERVAL '180 days'),
-('Batería Huawei P30',                'Baterías',        5600.00,  13, 5, NOW() - INTERVAL '180 days'),
-('Conector de auriculares 3.5mm',     'Conectores',       950.00,  28, 10, NOW() - INTERVAL '180 days');
+INSERT INTO repuestos (nombre, categoria, precio, stock_actual, stock_minimo, stock_bajo, activo, created_at) VALUES
+('Pantalla LCD 6.1" iPhone',          'Pantallas',       45000.00, 8,  3,  6, true, NOW() - INTERVAL '180 days'),
+('Pantalla OLED Samsung S21',         'Pantallas',       62000.00, 5,  3,  6, true, NOW() - INTERVAL '180 days'),
+('Pantalla LCD Motorola G54',         'Pantallas',       18500.00, 12, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Pantalla LCD Xiaomi Redmi 10',      'Pantallas',       14200.00, 10, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Batería iPhone 12',                 'Baterías',        8500.00,  15, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Batería Samsung A52',               'Baterías',        6200.00,  18, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Batería Motorola G30',              'Baterías',        4800.00,  20, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Batería Xiaomi Redmi 9',            'Baterías',        4200.00,  22, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Conector de carga USB-C universal', 'Conectores',      1200.00,  30, 10, 20, true, NOW() - INTERVAL '180 days'),
+('Conector Lightning iPhone',         'Conectores',      2400.00,  25, 8,  16, true, NOW() - INTERVAL '180 days'),
+('Conector micro USB',                'Conectores',       800.00,  35, 10, 20, true, NOW() - INTERVAL '180 days'),
+('Flex de cámara trasera Samsung A53','Cámaras',         7800.00,  7,  3,  6, true, NOW() - INTERVAL '180 days'),
+('Lente de cámara iPhone 13',         'Cámaras',        12000.00, 5,  2,  4, true, NOW() - INTERVAL '180 days'),
+('Módulo cámara frontal Motorola',    'Cámaras',         3200.00,  10, 4,  8, true, NOW() - INTERVAL '180 days'),
+('Tapa trasera Xiaomi Redmi 10',      'Carcasas',        2800.00,  14, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Tapa trasera Samsung A51',          'Carcasas',        3600.00,  11, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Marco/chasis iPhone 11',            'Carcasas',       22000.00,  4,  2,  4, true, NOW() - INTERVAL '180 days'),
+('Altavoz principal Samsung',         'Audio',           1800.00,  20, 7,  14, true, NOW() - INTERVAL '180 days'),
+('Auricular de llamadas iPhone',      'Audio',           2200.00,  18, 6,  12, true, NOW() - INTERVAL '180 days'),
+('Vibrador universal',                'Mecanismos',       900.00,  25, 8,  16, true, NOW() - INTERVAL '180 days'),
+('Botón home Samsung',                'Botones',         1400.00,  22, 7,  14, true, NOW() - INTERVAL '180 days'),
+('Flex botón encendido iPhone',       'Botones',         1600.00,  16, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Flex volumen Motorola',             'Botones',         1100.00,  18, 6,  12, true, NOW() - INTERVAL '180 days'),
+('Sensor de proximidad universal',    'Sensores',        1300.00,  14, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Pasta térmica procesador',          'Insumos',          450.00,  40, 15, 30, true, NOW() - INTERVAL '180 days'),
+('Adhesivo doble faz pantallas',      'Insumos',          380.00,  50, 15, 30, true, NOW() - INTERVAL '180 days'),
+('Kit limpieza ultrasonido',          'Insumos',         1200.00,  20, 8,  16, true, NOW() - INTERVAL '180 days'),
+('Placa de carga Samsung A32',        'Placas',          5400.00,  8,  3,  6, true, NOW() - INTERVAL '180 days'),
+('IC de carga iPhone 12',             'Placas',          8900.00,  6,  2,  4, true, NOW() - INTERVAL '180 days'),
+('Chip NFC Samsung',                  'Placas',          3200.00,  9,  3,  6, true, NOW() - INTERVAL '180 days'),
+('Membrana anti-polvo altavoz',       'Insumos',          280.00,  60, 20, 40, true, NOW() - INTERVAL '180 days'),
+('Tornillos pentalobe iPhone (set)',  'Insumos',          350.00,  45, 15, 30, true, NOW() - INTERVAL '180 days'),
+('Pantalla LCD Huawei P20 Lite',      'Pantallas',       16800.00, 7,  3,  6, true, NOW() - INTERVAL '180 days'),
+('Batería Huawei P30',                'Baterías',        5600.00,  13, 5,  10, true, NOW() - INTERVAL '180 days'),
+('Conector de auriculares 3.5mm',     'Conectores',       950.00,  28, 10, 20, true, NOW() - INTERVAL '180 days');
 
 -- ─── EQUIPOS ──────────────────────────────────────────────────────
 -- Asignamos equipos a clientes (cliente_id 1 al 35 según el orden de inserción)
@@ -896,7 +896,7 @@ INSERT INTO orden_repuestos (orden_id, repuesto_id, cantidad, precio_unit)
 SELECT ot.id, r.id, 1, r.precio
 FROM ordenes_trabajo ot
 JOIN clientes c ON ot.cliente_id = c.id
-JOIN repuestos r ON r.nombre = 'Pantalla LCD Samsung' -- closest match
+JOIN repuestos r ON r.nombre = 'Pantalla LCD Motorola G54'
 WHERE c.email = 'nicolas.reyes@gmail.com'
 LIMIT 1;
 

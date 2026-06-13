@@ -13,33 +13,30 @@ TallerSoft es un ERP web para talleres de servicio técnico, compuesto por tres 
                          │            CLIENTE (Browser)             │
                          │         Angular 18 PWA (puerto 80)       │
                          └───────────────────┬─────────────────────┘
-                                             │ HTTP/HTTPS
+                                             │ HTTP/HTTPS  +  WS (WebSocket)
                                              ▼
                          ┌─────────────────────────────────────────┐
                          │          API GATEWAY (puerto 8080)       │
                          │       Spring Cloud Gateway 2024.0.1      │
                          │   Único punto de entrada al sistema      │
-                         └──────┬──────────────────────┬───────────┘
-                                │                      │
-                  /api/**, /auth/**          /analytics/**
-                                │                      │
-               ┌────────────────▼──┐        ┌──────────▼──────────┐
-               │   CORE SERVICE    │        │  ANALYTICS SERVICE  │
-               │  (puerto 8081)    │        │   (puerto 8082)     │
-               │  Java 21 +        │        │  Python 3.11 +      │
-               │  Spring Boot 3    │        │  FastAPI            │
-               │  Spring Security  │        │  Pandas             │
-               │  JPA/Hibernate    │        │  SQLAlchemy         │
-               │  JWT              │        │  Groq API           │
-               └────────┬──────────┘        └──────────┬──────────┘
-                        │ R/W                           │ R (solo lectura)
-                        └──────────────┬────────────────┘
-                                       ▼
-                        ┌──────────────────────────────┐
-                        │      PostgreSQL 16            │
-                        │      (puerto 5432)            │
-                        │  Base de datos compartida     │
-                        └──────────────────────────────┘
+                         └──────┬───────────────────────┬──────────┘
+                                │                       │
+                  /api/**, /auth/**       /analytics/**  │  /ws/**
+                  (HTTP)                 (HTTP)          │  (WebSocket)
+                                │                       │
+               ┌────────────────▼───────────────────────▼──────────┐
+               │                  CORE SERVICE (puerto 8081)        │
+               │   Java 21 · Spring Boot 3 · Spring Security        │
+               │   JPA/Hibernate · JWT · Spring WebSocket + STOMP   │
+               └────────┬──────────────────────────────────────────┘
+                        │ R/W
+                        ▼
+               ┌─────────────────────┐   ┌──────────────────────────┐
+               │    PostgreSQL 16     │   │   ANALYTICS SERVICE      │
+               │    (puerto 5432)     │   │   (puerto 8082)          │
+               │  Base de datos       │   │   Python · FastAPI        │
+               │  compartida          │   │   (R solo lectura)        │
+               └─────────────────────┘   └──────────────────────────┘
 ```
 
 ---
@@ -56,13 +53,16 @@ TallerSoft es un ERP web para talleres de servicio técnico, compuesto por tres 
 - **Responsabilidad:** Único punto de entrada. Enruta peticiones al Core Service o al Analytics Service según la ruta.
 - **Tecnología:** Spring Boot 3, Spring Cloud Gateway.
 - **Reglas de enrutamiento:**
+  - `/ws/**` → Core Service (8081) via `ws://` (WebSocket — primera regla, prioridad máxima)
   - `/analytics/**` → Analytics Service (8082)
-  - Todo lo demás (`/api/**`, `/auth/**`) → Core Service (8081)
+  - `/api/**`, `/auth/**` → Core Service (8081)
+- **Autenticación WebSocket:** Para rutas `/ws/**`, el token JWT puede viajar como query param `?token=<jwt>` (los WebSockets no soportan headers custom en el handshake inicial).
 
 ### Core Service — Spring Boot 3 (puerto 8081)
-- **Responsabilidad:** Toda la lógica de negocio principal: usuarios, clientes, equipos, órdenes de trabajo, stock, cobros, pagos.
-- **Tecnología:** Java 21, Spring Boot 3, Spring Security, JWT, JPA/Hibernate, MapStruct, iText.
+- **Responsabilidad:** Toda la lógica de negocio principal: usuarios, clientes, equipos, órdenes de trabajo, stock, cobros, pagos y notificaciones en tiempo real.
+- **Tecnología:** Java 21, Spring Boot 3, Spring Security, JWT, JPA/Hibernate, MapStruct, iText, Spring WebSocket + STOMP.
 - **Base de datos:** Acceso de lectura y escritura a PostgreSQL.
+- **WebSocket:** Expone el endpoint STOMP en `/ws` (con SockJS fallback). Publica cambios de estado del Kanban en el topic `/topic/kanban`.
 
 ### Analytics Service — FastAPI (puerto 8082)
 - **Responsabilidad:** KPIs, reportes, alertas y asistente IA. Solo lectura sobre la BD.
@@ -82,6 +82,7 @@ TallerSoft es un ERP web para talleres de servicio técnico, compuesto por tres 
 | ✅ Gateway primero | El frontend siempre llama al Gateway (8080), nunca directamente a los servicios internos. |
 | ✅ Analytics solo lectura | El Analytics Service solo tiene permisos `SELECT` sobre PostgreSQL. |
 | ✅ JWT en sessionStorage | El frontend almacena tokens solo en `sessionStorage`, nunca en `localStorage`. |
+| ✅ JWT en WebSocket por query param | Los WebSockets no soportan headers custom en el handshake; el token va como `?token=<jwt>`. |
 | ❌ No llamar Core directo | El frontend nunca hace peticiones al Core (8081) directamente. |
 | ❌ No escritura desde Analytics | El Analytics Service nunca ejecuta INSERT/UPDATE/DELETE. |
 | ❌ No CORS permisivo | El Analytics Service solo acepta requests del Gateway. |
@@ -118,6 +119,46 @@ Ejemplo: el usuario consulta las órdenes de trabajo desde el Kanban.
 
 ---
 
+## Flujo del Kanban en Tiempo Real (WebSocket + STOMP)
+
+Cuando un usuario arrastra una tarjeta, todos los demás usuarios conectados ven el cambio sin recargar la página.
+
+```
+1. Usuario A arrastra una orden de "Pendiente" a "En Proceso"
+   │
+2. KanbanComponent llama ordenesService.cambiarEstado(id, "EN_PROCESO")
+   │  (HTTP PATCH al Gateway con Authorization: Bearer <jwt>)
+   │
+3. Gateway → Core Service: OrdenTrabajoService.cambiarEstado()
+   │  - Valida la transición de estado
+   │  - Persiste el nuevo estado en PostgreSQL
+   │  - Al terminar: llama KanbanNotificationService.notificarCambioOrden()
+   │
+4. KanbanNotificationService publica en el broker STOMP interno:
+   │  Topic: /topic/kanban
+   │  Payload: { "ordenId": 42, "nuevoEstado": "EN_PROCESO" }
+   │
+5. El broker STOMP reenvía el mensaje a todos los suscriptores del topic
+   │
+6. KanbanSyncService en el navegador de Usuario B recibe el mensaje
+   │  (conexión WebSocket establecida en /ws?token=<jwt>)
+   │
+7. KanbanComponent.ngOnInit() reacciona:
+   │  - Busca la orden con id=42 en el array local
+   │  - La mueve de la columna "Pendiente" a "En Proceso"
+   │  - Sin recargar toda la página ni llamar a la API
+```
+
+**Conexión WebSocket desde el frontend:**
+```
+ws://localhost:8080/ws/websocket?token=<jwt>
+                     ▲             ▲
+                  endpoint       El Gateway valida el token
+                  STOMP+SockJS   desde el query param
+```
+
+---
+
 ## Flujo del Asistente IA
 
 ```
@@ -137,7 +178,7 @@ Ejemplo: el usuario consulta las órdenes de trabajo desde el Kanban.
 5. Analytics llama a Groq API (llama-3.3-70b-versatile)
    │  con el SYSTEM_PROMPT + contexto + pregunta del usuario
    │
-6. Claude responde en español con datos precisos del taller
+6. Groq responde en español con datos precisos del taller
    │
 7. Analytics retorna { "respuesta": "...", "contexto_utilizado": {...} }
    │
@@ -197,10 +238,12 @@ JWT permite autenticación sin estado en el servidor, eliminando la necesidad de
 | Analytics Service | Una instancia | Escala horizontal (solo lectura) |
 | Base de datos | Una instancia PostgreSQL | PostgreSQL HA, read replicas |
 | JWT | Sin refresh token | Implementar refresh token |
-| Analytics Claude | API call por request | Cache de respuestas frecuentes |
+| Analytics (Groq) | API call por request | Cache de respuestas frecuentes |
 | Rate limiting | No implementado | Añadir en el Gateway |
 
 **Limitaciones conocidas v1.0:**
 - Sin refresh token: si el JWT expira durante la sesión, el usuario debe volver a loguearse.
-- Sin WebSockets: el estado del Kanban no se actualiza en tiempo real entre múltiples usuarios.
 - Analytics Service sin autenticación propia: confía en que el Gateway es el único que lo llama.
+
+**Implementado en v1.1:**
+- WebSockets con STOMP para sincronización en tiempo real del Kanban entre múltiples usuarios.

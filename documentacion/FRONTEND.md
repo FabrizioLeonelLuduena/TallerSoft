@@ -8,6 +8,8 @@
 | Angular Material | 18.2 | Componentes UI (Material Design) |
 | Angular CDK | 18.2 | Drag and Drop (Kanban) |
 | RxJS | 7.8 | Programación reactiva |
+| @stomp/rx-stomp | 2.x | Cliente STOMP reactivo sobre WebSocket |
+| sockjs-client | 1.6 | Fallback WebSocket (SockJS) |
 | TypeScript | 5.4 | Tipado estático |
 | Karma + Jasmine | — | Tests unitarios del frontend |
 
@@ -35,6 +37,8 @@ src/app/
 │   ├── auth/                  — Login
 │   ├── dashboard/             — KPIs y gráficos
 │   ├── ordenes/               — Kanban + lista + detalle + crear
+│   │   └── services/
+│   │       └── kanban-sync.service.ts — Conexión WebSocket STOMP para el Kanban
 │   ├── clientes/              — Lista, detalle, crear, editar clientes
 │   ├── stock/                 — Inventario de repuestos
 │   ├── caja/                  — Cobros y caja diaria
@@ -59,7 +63,7 @@ src/app/
 | Clientes | `/clientes` | CRUD de clientes | ADMIN, RECEPCION |
 | Stock | `/stock` | Inventario de repuestos | ADMIN, RECEPCION |
 | Caja | `/caja` | Cobros y caja diaria | ADMIN, RECEPCION |
-| Asistente | `/asistente` | Chat con Claude AI | Todos |
+| Asistente | `/asistente` | Chat con asistente IA (Groq) | Todos |
 | Usuarios | `/usuarios` | Gestión de usuarios | ADMIN |
 
 ---
@@ -172,6 +176,23 @@ El Kanban muestra las órdenes en 4 columnas: **Pendiente**, **En Proceso**, **L
   2. Se llama `ordenesService.cambiarEstado(id, nuevoEstado)`
   3. Si el backend retorna error: la card vuelve a su columna original y se muestra un snackbar de error
 - La columna ENTREGADO muestra solo las 3 órdenes más recientes
+
+### Sincronización en Tiempo Real (WebSocket + STOMP)
+
+`KanbanSyncService` establece una conexión STOMP persistente al inicializarse. Se conecta a través del Gateway pasando el JWT como query param (los WebSockets no soportan headers custom en el handshake):
+
+```
+ws://<host>/ws/websocket?token=<jwt>
+```
+
+El servicio suscribe al topic `/topic/kanban` y emite un observable `kanbanUpdates$()`. `KanbanComponent` se suscribe en `ngOnInit` y reacciona a cada mensaje actualizando el array local sin recargar toda la página:
+
+```typescript
+// Cuando llega { ordenId: 42, nuevoEstado: "EN_PROCESO" }
+// → la orden se mueve de columna en el array local sin HTTP request
+```
+
+La suscripción se limpia en `ngOnDestroy` con `kanbanSub.unsubscribe()` y `kanbanSync.disconnect()`.
 
 ---
 

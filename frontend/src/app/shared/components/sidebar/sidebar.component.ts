@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDrawerModule } from '@angular/material/sidenav';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    MatDrawerModule,
+    MatSidenavModule,
     MatListModule,
     RouterModule
   ],

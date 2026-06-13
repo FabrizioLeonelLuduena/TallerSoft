@@ -34,31 +34,34 @@ public class RepuestoService {
         
         RepuestoResponse response = repuestoMapper.toResponse(saved);
         response.setCritico(repuestoMapper.calculateCritico(saved));
+        response.setBajo(repuestoMapper.calculateBajo(saved));
         return response;
     }
-    
+
     @Transactional(readOnly = true)
     public RepuestoResponse obtenerRepuesto(Long id) {
         Repuesto repuesto = repuestoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
-        
+
         RepuestoResponse response = repuestoMapper.toResponse(repuesto);
         response.setCritico(repuestoMapper.calculateCritico(repuesto));
+        response.setBajo(repuestoMapper.calculateBajo(repuesto));
         return response;
     }
-    
+
     @Transactional(readOnly = true)
     public List<RepuestoResponse> listarRepuestos() {
-        List<Repuesto> repuestos = repuestoRepository.findAll();
+        List<Repuesto> repuestos = repuestoRepository.findByActivoTrue();
         return repuestos.stream()
                 .map(r -> {
                     RepuestoResponse response = repuestoMapper.toResponse(r);
                     response.setCritico(repuestoMapper.calculateCritico(r));
+                    response.setBajo(repuestoMapper.calculateBajo(r));
                     return response;
                 })
                 .collect(Collectors.toList());
     }
-    
+
     @Transactional(readOnly = true)
     public List<RepuestoResponse> listarRepuestosCriticos() {
         List<Repuesto> repuestos = repuestoRepository.findRepuestosCriticos();
@@ -66,31 +69,67 @@ public class RepuestoService {
                 .map(r -> {
                     RepuestoResponse response = repuestoMapper.toResponse(r);
                     response.setCritico(true);
+                    response.setBajo(false);
                     return response;
                 })
                 .collect(Collectors.toList());
     }
-    
+
     @Transactional
     public RepuestoResponse editarRepuesto(Long id, RepuestoRequest request) {
         log.info("Editando repuesto {}", id);
-        
+
         Repuesto repuesto = repuestoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
-        
+
         repuesto.setNombre(request.getNombre());
         repuesto.setCategoria(request.getCategoria());
         repuesto.setPrecio(request.getPrecio());
         repuesto.setStockActual(request.getStockActual());
         repuesto.setStockMinimo(request.getStockMinimo());
-        
+        repuesto.setStockBajo(request.getStockBajo());
+
         Repuesto updated = repuestoRepository.save(repuesto);
-        
+
         RepuestoResponse response = repuestoMapper.toResponse(updated);
         response.setCritico(repuestoMapper.calculateCritico(updated));
+        response.setBajo(repuestoMapper.calculateBajo(updated));
         return response;
     }
     
+    @Transactional
+    public void darDeBajaRepuesto(Long id) {
+        log.info("Dando de baja repuesto {}", id);
+        Repuesto repuesto = repuestoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
+        repuesto.setActivo(false);
+        repuestoRepository.save(repuesto);
+        log.info("Repuesto {} dado de baja: {}", id, repuesto.getNombre());
+    }
+
+    @Transactional
+    public void reactivarRepuesto(Long id) {
+        log.info("Reactivando repuesto {}", id);
+        Repuesto repuesto = repuestoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
+        repuesto.setActivo(true);
+        repuestoRepository.save(repuesto);
+        log.info("Repuesto {} reactivado: {}", id, repuesto.getNombre());
+    }
+
+    @Transactional(readOnly = true)
+    public List<RepuestoResponse> listarTodosRepuestos() {
+        List<Repuesto> repuestos = repuestoRepository.findAll();
+        return repuestos.stream()
+                .map(r -> {
+                    RepuestoResponse response = repuestoMapper.toResponse(r);
+                    response.setCritico(repuestoMapper.calculateCritico(r));
+                    response.setBajo(repuestoMapper.calculateBajo(r));
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public void decrementarStock(Long repuestoId, Integer cantidad) {
         log.info("Decrementando stock del repuesto {} en {}", repuestoId, cantidad);

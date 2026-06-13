@@ -32,14 +32,15 @@
       <input
         type="text"
         class="search-input ts-input"
-        placeholder="Buscar por #, cliente, falla o técnico..."
+        [placeholder]="isTecnico ? 'Buscar por #, cliente o falla...' : 'Buscar por #, cliente, falla o técnico...'"
         [(ngModel)]="searchTerm"
         (input)="applyFilters()"
       />
     </div>
 
-    <!-- Técnico Filter -->
+    <!-- Técnico Filter (solo ADMIN y RECEPCION) -->
     <select
+      *ngIf="!isTecnico"
       class="filter-select ts-input"
       [(ngModel)]="selectedTecnicoId"
       (change)="applyFilters()"
@@ -59,6 +60,19 @@
       <option value="">Prioridad</option>
       <option *ngFor="let pri of prioridades" [value]="pri">
         {{ pri }}
+      </option>
+    </select>
+
+    <!-- Estado Filter (solo vista lista) -->
+    <select
+      *ngIf="viewMode === 'lista'"
+      class="filter-select ts-input"
+      [(ngModel)]="selectedEstado"
+      (change)="applyFilters()"
+    >
+      <option value="">Estado</option>
+      <option *ngFor="let estado of estados" [value]="estado">
+        {{ formatEstado(estado) }}
       </option>
     </select>
 

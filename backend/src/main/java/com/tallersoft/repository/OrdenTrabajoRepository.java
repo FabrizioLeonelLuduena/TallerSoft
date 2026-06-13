@@ -21,4 +21,6 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Long
     List<OrdenTrabajo> findByCreatedAtBetween(LocalDateTime inicio, LocalDateTime fin);
     
     List<OrdenTrabajo> findByEstadoNot(EstadoOrden estado);
+
+    List<OrdenTrabajo> findByTecnicoIdAndEstadoNot(Long tecnicoId, EstadoOrden estado);
 }

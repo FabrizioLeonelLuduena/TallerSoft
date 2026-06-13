@@ -35,9 +35,10 @@ public class ClienteController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ResponseEntity<List<ClienteResponse>> listar(
-            @RequestParam(required = false) String nombre) {
-        log.info("Listando clientes con filtro: {}", nombre);
-        List<ClienteResponse> clientes = clienteService.listarClientes(nombre);
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInactivos) {
+        log.info("Listando clientes con filtro: {}, incluirInactivos: {}", nombre, incluirInactivos);
+        List<ClienteResponse> clientes = clienteService.listarClientes(nombre, incluirInactivos);
         return ResponseEntity.ok(clientes);
     }
 
@@ -95,6 +96,14 @@ public class ClienteController {
      * @param id Client ID
      * @return Empty response
      */
+    @PatchMapping("/{id}/activar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reactivar(@PathVariable Long id) {
+        log.info("Reactivando cliente: {}", id);
+        clienteService.reactivarCliente(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin, interval, Subscription } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
@@ -50,7 +50,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private alertasSub?: Subscription;
 
-  constructor(private analytics: AnalyticsService) {}
+  constructor(private analytics: AnalyticsService, private router: Router) {}
+
+  readonly moduloRutas: Record<string, string> = {
+    stock: '/stock',
+    ordenes: '/ordenes',
+    caja: '/caja',
+  };
+
+  navegarDesdeAlerta(alerta: any): void {
+    const ruta = this.moduloRutas[alerta.modulo];
+    if (ruta) {
+      this.cerrarModal();
+      this.router.navigate([ruta]);
+    }
+  }
 
   ngOnInit(): void {
     this.cargarDashboard();

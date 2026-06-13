@@ -33,6 +33,7 @@ public class OrdenTrabajoService {
     private final UsuarioRepository usuarioRepository;
     private final OrdenTrabajoMapper ordenTrabajoMapper;
     private final OrdenRepuestoMapper ordenRepuestoMapper;
+    private final KanbanNotificationService kanbanNotificationService;
     
     @Transactional
     public OrdenTrabajoResponse crearOrden(OrdenTrabajoRequest request) {
@@ -114,6 +115,14 @@ public class OrdenTrabajoService {
                 .map(ordenTrabajoMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public List<OrdenTrabajoResponse> listarOrdenesActivas(Long tecnicoId) {
+        List<OrdenTrabajo> ordenes = ordenTrabajoRepository.findByTecnicoIdAndEstadoNot(tecnicoId, EstadoOrden.ENTREGADO);
+        return ordenes.stream()
+                .map(ordenTrabajoMapper::toResponse)
+                .collect(Collectors.toList());
+    }
     
     @Transactional
     public OrdenTrabajoResponse cambiarEstado(Long id, EstadoOrden nuevoEstado) {
@@ -132,24 +141,39 @@ public class OrdenTrabajoService {
             transicionValida = true;
         } else if (estadoActual == EstadoOrden.LISTO && nuevoEstado == EstadoOrden.ENTREGADO) {
             transicionValida = true;
+        } else if (estadoActual == EstadoOrden.PENDIENTE && nuevoEstado == EstadoOrden.CANCELADO) {
+            transicionValida = true;
         }
-        
+
         if (!transicionValida) {
             throw new InvalidStateTransitionException(
                     String.format("Transición inválida de %s a %s", estadoActual, nuevoEstado)
             );
         }
-        
+
         // Si el nuevo estado es LISTO, verificar que existe diagnóstico
         if (nuevoEstado == EstadoOrden.LISTO) {
             if (orden.getDiagnostico() == null || orden.getDiagnostico().isBlank()) {
                 throw new MissingDiagnosticException("No se puede cambiar a LISTO sin diagnóstico");
             }
         }
+
+        // Al cancelar, devolver al inventario el stock de repuestos reservados
+        if (nuevoEstado == EstadoOrden.CANCELADO) {
+            List<OrdenRepuesto> repuestosOrden = ordenRepuestoRepository.findByOrdenId(id);
+            for (OrdenRepuesto or : repuestosOrden) {
+                Repuesto repuesto = repuestoRepository.findByIdWithLock(or.getRepuesto().getId())
+                        .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
+                repuesto.setStockActual(repuesto.getStockActual() + or.getCantidad());
+                repuestoRepository.save(repuesto);
+            }
+            log.info("Stock devuelto por cancelación de orden {}", id);
+        }
         
         orden.setEstado(nuevoEstado);
         OrdenTrabajo updated = ordenTrabajoRepository.save(orden);
         log.info("Estado de orden {} cambiado a {}", id, nuevoEstado);
+        kanbanNotificationService.notificarCambioOrden(updated.getId(), nuevoEstado.name());
         return ordenTrabajoMapper.toResponse(updated);
     }
     
@@ -181,9 +205,9 @@ public class OrdenTrabajoService {
                     "No se puede agregar repuestos a una orden ya entregada");
         }
 
-        Repuesto repuesto = repuestoRepository.findById(request.getRepuestoId())
+        Repuesto repuesto = repuestoRepository.findByIdWithLock(request.getRepuestoId())
                 .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
-        
+
         // Verificar stock disponible
         if (repuesto.getStockActual() < request.getCantidad()) {
             throw new InsufficientStockException(
@@ -233,8 +257,9 @@ public class OrdenTrabajoService {
         OrdenRepuesto ordenRepuesto = ordenRepuestoRepository.findById(ordenRepuestoId)
                 .orElseThrow(() -> new EntityNotFoundException("Item de repuesto no encontrado"));
 
-        // Devolver stock al inventario
-        Repuesto repuesto = ordenRepuesto.getRepuesto();
+        // Devolver stock al inventario — lock pesimista para evitar race condition
+        Repuesto repuesto = repuestoRepository.findByIdWithLock(ordenRepuesto.getRepuesto().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Repuesto no encontrado"));
         repuesto.setStockActual(repuesto.getStockActual() + ordenRepuesto.getCantidad());
         repuestoRepository.save(repuesto);
 

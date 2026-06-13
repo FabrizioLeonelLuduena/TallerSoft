@@ -42,11 +42,20 @@ public class JwtValidationFilter implements GlobalFilter {
 
         // Extract JWT token from Authorization header
         String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
-        
+
         if (authHeader == null || authHeader.isEmpty()) {
-            log.warn("Missing Authorization header for path: {}", path);
-            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, 
-                    "Authorization header requerido");
+            // For WebSocket upgrade requests, accept token from query param
+            if (path.startsWith("/ws/")) {
+                String queryToken = exchange.getRequest().getQueryParams().getFirst("token");
+                if (queryToken != null && !queryToken.isEmpty()) {
+                    authHeader = "Bearer " + queryToken;
+                }
+            }
+            if (authHeader == null || authHeader.isEmpty()) {
+                log.warn("Missing Authorization header for path: {}", path);
+                return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED,
+                        "Authorization header requerido");
+            }
         }
 
         try {

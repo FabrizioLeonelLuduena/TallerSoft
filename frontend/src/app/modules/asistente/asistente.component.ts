@@ -121,10 +121,13 @@ export class AsistenteComponent implements OnInit, AfterViewChecked, OnDestroy {
           this.scrollPendiente = true;
           this.persistSession();
         },
-        error: () => {
+        error: (err: { status?: number }) => {
+          const texto = err?.status === 503
+            ? 'El asistente no está disponible en este momento. Intentá de nuevo más tarde.'
+            : 'Ocurrió un error al consultar el asistente. Verificá que el servicio de analítica esté activo.';
           this.mensajes.push({
             rol: 'asistente',
-            texto: 'Ocurrió un error al consultar el asistente. Verificá que el servicio de analítica esté activo.',
+            texto,
             timestamp: new Date(),
           });
           this.cargando = false;

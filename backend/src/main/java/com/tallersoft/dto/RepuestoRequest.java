@@ -17,7 +17,10 @@ public class RepuestoRequest {
     
     @Min(value = 0, message = "stockActual no puede ser negativo")
     private Integer stockActual = 0;
-    
+
     @Min(value = 0, message = "stockMinimo no puede ser negativo")
     private Integer stockMinimo = 5;
+
+    @Min(value = 0, message = "stockBajo no puede ser negativo")
+    private Integer stockBajo = 10;
 }

@@ -10,7 +10,10 @@ export interface RepuestoResponse {
   precio: number;
   stockActual: number;
   stockMinimo: number;
+  stockBajo: number;
   critico: boolean;
+  bajo: boolean;
+  activo: boolean;
   createdAt?: string;
 }
 
@@ -20,6 +23,7 @@ export interface RepuestoRequest {
   precio: number;
   stockActual: number;
   stockMinimo: number;
+  stockBajo: number;
 }
 
 // Alias used by stock module components
@@ -31,11 +35,10 @@ export class RepuestosService {
 
   constructor(private http: HttpClient) {}
 
-  listarRepuestos(critico?: boolean): Observable<RepuestoResponse[]> {
+  listarRepuestos(critico?: boolean, incluirInactivos = false): Observable<RepuestoResponse[]> {
     let params = new HttpParams();
-    if (critico === true) {
-      params = params.set('critico', 'true');
-    }
+    if (critico === true) params = params.set('critico', 'true');
+    if (incluirInactivos) params = params.set('incluirInactivos', 'true');
     return this.http.get<RepuestoResponse[]>(this.api, { params });
   }
 
@@ -61,5 +64,9 @@ export class RepuestosService {
 
   eliminarRepuesto(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
+  }
+
+  reactivarRepuesto(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.api}/${id}/activar`, {});
   }
 }

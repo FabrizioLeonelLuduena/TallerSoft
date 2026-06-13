@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -71,7 +71,7 @@ export class ListComponent implements OnInit {
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
 
-  showDeleteUserModal = false;
+  @ViewChild('deleteUserDialog') private deleteUserDialog!: ElementRef<HTMLDialogElement>;
   userToDelete: any = null;
 
   showEditDialog = false;
@@ -179,7 +179,7 @@ export class ListComponent implements OnInit {
 
   openDeleteUserModal(usuario: any) {
     this.userToDelete = usuario;
-    this.showDeleteUserModal = true;
+    this.deleteUserDialog.nativeElement.showModal();
   }
 
   confirmDeleteUser() {
@@ -201,7 +201,23 @@ export class ListComponent implements OnInit {
   }
 
   cancelDeleteUser() {
-    this.showDeleteUserModal = false;
+    if (this.deleteUserDialog.nativeElement.open) {
+      this.deleteUserDialog.nativeElement.close();
+    }
     this.userToDelete = null;
+  }
+
+  reactivarUsuario(usuario: UsuarioResponse) {
+    this.usuarioService.activarUsuario(usuario.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.notifications.success(`${usuario.nombre} fue reactivado correctamente`);
+          this.loadUsuarios();
+        },
+        error: (err) => {
+          this.notifications.error(err.error?.message || 'Error al reactivar el usuario');
+        }
+      });
   }
 }

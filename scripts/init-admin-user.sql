@@ -7,7 +7,7 @@
 INSERT INTO usuarios (nombre, email, password, rol, activo, created_at)
 VALUES (
     'Administrador',
-    'admin@techsoft.com',
+    'admin@tallersoft.com',
     '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y',
     'ADMIN',
     true,

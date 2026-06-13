@@ -45,7 +45,8 @@ describe('RepuestosService', () => {
       categoria: 'Pantallas',
       precio: 45000,
       stockActual: 10,
-      stockMinimo: 5
+      stockMinimo: 5,
+      stockBajo: 3
     };
 
     service.crearRepuesto(payload).subscribe();

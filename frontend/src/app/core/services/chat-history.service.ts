@@ -15,15 +15,12 @@ export interface ChatSession {
   updatedAt: string;
 }
 
-const STORAGE_KEY = 'tallersoft_chat_history';
+const BASE_KEY = 'tallersoft_chat';
 
 @Injectable({ providedIn: 'root' })
 export class ChatHistoryService {
   private sessions$ = new BehaviorSubject<ChatSession[]>([]);
-
-  constructor() {
-    this.load();
-  }
+  private storageKey = BASE_KEY;
 
   get sessions() {
     return this.sessions$.asObservable();
@@ -33,9 +30,21 @@ export class ChatHistoryService {
     return this.sessions$.value;
   }
 
+  /** Llamar tras login: carga el historial del usuario autenticado. */
+  init(userId: number | string): void {
+    this.storageKey = `${BASE_KEY}_${userId}`;
+    this.load();
+  }
+
+  /** Llamar en logout: vacía la sesión en memoria sin tocar localStorage. */
+  reset(): void {
+    this.storageKey = BASE_KEY;
+    this.sessions$.next([]);
+  }
+
   private load(): void {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(this.storageKey);
       this.sessions$.next(raw ? JSON.parse(raw) : []);
     } catch {
       this.sessions$.next([]);
@@ -43,7 +52,7 @@ export class ChatHistoryService {
   }
 
   private persist(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.sessions$.value));
+    localStorage.setItem(this.storageKey, JSON.stringify(this.sessions$.value));
   }
 
   getSession(id: string): ChatSession | undefined {

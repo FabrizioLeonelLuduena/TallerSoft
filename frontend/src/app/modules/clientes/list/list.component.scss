@@ -428,3 +428,62 @@
     margin-left: var(--spacing-sm);
   }
 }
+
+// ─── Inactive clients section ────────────────────────────────
+
+.section-inactivos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(222, 225, 247, 0.08);
+  }
+
+  .material-symbols-outlined {
+    font-size: 16px; /* icon size — intentional */
+  }
+}
+
+.client-card--inactivo {
+  opacity: 0.6;
+  border-color: rgba(222, 225, 247, 0.05) !important;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.client-avatar--inactivo {
+  background: linear-gradient(135deg, rgba(156, 163, 175, 0.4), rgba(107, 114, 128, 0.4)) !important;
+  box-shadow: none !important;
+}
+
+.badge-inactivo {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  background: rgba(156, 163, 175, 0.12);
+  color: var(--color-text-muted);
+  border: 1px solid rgba(156, 163, 175, 0.2);
+  margin-top: 2px;
+}

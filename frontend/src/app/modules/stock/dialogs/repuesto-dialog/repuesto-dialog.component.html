@@ -77,7 +77,7 @@
         </div>
 
         <div class="form-field">
-          <label for="d-stockMinimo">Stock Mínimo <span class="required">*</span></label>
+          <label for="d-stockMinimo">Stock Mínimo (Crítico) <span class="required">*</span></label>
           <input
             id="d-stockMinimo"
             type="number"
@@ -91,6 +91,22 @@
             No puede ser negativo
           </span>
         </div>
+      </div>
+
+      <div class="form-field">
+        <label for="d-stockBajo">Stock Bajo (Alerta) <span class="required">*</span></label>
+        <input
+          id="d-stockBajo"
+          type="number"
+          class="ts-input"
+          formControlName="stockBajo"
+          min="0"
+          step="1"
+          [class.error]="form.get('stockBajo')?.invalid && form.get('stockBajo')?.touched"
+        />
+        <span class="error-text" *ngIf="form.get('stockBajo')?.hasError('min') && form.get('stockBajo')?.touched">
+          No puede ser negativo
+        </span>
       </div>
 
       <div class="modal-actions">

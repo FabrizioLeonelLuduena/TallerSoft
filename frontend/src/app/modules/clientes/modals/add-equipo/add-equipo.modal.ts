@@ -76,7 +76,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             />
           </div>
 
-          <div class="form-field" *ngIf="selectedType" [@fadeSlideIn]>
+          <div class="form-field">
             <label for="observaciones">Observaciones</label>
             <textarea 
               id="observaciones"

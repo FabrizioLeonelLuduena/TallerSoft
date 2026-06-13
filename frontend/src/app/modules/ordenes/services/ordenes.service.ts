@@ -21,7 +21,7 @@ export interface OrdenTrabajoResponse {
   tecnicoNombre: string | null;
   fallaReportada: string;
   diagnostico: string | null;
-  estado: 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO';
+  estado: 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO' | 'CANCELADO';
   prioridad: 'BAJA' | 'NORMAL' | 'ALTA';
   presupuesto: number;
   createdAt: string;
@@ -38,7 +38,7 @@ export interface OrdenTrabajoRequest {
 }
 
 export interface CambiarEstadoRequest {
-  nuevoEstado: 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO';
+  nuevoEstado: 'PENDIENTE' | 'EN_PROCESO' | 'LISTO' | 'ENTREGADO' | 'CANCELADO';
 }
 
 export interface DiagnosticoRequest {

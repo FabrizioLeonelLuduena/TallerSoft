@@ -7,26 +7,42 @@ export interface ProfileState {
   avatarImage: string | null;
 }
 
-const STORAGE_KEY = 'ts_profile';
+const BASE_KEY = 'ts_profile';
+const EMPTY: ProfileState = { nombre: '', avatarGradient: 0, avatarImage: null };
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  private _state: ProfileState = this.load();
-  private _subject = new BehaviorSubject<ProfileState>({ ...this._state });
+  private storageKey = BASE_KEY;
+  private _state: ProfileState = { ...EMPTY };
+  private _subject = new BehaviorSubject<ProfileState>({ ...EMPTY });
   readonly profile$ = this._subject.asObservable();
+
+  /** Llamar tras login: carga el perfil del usuario autenticado. */
+  init(userId: number | string): void {
+    this.storageKey = `${BASE_KEY}_${userId}`;
+    this._state = this.load();
+    this._subject.next({ ...this._state });
+  }
+
+  /** Llamar en logout: vacía la memoria sin borrar localStorage. */
+  reset(): void {
+    this.storageKey = BASE_KEY;
+    this._state = { ...EMPTY };
+    this._subject.next({ ...EMPTY });
+  }
 
   private load(): ProfileState {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : { nombre: '', avatarGradient: 0, avatarImage: null };
+      const raw = localStorage.getItem(this.storageKey);
+      return raw ? JSON.parse(raw) : { ...EMPTY };
     } catch {
-      return { nombre: '', avatarGradient: 0, avatarImage: null };
+      return { ...EMPTY };
     }
   }
 
   update(patch: Partial<ProfileState>): void {
     this._state = { ...this._state, ...patch };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this._state)); } catch (e) {
+    try { localStorage.setItem(this.storageKey, JSON.stringify(this._state)); } catch (e) {
       console.warn('[ProfileService] localStorage write failed:', e);
     }
     this._subject.next({ ...this._state });

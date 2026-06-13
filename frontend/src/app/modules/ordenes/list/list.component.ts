@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -43,14 +43,14 @@ export class ListComponent implements OnInit {
   currentPage = 1;
   readonly pageSize = 10;
 
-  estados = ['PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO'];
+  estados = ['PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO', 'CANCELADO'];
   tecnicos: { id: number | null; nombre: string }[] = [];
-  
-  showDeleteOrdenConfirm = false;
+
+  @ViewChild('cancelDialog') cancelDialog!: ElementRef<HTMLDialogElement>;
   ordenToDelete: OrdenTrabajoResponse | null = null;
   isDeleting = false;
 
-  readonly estadoOrden = { ENTREGADO: 0, LISTO: 1, EN_PROCESO: 2, PENDIENTE: 3 };
+  readonly estadoOrden = { ENTREGADO: 0, LISTO: 1, EN_PROCESO: 2, PENDIENTE: 3, CANCELADO: 4 };
 
   ngOnInit() {
     this.currentRole = this.authService.getCurrentRole();
@@ -216,6 +216,7 @@ export class ListComponent implements OnInit {
       case 'EN_PROCESO': return 'rgba(249, 115, 22, 0.15)';
       case 'LISTO': return 'rgba(34, 197, 94, 0.15)';
       case 'ENTREGADO': return 'rgba(75, 85, 99, 0.2)';
+      case 'CANCELADO': return 'rgba(239, 68, 68, 0.15)';
       default: return 'transparent';
     }
   }
@@ -226,6 +227,7 @@ export class ListComponent implements OnInit {
       case 'EN_PROCESO': return 'var(--color-accent)';
       case 'LISTO': return 'var(--color-success)';
       case 'ENTREGADO': return 'var(--color-text-muted)';
+      case 'CANCELADO': return 'var(--color-danger)';
       default: return 'transparent';
     }
   }
@@ -253,6 +255,7 @@ export class ListComponent implements OnInit {
       case 'EN_PROCESO': return 'var(--color-accent)';
       case 'LISTO': return 'var(--color-success)';
       case 'ENTREGADO': return 'var(--color-text-muted)';
+      case 'CANCELADO': return 'var(--color-danger)';
       default: return 'transparent';
     }
   }
@@ -269,28 +272,31 @@ export class ListComponent implements OnInit {
   showDeleteOrdenModal(orden: OrdenTrabajoResponse, event: Event) {
     event.stopPropagation();
     this.ordenToDelete = orden;
-    this.showDeleteOrdenConfirm = true;
+    this.cancelDialog.nativeElement.showModal();
   }
 
   closeDeleteOrdenModal() {
-    this.showDeleteOrdenConfirm = false;
+    if (this.cancelDialog.nativeElement.open) {
+      this.cancelDialog.nativeElement.close();
+    }
     this.ordenToDelete = null;
+    this.isDeleting = false;
   }
 
   confirmDeleteOrden() {
     if (!this.ordenToDelete) return;
     this.isDeleting = true;
-    this.ordenesService.eliminarOrden(this.ordenToDelete.id)
+    this.ordenesService.cambiarEstado(this.ordenToDelete.id, 'CANCELADO')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.notifications.success('Orden eliminada exitosamente');
+          this.notifications.success('Orden cancelada exitosamente');
           this.loadOrdenes();
           this.closeDeleteOrdenModal();
         },
         error: (err) => {
           this.isDeleting = false;
-          this.notifications.error(err.error?.message || 'Error al eliminar la orden');
+          this.notifications.error(err.error?.message || 'Error al cancelar la orden');
         }
       });
   }

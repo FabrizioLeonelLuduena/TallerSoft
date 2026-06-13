@@ -24,16 +24,19 @@ public class RepuestoController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
     public ResponseEntity<List<RepuestoResponse>> listarRepuestos(
-            @RequestParam(required = false) Boolean critico) {
-        log.info("Listando repuestos, critico={}", critico);
-        
+            @RequestParam(required = false) Boolean critico,
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInactivos) {
+        log.info("Listando repuestos, critico={}, incluirInactivos={}", critico, incluirInactivos);
+
         List<RepuestoResponse> repuestos;
         if (critico != null && critico) {
             repuestos = repuestoService.listarRepuestosCriticos();
+        } else if (incluirInactivos) {
+            repuestos = repuestoService.listarTodosRepuestos();
         } else {
             repuestos = repuestoService.listarRepuestos();
         }
-        
+
         return ResponseEntity.ok(repuestos);
     }
     
@@ -61,5 +64,21 @@ public class RepuestoController {
         log.info("Editando repuesto {}", id);
         RepuestoResponse repuesto = repuestoService.editarRepuesto(id, request);
         return ResponseEntity.ok(repuesto);
+    }
+
+    @PatchMapping("/{id}/activar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reactivarRepuesto(@PathVariable Long id) {
+        log.info("Reactivando repuesto {}", id);
+        repuestoService.reactivarRepuesto(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminarRepuesto(@PathVariable Long id) {
+        log.info("Dando de baja repuesto {}", id);
+        repuestoService.darDeBajaRepuesto(id);
+        return ResponseEntity.noContent().build();
     }
 }

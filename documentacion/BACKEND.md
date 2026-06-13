@@ -10,6 +10,7 @@
 | Spring Data JPA / Hibernate | 6.x | Persistencia |
 | MapStruct | 1.5.x | Mapeo Entity ↔ DTO |
 | JJWT (io.jsonwebtoken) | 0.12.x | Generación y validación de JWT |
+| Spring WebSocket | (incluido en Boot 3) | Soporte STOMP sobre WebSocket |
 | MercadoPago SDK | 2.x | Pagos online |
 | iText | 7.x | Generación de PDFs |
 | PostgreSQL Driver | 42.x | Conector JDBC |
@@ -25,7 +26,8 @@
 com.tallersoft/
 ├── TallerSoftApplication.java     — Punto de entrada Spring Boot
 ├── config/
-│   └── SecurityConfig.java        — Configuración de Spring Security
+│   ├── SecurityConfig.java        — Configuración de Spring Security
+│   └── WebSocketConfig.java       — Endpoint STOMP (/ws), broker y prefijos
 ├── controller/
 │   ├── AuthController.java        — Login y registro
 │   ├── ClienteController.java     — CRUD de clientes
@@ -43,7 +45,8 @@ com.tallersoft/
 │   ├── RepuestoService.java       — Gestión de stock
 │   ├── CobrosService.java         — Cobros y caja
 │   ├── MercadoPagoService.java    — Integración MP (Checkout Pro + POS QR)
-│   └── PresupuestoPdfService.java — Generación de PDF con iText
+│   ├── PresupuestoPdfService.java — Generación de PDF con iText
+│   └── KanbanNotificationService.java — Publica cambios de estado en /topic/kanban (STOMP)
 ├── repository/
 │   ├── UsuarioRepository.java
 │   ├── ClienteRepository.java
@@ -236,6 +239,55 @@ Todas las demás rutas requieren JWT válido.
 
 ---
 
+## WebSocket — Sincronización en Tiempo Real del Kanban
+
+### Configuración (`WebSocketConfig.java`)
+
+```java
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws")           // URL de conexión
+                .setAllowedOriginPatterns("*")
+                .withSockJS();                // Fallback para navegadores sin WS nativo
+    }
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/topic"); // Broker en memoria
+        registry.setApplicationDestinationPrefixes("/app"); // Prefijo para envíos al servidor
+    }
+}
+```
+
+### Publicar Notificaciones (`KanbanNotificationService.java`)
+
+`KanbanNotificationService` es un `@Component` con `SimpMessagingTemplate` inyectado. Se llama al final de `OrdenTrabajoService.cambiarEstado()` después del `save()` exitoso:
+
+```java
+kanbanNotificationService.notificarCambioOrden(updated.getId(), nuevoEstado.name());
+```
+
+El payload publicado en `/topic/kanban`:
+```json
+{ "ordenId": 42, "nuevoEstado": "EN_PROCESO" }
+```
+
+### Topic y Suscriptores
+
+| Destino | Tipo | Descripción |
+|---------|------|-------------|
+| `/topic/kanban` | Broadcast | Notifica a todos los clientes conectados cuando cambia el estado de una orden |
+
+### Rutas Públicas WebSocket
+
+Spring Security está configurado para permitir el handshake WebSocket sin JWT en la capa de Spring Security del Core. La validación del JWT ocurre en el **Gateway** (via `JwtValidationFilter`) antes de que el request llegue al Core.
+
+---
+
 ## Integración con MercadoPago
 
 ### Modalidades Implementadas
@@ -280,7 +332,7 @@ El PDF se retorna como `application/pdf` en el response.
 | Operación | `@Transactional` | Motivo |
 |-----------|-----------------|--------|
 | `crearOrden()` | Sí | Asocia cliente, equipo y técnico en una sola operación atómica |
-| `cambiarEstado()` | Sí | Lee y escribe la orden en una transacción |
+| `cambiarEstado()` | Sí | Lee y escribe la orden en una transacción; al finalizar publica en `/topic/kanban` via STOMP |
 | `agregarRepuesto()` | Sí | Descuenta stock Y crea OrdenRepuesto Y actualiza presupuesto. Si falla alguno, rollback total |
 | `registrarCobro()` | Sí | Crea cobro Y actualiza estado de orden en una sola transacción |
 | `procesarPagoAprobado()` | Sí | Actualiza cobro Y orden atómicamente al recibir webhook |

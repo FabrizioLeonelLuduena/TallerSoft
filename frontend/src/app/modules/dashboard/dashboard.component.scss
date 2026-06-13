@@ -573,6 +573,18 @@
   transition: background .1s;
   &:last-child { border-bottom: none; }
   &:hover { background: var(--color-surface-2); }
+  &.clickable {
+    cursor: pointer;
+    &:hover { background: var(--color-surface-2); }
+  }
+}
+.nav-arrow {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  align-self: center;
+  font-size: 18px; width: 18px; height: 18px;
+  opacity: .6;
 }
 .modal-alerta-icon {
   width: 34px; height: 34px;

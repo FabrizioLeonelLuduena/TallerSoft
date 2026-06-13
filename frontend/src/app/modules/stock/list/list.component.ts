@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +12,7 @@ import { takeUntil } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/auth/auth.service';
 
-type FilterState = 'todos' | 'criticos' | 'bajo';
+type FilterState = 'todos' | 'criticos' | 'bajo' | 'inactivos';
 
 @Component({
   selector: 'app-stock-list',
@@ -29,6 +29,8 @@ type FilterState = 'todos' | 'criticos' | 'bajo';
   styleUrls: ['./list.component.scss']
 })
 export class StockListComponent implements OnInit, OnDestroy {
+
+
   allRepuestos: Repuesto[] = [];
   filteredStock: Repuesto[] = [];
   loading = true;
@@ -61,7 +63,7 @@ export class StockListComponent implements OnInit, OnDestroy {
   showEditDialog = false;
   repuestoToEdit: Repuesto | null = null;
 
-  showDeleteModal = false;
+  @ViewChild('deleteRepuestoDialog') private deleteRepuestoDialog!: ElementRef<HTMLDialogElement>;
   repuestoToDelete: Repuesto | null = null;
 
   private searchSubject = new Subject<string>();
@@ -76,6 +78,14 @@ export class StockListComponent implements OnInit, OnDestroy {
 
   get currentRole(): string | null {
     return this.authService.getCurrentRole();
+  }
+
+  get canEdit(): boolean {
+    return this.currentRole === 'ADMIN';
+  }
+
+  private get activeRepuestos(): Repuesto[] {
+    return this.allRepuestos.filter(r => r.activo !== false);
   }
 
   onCreateClick(): void {
@@ -99,7 +109,7 @@ export class StockListComponent implements OnInit, OnDestroy {
 
   cargarRepuestos(): void {
     this.loading = true;
-    this.repuestosService.listarRepuestos()
+    this.repuestosService.listarRepuestos(undefined, true)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (repuestos) => {
@@ -126,10 +136,15 @@ export class StockListComponent implements OnInit, OnDestroy {
   private applyFilters(): void {
     let base = this.allRepuestos;
 
-    if (this.filterState === 'criticos') {
-      base = base.filter(r => r.critico);
-    } else if (this.filterState === 'bajo') {
-      base = base.filter(r => r.stockActual <= r.stockMinimo);
+    if (this.filterState === 'inactivos') {
+      base = base.filter(r => r.activo === false);
+    } else {
+      base = base.filter(r => r.activo !== false);
+      if (this.filterState === 'criticos') {
+        base = base.filter(r => r.critico);
+      } else if (this.filterState === 'bajo') {
+        base = base.filter(r => r.bajo);
+      }
     }
 
     if (this.searchTerm.trim()) {
@@ -157,7 +172,7 @@ export class StockListComponent implements OnInit, OnDestroy {
 
   eliminarRepuesto(repuesto: Repuesto): void {
     this.repuestoToDelete = repuesto;
-    this.showDeleteModal = true;
+    this.deleteRepuestoDialog.nativeElement.showModal();
   }
 
   confirmDeleteRepuesto(): void {
@@ -166,7 +181,7 @@ export class StockListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.notifications.success('Repuesto eliminado correctamente');
+          this.notifications.success('Repuesto dado de baja correctamente');
           this.cancelDeleteRepuesto();
           this.cargarRepuestos();
         },
@@ -177,45 +192,63 @@ export class StockListComponent implements OnInit, OnDestroy {
   }
 
   cancelDeleteRepuesto(): void {
-    this.showDeleteModal = false;
+    if (this.deleteRepuestoDialog.nativeElement.open) {
+      this.deleteRepuestoDialog.nativeElement.close();
+    }
     this.repuestoToDelete = null;
   }
 
-  // ---- Stats helpers ----
+  reactivarRepuesto(repuesto: Repuesto): void {
+    this.repuestosService.reactivarRepuesto(repuesto.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.notifications.success(`${repuesto.nombre} fue reactivado correctamente`);
+          this.cargarRepuestos();
+        },
+        error: (err) => {
+          this.notifications.error(err.error?.message || 'Error al reactivar el repuesto');
+        }
+      });
+  }
+
+  // ---- Stats helpers (active only) ----
 
   getTotalRepuestos(): number {
-    return this.allRepuestos.length;
+    return this.activeRepuestos.length;
   }
 
   getCriticosCount(): number {
-    return this.allRepuestos.filter(r => r.critico).length;
+    return this.activeRepuestos.filter(r => r.critico).length;
   }
 
   getBajoStockCount(): number {
-    return this.allRepuestos.filter(r => r.stockActual <= r.stockMinimo && !r.critico).length;
+    return this.activeRepuestos.filter(r => r.bajo).length;
   }
 
   getDisponiblesCount(): number {
-    return this.allRepuestos.filter(r => r.stockActual > r.stockMinimo).length;
+    return this.activeRepuestos.filter(r => !r.critico && !r.bajo).length;
   }
 
   // ---- Display helpers ----
 
   getStockPercentage(repuesto: Repuesto): number {
-    if (!repuesto.stockMinimo) return 100;
-    const ratio = repuesto.stockActual / (repuesto.stockMinimo * 2);
+    const ref = repuesto.stockBajo || repuesto.stockMinimo * 2 || 1;
+    const ratio = repuesto.stockActual / ref;
     return Math.min(Math.round(ratio * 100), 100);
   }
 
   getEstadoClass(repuesto: Repuesto): string {
+    if (repuesto.activo === false) return 'inactivo';
     if (repuesto.critico) return 'critico';
-    if (repuesto.stockActual <= repuesto.stockMinimo) return 'bajo';
+    if (repuesto.bajo) return 'bajo';
     return 'disponible';
   }
 
   getEstadoLabel(repuesto: Repuesto): string {
+    if (repuesto.activo === false) return 'INACTIVO';
     if (repuesto.critico) return 'CRÍTICO';
-    if (repuesto.stockActual <= repuesto.stockMinimo) return 'BAJO';
+    if (repuesto.bajo) return 'BAJO';
     return 'OK';
   }
 }

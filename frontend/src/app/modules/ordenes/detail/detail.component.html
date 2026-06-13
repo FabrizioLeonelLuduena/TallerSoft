@@ -109,8 +109,8 @@
         </div>
       </div>
 
-      <!-- Cobro Pendiente (solo cuando estado = LISTO) -->
-      <div class="card card--cobro" *ngIf="orden.estado === 'LISTO'">
+      <!-- Cobro Pendiente (solo ADMIN/RECEPCION cuando estado = LISTO) -->
+      <div class="card card--cobro" *ngIf="orden.estado === 'LISTO' && canRegistrarCobro()">
         <div class="card-header">
           <h3 class="card-title">Cobro Pendiente</h3>
         </div>
@@ -147,6 +147,26 @@
         <div *ngIf="isChangeEstadoDisabled()" class="state-hint">
           ⓘ Agregá un diagnóstico antes de continuar
         </div>
+
+        <ng-container *ngIf="canCancelar()">
+          <button
+            *ngIf="!showCancelConfirm"
+            class="btn-cancelar-orden"
+            (click)="onCancelarOrden()"
+          >
+            <span class="material-symbols-outlined">cancel</span>
+            Cancelar orden
+          </button>
+          <div *ngIf="showCancelConfirm" class="cancel-confirm-box">
+            <p class="cancel-confirm-text">¿Confirmar cancelación? Se devolverá el stock de repuestos.</p>
+            <div class="cancel-confirm-actions">
+              <button class="btn-cancel-no" (click)="onDismissCancelar()" [disabled]="isCancelling">No</button>
+              <button class="btn-cancel-yes" (click)="onConfirmCancelar()" [disabled]="isCancelling">
+                {{ isCancelling ? 'Cancelando...' : 'Sí, cancelar' }}
+              </button>
+            </div>
+          </div>
+        </ng-container>
       </div>
 
       <!-- Historial -->

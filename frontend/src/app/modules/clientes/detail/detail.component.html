@@ -57,10 +57,10 @@
         </div>
       </div>
 
-      <!-- Edit / Delete at bottom-right -->
+      <!-- Edit / Delete -->
       <div class="header-footer">
         <button
-          class="action-btn"
+          class="btn-icon"
           title="Editar cliente"
           (click)="onEdit()"
           type="button"
@@ -68,13 +68,22 @@
           <span class="material-symbols-outlined">edit</span>
         </button>
         <button
-          class="action-btn action-btn-danger"
-          title="Eliminar cliente"
-          *ngIf="currentRole === 'ADMIN'"
+          class="btn-icon-danger"
+          title="Desactivar cliente"
+          *ngIf="currentRole === 'ADMIN' && cliente?.activo"
           (click)="onDelete()"
           type="button"
         >
           <span class="material-symbols-outlined">delete</span>
+        </button>
+        <button
+          class="btn-icon-success"
+          title="Reactivar cliente"
+          *ngIf="currentRole === 'ADMIN' && !cliente?.activo"
+          (click)="onReactivar()"
+          type="button"
+        >
+          <span class="material-symbols-outlined">restore</span>
         </button>
       </div>
     </section>

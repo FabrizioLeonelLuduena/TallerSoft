@@ -27,22 +27,12 @@ export class ClienteService {
 
   constructor(private http: HttpClient) {}
 
-  listarClientes(nombre?: string): Observable<ClienteResponse[]> {
-    console.log('[ClienteService] listarClientes() called with nombre:', nombre);
+  listarClientes(nombre?: string, incluirInactivos = false): Observable<ClienteResponse[]> {
     let params = new HttpParams();
-    if (nombre) {
-      params = params.set('nombre', nombre);
-    }
-
-    const url = `${this.api}`;
-    console.log('[ClienteService] Making request to:', url, 'with params:', params.toString());
-    
-    return this.http.get<ClienteResponse[]>(url, { params }).pipe(
-      tap(response => console.log('[ClienteService] Response received:', response)),
-      catchError(err => {
-        console.error('[ClienteService] HTTP Error:', err);
-        throw err;
-      })
+    if (nombre) params = params.set('nombre', nombre);
+    if (incluirInactivos) params = params.set('incluirInactivos', 'true');
+    return this.http.get<ClienteResponse[]>(this.api, { params }).pipe(
+      catchError(err => { throw err; })
     );
   }
 
@@ -56,6 +46,10 @@ export class ClienteService {
 
   editarCliente(id: number, data: ClienteRequest): Observable<ClienteResponse> {
     return this.http.put<ClienteResponse>(`${this.api}/${id}`, data);
+  }
+
+  reactivarCliente(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.api}/${id}/activar`, {});
   }
 
   eliminarCliente(id: number): Observable<void> {

@@ -74,4 +74,8 @@ export class UsuarioService {
   deleteUsuario(usuarioId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${usuarioId}`);
   }
+
+  activarUsuario(usuarioId: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${usuarioId}/activar`, {});
+  }
 }

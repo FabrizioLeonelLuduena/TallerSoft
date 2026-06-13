@@ -10,6 +10,7 @@ import { OrdenesService } from '../services/ordenes.service';
 import { ClienteService } from '../../clientes/services/cliente.service';
 import { EquipoService, EquipoResponse } from '../services/equipo.service';
 import { UsuariosService, Usuario } from '../../../core/services/usuarios.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface ClienteResponse {
   id: number;
@@ -32,6 +33,7 @@ export class CreateComponent implements OnInit {
   private clienteService = inject(ClienteService);
   private equipoService = inject(EquipoService);
   private usuariosService = inject(UsuariosService);
+  private authService = inject(AuthService);
   private destroyRef = inject(DestroyRef);
 
   form!: FormGroup;
@@ -57,6 +59,7 @@ export class CreateComponent implements OnInit {
   selectedTecnico: Usuario | null = null;
   showTecnicoDropdown = false;
   tecnicoSearchTerm = '';
+  isTecnico = false;
 
   isLoading = false;
   isSubmitting = false;
@@ -94,17 +97,35 @@ export class CreateComponent implements OnInit {
       }
     });
 
-    this.usuariosService.obtenerUsuariosPorRol('TECNICO')
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (usuarios) => {
-          this.tecnicos = usuarios.filter(u => u.activo);
-          this.filteredTecnicos = this.tecnicos;
-        },
-        error: () => {
-          this.notifications.error('Error al cargar técnicos');
-        }
-      });
+    const currentUser = this.authService.getCurrentUser();
+    this.isTecnico = currentUser?.rol === 'TECNICO';
+
+    if (this.isTecnico && currentUser) {
+      this.usuariosService.obtenerUsuario(currentUser.userId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (usuario) => {
+            this.selectedTecnico = usuario;
+            this.tecnicoSearchTerm = usuario.nombre;
+            this.form.patchValue({ tecnicoId: usuario.id });
+          },
+          error: () => {
+            this.notifications.error('Error al cargar datos del técnico');
+          }
+        });
+    } else {
+      this.usuariosService.obtenerUsuariosPorRol('TECNICO')
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (usuarios) => {
+            this.tecnicos = usuarios.filter(u => u.activo);
+            this.filteredTecnicos = this.tecnicos;
+          },
+          error: () => {
+            this.notifications.error('Error al cargar técnicos');
+          }
+        });
+    }
   }
 
   // ── Blur (cierra dropdown al salir del campo) ────────────

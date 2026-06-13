@@ -18,4 +18,12 @@ public interface RepuestoMapper {
         }
         return repuesto.getStockActual() <= repuesto.getStockMinimo();
     }
+
+    default Boolean calculateBajo(Repuesto repuesto) {
+        if (repuesto.getStockActual() == null || repuesto.getStockMinimo() == null || repuesto.getStockBajo() == null) {
+            return false;
+        }
+        return repuesto.getStockActual() > repuesto.getStockMinimo()
+                && repuesto.getStockActual() <= repuesto.getStockBajo();
+    }
 }

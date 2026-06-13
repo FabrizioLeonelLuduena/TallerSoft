@@ -102,12 +102,13 @@
             >
               <span class="material-symbols-outlined">edit</span>
             </button>
-            <button 
+            <button
+              *ngIf="orden.estado === 'PENDIENTE'"
               class="btn-action btn-danger"
               (click)="showDeleteOrdenModal(orden, $event)"
-              title="Eliminar"
+              title="Cancelar orden"
             >
-              <span class="material-symbols-outlined">delete_forever</span>
+              <span class="material-symbols-outlined">cancel</span>
             </button>
           </div>
         </div>
@@ -134,27 +135,28 @@
     <p>{{ searchTerm ? 'No se encontraron órdenes con los criterios de búsqueda' : 'Comenzá a crear órdenes de trabajo' }}</p>
   </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div *ngIf="showDeleteOrdenConfirm && ordenToDelete" class="modal-backdrop">
-    <div class="modal-dialog">
+  <!-- Cancel Confirmation Modal (native <dialog> → top layer, siempre cubre todo el viewport) -->
+  <dialog #cancelDialog class="cancel-dialog"
+    (click)="closeDeleteOrdenModal()"
+    (cancel)="closeDeleteOrdenModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <span class="material-symbols-outlined modal-icon error">delete_forever</span>
-        <h2>Eliminar Orden #{{ padOrderId(ordenToDelete.id) }}</h2>
+        <h2>¿Cancelar Orden {{ ordenToDelete ? padOrderId(ordenToDelete.id) : '' }}?</h2>
       </div>
       <div class="modal-body">
-        <p>Estás a punto de eliminar esta orden de trabajo.</p>
-        <p class="warning-text">Esta acción no se puede deshacer.</p>
+        <p class="warning-text">
+          Estás a punto de cancelar esta orden de trabajo. El stock de repuestos reservados será devuelto al inventario.
+        </p>
       </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" (click)="closeDeleteOrdenModal()" [disabled]="isDeleting">
-          Cancelar
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeDeleteOrdenModal()" [disabled]="isDeleting" type="button">
+          Volver
         </button>
-        <button class="btn-delete" (click)="confirmDeleteOrden()" [disabled]="isDeleting">
-          <span *ngIf="!isDeleting" class="material-symbols-outlined">delete_forever</span>
-          <span *ngIf="isDeleting" class="material-symbols-outlined loading-spinner">hourglass_empty</span>
-          {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
+        <button class="btn-delete" (click)="confirmDeleteOrden()" [disabled]="isDeleting" type="button">
+          <span *ngIf="!isDeleting">Sí, cancelar</span>
+          <span *ngIf="isDeleting">Cancelando...</span>
         </button>
       </div>
     </div>
-  </div>
+  </dialog>
 </div>

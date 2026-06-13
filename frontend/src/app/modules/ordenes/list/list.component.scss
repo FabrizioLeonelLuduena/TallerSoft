@@ -513,151 +513,120 @@
 // MODAL
 // ───────────────────────────────────────────────────────────
 
-.modal-backdrop {
+.cancel-dialog {
+  // Reset todos los estilos default del <dialog>
+  all: unset;
+  // Cubre el viewport completo (el <dialog> con showModal() está en el top layer,
+  // por encima de cualquier stacking context o overflow del árbol CSS)
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 200ms ease;
+
+  &[open] {
+    display: flex;
+    background: rgba(0, 0, 0, 0.6);
+    animation: fadeIn 200ms ease;
+  }
 }
 
-.modal-dialog {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  max-width: 400px;
+.modal-card {
+  background: #141824;
+  border: 1px solid rgba(222, 225, 247, 0.08);
+  border-radius: 16px;
   width: 90%;
-  overflow: hidden;
-  animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+  animation: slideUp 0.3s ease-out;
 }
 
 .modal-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-
-  .modal-icon {
-    font-size: 32px;
-    color: #ef4444;
-
-    &.error {
-      color: #ef4444;
-    }
-  }
-
   h2 {
     margin: 0;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.95);
+    color: #ef4444;
   }
 }
 
 .modal-body {
-  padding: var(--spacing-lg);
-
-  p {
-    margin: 0 0 8px 0;
+  .warning-text {
+    margin: 0;
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    &.warning-text {
-      color: rgba(239, 68, 68, 0.8);
-      font-weight: 600;
-    }
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
   }
 }
 
-.modal-footer {
+.modal-actions {
   display: flex;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 12px;
+  justify-content: flex-end;
 
   button {
-    flex: 1;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: 6px;
-    border: none;
-    font-weight: 600;
-    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: not-allowed;
     }
   }
 
   .btn-cancel {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
 
     &:hover:not(:disabled) {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.1);
     }
   }
 
   .btn-delete {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #ef4444;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
 
     &:hover:not(:disabled) {
-      background: rgba(239, 68, 68, 0.3);
-      border-color: rgba(239, 68, 68, 0.6);
+      background: #dc2626;
+      border-color: #dc2626;
     }
 
-    .loading-spinner {
-      font-size: 16px;
-      animation: spin 1s linear infinite;
+    &:active:not(:disabled) {
+      transform: scale(0.98);
     }
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
   from {
-    opacity: 0;
     transform: translateY(20px);
+    opacity: 0;
   }
   to {
-    opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+    opacity: 1;
   }
 }
 

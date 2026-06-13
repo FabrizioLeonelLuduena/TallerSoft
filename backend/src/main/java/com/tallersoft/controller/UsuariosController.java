@@ -39,7 +39,7 @@ public class UsuariosController {
      * @return List of UsuarioResponse
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ResponseEntity<List<UsuarioResponse>> listar(
             @RequestParam(required = false) String rol) {
         log.info("Listando usuarios con filtro rol: {}", rol);
@@ -62,9 +62,16 @@ public class UsuariosController {
      * @return UsuarioResponse
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UsuarioResponse> obtener(@PathVariable Long id) {
+    public ResponseEntity<?> obtener(@PathVariable Long id, Authentication authentication) {
         log.info("Obteniendo usuario: {}", id);
+        com.tallersoft.model.Usuario principal = (com.tallersoft.model.Usuario) authentication.getPrincipal();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isSelf = principal.getId().equals(id);
+        if (!isAdmin && !isSelf) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "No tenés permiso para ver este usuario"));
+        }
         UsuarioResponse usuario = usuarioService.obtenerUsuario(id);
         return ResponseEntity.ok(usuario);
     }

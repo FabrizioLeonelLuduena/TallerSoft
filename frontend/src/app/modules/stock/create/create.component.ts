@@ -31,13 +31,15 @@ export class StockCreateComponent {
     categoria: [''],
     precio: ['', [Validators.required, Validators.min(0.01)]],
     stockActual: [0, [Validators.required, Validators.min(0)]],
-    stockMinimo: [5, [Validators.required, Validators.min(0)]]
+    stockMinimo: [5, [Validators.required, Validators.min(0)]],
+    stockBajo: [10, [Validators.required, Validators.min(0)]]
   });
 
   get nombreControl() { return this.form.get('nombre'); }
   get precioControl() { return this.form.get('precio'); }
   get stockActualControl() { return this.form.get('stockActual'); }
   get stockMinimoControl() { return this.form.get('stockMinimo'); }
+  get stockBajoControl() { return this.form.get('stockBajo'); }
 
   onSubmit(): void {
     if (this.form.invalid) {
@@ -53,7 +55,8 @@ export class StockCreateComponent {
       categoria: this.form.value.categoria || null,
       precio: Number(this.form.value.precio),
       stockActual: Number(this.form.value.stockActual),
-      stockMinimo: Number(this.form.value.stockMinimo)
+      stockMinimo: Number(this.form.value.stockMinimo),
+      stockBajo: Number(this.form.value.stockBajo)
     };
 
     this.repuestosService.crearRepuesto(data).pipe(

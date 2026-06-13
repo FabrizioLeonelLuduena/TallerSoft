@@ -31,18 +31,30 @@ public class OrdenTrabajoController {
             @RequestParam(required = false) EstadoOrden estado,
             @RequestParam(required = false) Long tecnicoId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        log.info("Listando órdenes con filtros: estado={}, tecnicoId={}, desde={}, hasta={}", 
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            Authentication auth) {
+        boolean isTecnico = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TECNICO"));
+        if (isTecnico) {
+            tecnicoId = ((Usuario) auth.getPrincipal()).getId();
+            desde = null;
+            hasta = null;
+        }
+        log.info("Listando órdenes con filtros: estado={}, tecnicoId={}, desde={}, hasta={}",
                 estado, tecnicoId, desde, hasta);
         List<OrdenTrabajoResponse> ordenes = ordenTrabajoService.listarOrdenes(estado, tecnicoId, desde, hasta);
         return ResponseEntity.ok(ordenes);
     }
-    
+
     @GetMapping("/activas")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
-    public ResponseEntity<List<OrdenTrabajoResponse>> listarOrdenesActivas() {
-        log.info("Listando órdenes activas");
-        List<OrdenTrabajoResponse> ordenes = ordenTrabajoService.listarOrdenesActivas();
+    public ResponseEntity<List<OrdenTrabajoResponse>> listarOrdenesActivas(Authentication auth) {
+        boolean isTecnico = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TECNICO"));
+        List<OrdenTrabajoResponse> ordenes = isTecnico
+                ? ordenTrabajoService.listarOrdenesActivas(((Usuario) auth.getPrincipal()).getId())
+                : ordenTrabajoService.listarOrdenesActivas();
+        log.info("Listando órdenes activas (tecnico={})", isTecnico);
         return ResponseEntity.ok(ordenes);
     }
     

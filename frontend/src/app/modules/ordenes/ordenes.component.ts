@@ -42,11 +42,14 @@ export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
   searchTerm = '';
   selectedTecnicoId: number | null = null;
   selectedPrioridad: string = '';
-  
+  selectedEstado: string = '';
+
   ordenes: OrdenTrabajoResponse[] = [];
   tecnicos: { id: number | null; nombre: string }[] = [];
   prioridades = ['BAJA', 'NORMAL', 'ALTA'];
+  estados = ['PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO', 'CANCELADO'];
   currentRole: string | null = '';
+  get isTecnico(): boolean { return this.currentRole === Rol.TECNICO; }
 
   ngOnInit() {
     this.currentRole = this.authService.getCurrentRole();
@@ -92,6 +95,9 @@ export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
 
   switchViewMode(mode: 'kanban' | 'lista') {
     this.viewMode = mode;
+    if (mode === 'kanban') {
+      this.selectedEstado = '';
+    }
     // Wait for *ngIf to create the new child and update @ViewChild
     setTimeout(() => this.applyFilters(), 0);
   }
@@ -106,12 +112,13 @@ export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
       // eslint-disable-next-line eqeqeq
       const tecnicoMatch = tecnicoId === null || orden.tecnicoId == tecnicoId;
       const prioridadMatch = !this.selectedPrioridad || orden.prioridad === this.selectedPrioridad;
+      const estadoMatch = !this.selectedEstado || orden.estado === this.selectedEstado;
       const searchMatch = !term ||
         (orden.clienteNombre ?? '').toLowerCase().includes(term) ||
         orden.id.toString().includes(term) ||
         (orden.fallaReportada ?? '').toLowerCase().includes(term) ||
         (orden.tecnicoNombre ?? '').toLowerCase().includes(term);
-      return tecnicoMatch && prioridadMatch && searchMatch;
+      return tecnicoMatch && prioridadMatch && estadoMatch && searchMatch;
     });
 
     if (this.kanbanChild) {
@@ -128,5 +135,9 @@ export class OrdenesPrincipalComponent implements OnInit, AfterViewInit {
 
   canCreateOrden(): boolean {
     return this.currentRole === Rol.ADMIN || this.currentRole === Rol.RECEPCION;
+  }
+
+  formatEstado(estado: string): string {
+    return estado.replace('_', ' ');
   }
 }

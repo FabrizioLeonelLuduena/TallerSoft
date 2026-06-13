@@ -273,6 +273,38 @@
   }
 }
 
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.08);
+  color: #4ade80;
+  transition: all 150ms ease;
+
+  .estado-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    flex-shrink: 0;
+  }
+
+  &.inactivo {
+    border-color: rgba(156, 163, 175, 0.3);
+    background: rgba(156, 163, 175, 0.08);
+    color: var(--color-text-muted);
+
+    .estado-dot {
+      background: var(--color-text-muted);
+    }
+  }
+}
+
 .status-dot {
   display: inline-flex;
   align-items: center;
@@ -297,36 +329,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-
-  button {
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    transition: all 150ms ease;
-    opacity: 0.7;
-
-    &:hover {
-      background: rgba(0, 245, 212, 0.1);
-      color: var(--color-accent);
-      opacity: 1;
-    }
-
-    &.btn-delete:hover {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--color-danger);
-    }
-
-    .material-symbols-outlined {
-      font-size: 18px; /* icon size — intentional */
-    }
-  }
 }
 
 .skeleton-rows {
@@ -494,17 +496,53 @@
   }
 }
 
-// Modal Overlay
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
+// Reactivate Button Styles
+.btn-icon-success {
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 200ms ease;
+  border-radius: 8px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.08);
+  color: #22c55e;
+  cursor: pointer;
+  transition: all 200ms ease;
+  padding: 0;
+  font-family: inherit;
+
+  &:hover {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.6);
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  .material-symbols-outlined {
+    font-size: 20px; /* icon size — intentional */
+  }
+}
+
+// Modal (native <dialog> — top layer, cubre siempre el viewport completo)
+.confirm-dialog {
+  all: unset;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  &[open] {
+    display: flex;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 200ms ease;
+  }
 
   .modal-content {
     background: var(--color-surface);

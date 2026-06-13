@@ -1,5 +1,6 @@
 package com.tallersoft.security;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,19 @@ public class MercadoPagoWebhookValidator {
 
     @Value("${mercadopago.webhook-secret}")
     private String webhookSecret;
+
+    @Value("${mercadopago.sandbox}")
+    private boolean sandbox;
+
+    @PostConstruct
+    private void validateWebhookSecret() {
+        if (!sandbox && (webhookSecret == null || webhookSecret.isBlank())) {
+            throw new IllegalStateException(
+                "mercadopago.webhook-secret debe estar configurado en producción. " +
+                "Seteá la variable de entorno MP_WEBHOOK_SECRET."
+            );
+        }
+    }
 
     /**
      * Valida la firma del header x-signature de MercadoPago.

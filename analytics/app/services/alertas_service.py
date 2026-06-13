@@ -51,14 +51,28 @@ def generar_alertas(db) -> list[dict]:
             "datos_extra": {"orden_id": o["id"]},
         })
 
-    # 3. Stock crítico
+    # 3. Stock crítico (stockActual <= stockMinimo)
     for r in svc.get_stock_critico(db):
         alerta_id = f"stock-critico-{r['id']}"
         alertas.append({
             "id":          alerta_id,
-            "tipo":        "warn",
+            "tipo":        "danger",
             "titulo":      f"Stock crítico: {r['nombre']}",
             "descripcion": f"Quedan {r['stock_actual']} unidades (mínimo: {r['stock_minimo']})",
+            "modulo":      "stock",
+            "created_at":  now.isoformat(),
+            "leida":       _leida(alerta_id),
+            "datos_extra": {"repuesto_id": r["id"]},
+        })
+
+    # 3b. Stock bajo (stockMinimo < stockActual <= stockBajo)
+    for r in svc.get_stock_bajo(db):
+        alerta_id = f"stock-bajo-{r['id']}"
+        alertas.append({
+            "id":          alerta_id,
+            "tipo":        "warn",
+            "titulo":      f"Stock bajo: {r['nombre']}",
+            "descripcion": f"Quedan {r['stock_actual']} unidades (umbral de alerta: {r['stock_bajo']})",
             "modulo":      "stock",
             "created_at":  now.isoformat(),
             "leida":       _leida(alerta_id),

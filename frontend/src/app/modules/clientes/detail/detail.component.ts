@@ -140,6 +140,21 @@ export class DetailComponent implements OnInit {
     this.isDeleteModalOpen = false;
   }
 
+  onReactivar() {
+    if (!this.cliente) return;
+    this.clienteService.reactivarCliente(this.cliente.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.notifications.success(`${this.cliente!.nombre} fue reactivado correctamente`);
+          this.cliente = { ...this.cliente!, activo: true };
+        },
+        error: (err) => {
+          this.notifications.error(err.error?.message || 'Error al reactivar el cliente');
+        }
+      });
+  }
+
   getInitials(nombre: string | undefined): string {
     if (!nombre) return '';
     return nombre
