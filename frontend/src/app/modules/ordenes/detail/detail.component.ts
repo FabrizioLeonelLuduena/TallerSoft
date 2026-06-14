@@ -178,7 +178,7 @@ export class DetailComponent implements OnInit {
         next: (blob) => {
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
-          link.download = `presupuesto-orden-${this.orden!.id}.pdf`;
+          link.download = `TallerSoft-Presupuesto#${String(this.orden!.id).padStart(4, '0')}.pdf`;
           link.click();
         },
         error: () => {
