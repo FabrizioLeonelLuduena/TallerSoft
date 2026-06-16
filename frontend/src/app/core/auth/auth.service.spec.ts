@@ -2,7 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AuthService } from './auth.service';
+import { ProfileService } from '@core/services/profile.service';
+import { ChatHistoryService } from '@core/services/chat-history.service';
 import { environment } from '@environments/environment';
+
+const profileServiceStub = { init: () => {}, update: () => {}, reset: () => {} };
+const chatHistoryServiceStub = { init: () => {}, reset: () => {} };
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -16,7 +21,11 @@ describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, RouterTestingModule],
-      providers: [AuthService],
+      providers: [
+        AuthService,
+        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ChatHistoryService, useValue: chatHistoryServiceStub },
+      ],
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
