@@ -35,6 +35,7 @@ public class Repuesto {
     @Column(nullable = false)
     private Integer stockBajo = 10;
     
+    @Builder.Default
     @Column(nullable = false)
     private boolean activo = true;
 

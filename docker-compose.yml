@@ -105,9 +105,9 @@ services:
       DB_NAME: ${DB_NAME}
       ANALYTICS_USER: analytics_reader
       ANALYTICS_PASSWORD: analytics_reader_secure_password_change_in_production
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      CLAUDE_MODEL: ${CLAUDE_MODEL}
-      CLAUDE_MAX_TOKENS: ${CLAUDE_MAX_TOKENS}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      GROQ_MAX_TOKENS: ${GROQ_MAX_TOKENS:-1024}
       ANALYTICS_PORT: ${ANALYTICS_PORT}
     ports:
       - "${ANALYTICS_PORT}:8082"

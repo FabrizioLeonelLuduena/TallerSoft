@@ -737,6 +737,9 @@ app-root {
   font-size: var(--font-size-base);
   cursor: pointer;
   transition: transform 0.1s ease, opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 
   &:hover {
     opacity: 0.9;

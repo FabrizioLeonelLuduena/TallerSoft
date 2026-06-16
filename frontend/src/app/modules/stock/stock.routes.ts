@@ -9,7 +9,8 @@ export const stockRoutes: Routes = [
   {
     path: '',
     component: StockListComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: [Rol.ADMIN, Rol.TECNICO] }
   },
   {
     path: 'nuevo',

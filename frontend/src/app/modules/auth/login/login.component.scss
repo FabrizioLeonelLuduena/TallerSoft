@@ -316,12 +316,7 @@
 
     .footer-link {
       color: var(--color-primary);
-      text-decoration: none;
       font-weight: var(--font-weight-semibold);
-
-      &:hover {
-        text-decoration: underline;
-      }
     }
   }
 }

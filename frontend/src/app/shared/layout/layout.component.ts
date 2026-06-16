@@ -44,7 +44,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Dashboard',         icon: 'dashboard',           route: '/dashboard',   roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
     { label: 'Clientes',          icon: 'people',              route: '/clientes',    roles: [Rol.ADMIN, Rol.RECEPCION] },
     { label: 'Órdenes de Trabajo',icon: 'build',               route: '/ordenes',     roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
-    { label: 'Stock',             icon: 'inventory_2',         route: '/stock',       roles: [Rol.ADMIN, Rol.TECNICO, Rol.RECEPCION] },
+    { label: 'Stock',             icon: 'inventory_2',         route: '/stock',       roles: [Rol.ADMIN, Rol.TECNICO] },
     { label: 'Caja y Facturación',icon: 'point_of_sale',       route: '/caja/diaria', roles: [Rol.ADMIN, Rol.RECEPCION] },
     { label: 'Usuarios',          icon: 'admin_panel_settings',route: '/usuarios',    roles: [Rol.ADMIN] },
     { label: 'Asistente IA',      icon: 'smart_toy',           route: '/asistente',   roles: [Rol.ADMIN, Rol.RECEPCION] },

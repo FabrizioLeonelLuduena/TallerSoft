@@ -473,6 +473,7 @@ export class EditEquipoModal implements OnInit, OnChanges {
 
     this.isLoading = true;
     const updateData = {
+      clienteId: this.equipo.clienteId,
       tipo: this.selectedType,
       marca: this.form.value.marca || '',
       modelo: this.form.value.modelo || '',
