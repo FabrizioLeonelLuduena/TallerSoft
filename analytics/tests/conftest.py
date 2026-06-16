@@ -20,10 +20,30 @@ TestingSessionLocal = sessionmaker(bind=engine_test, autocommit=False, autoflush
 def _create_schema():
     with engine_test.begin() as conn:
         conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS clientes (
+                id     INTEGER PRIMARY KEY,
+                nombre TEXT NOT NULL,
+                activo INTEGER NOT NULL DEFAULT 1
+            )
+        """))
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS equipos (
+                id         INTEGER PRIMARY KEY,
+                cliente_id INTEGER,
+                tipo       TEXT NOT NULL DEFAULT '',
+                marca      TEXT,
+                modelo     TEXT
+            )
+        """))
+        conn.execute(text("""
             CREATE TABLE IF NOT EXISTS ordenes_trabajo (
                 id          INTEGER PRIMARY KEY,
                 estado      TEXT NOT NULL,
+                prioridad   TEXT NOT NULL DEFAULT 'NORMAL',
+                cliente_id  INTEGER,
+                equipo_id   INTEGER,
                 tecnico_id  INTEGER,
+                presupuesto REAL,
                 created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -41,7 +61,9 @@ def _create_schema():
                 nombre       TEXT NOT NULL,
                 categoria    TEXT,
                 stock_actual INTEGER NOT NULL DEFAULT 0,
-                stock_minimo INTEGER NOT NULL DEFAULT 0
+                stock_minimo INTEGER NOT NULL DEFAULT 0,
+                stock_bajo   INTEGER NOT NULL DEFAULT 0,
+                precio       REAL    NOT NULL DEFAULT 0
             )
         """))
         conn.execute(text("""
@@ -59,6 +81,15 @@ def _create_schema():
                 medio_pago   TEXT NOT NULL,
                 estado_pago  TEXT NOT NULL,
                 created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS alertas_leidas (
+                id          INTEGER PRIMARY KEY,
+                usuario_id  INTEGER NOT NULL,
+                alerta_key  TEXT    NOT NULL,
+                leida_en    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (usuario_id, alerta_key)
             )
         """))
 

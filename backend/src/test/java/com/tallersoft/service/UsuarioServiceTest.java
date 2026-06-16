@@ -50,7 +50,7 @@ class UsuarioServiceTest {
                 .build();
 
         usuarioResponse = new UsuarioResponse(1L, "Carlos Gómez", "carlos@tallersoft.com",
-                null, "TECNICO", true, LocalDateTime.now());
+                null, "TECNICO", true, LocalDateTime.now(), null);
     }
 
     // ─── crearUsuario ────────────────────────────────────────────────────────
@@ -194,13 +194,14 @@ class UsuarioServiceTest {
     // ─── desactivarUsuario ───────────────────────────────────────────────────
 
     @Test
-    @DisplayName("desactivarUsuario: id existente → elimina usuario")
+    @DisplayName("desactivarUsuario: id existente → soft delete (activo=false)")
     void desactivarUsuario_deberiaEliminarCuandoExiste() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
         usuarioService.desactivarUsuario(1L);
 
-        verify(usuarioRepository, times(1)).delete(usuario);
+        verify(usuarioRepository, times(1)).save(argThat(u -> !u.isActivo()));
     }
 
     @Test

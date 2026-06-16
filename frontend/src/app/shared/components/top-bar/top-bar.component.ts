@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, interval, startWith, switchMap, Subscription } from 'rxjs';
+import { filter, forkJoin, interval, startWith, switchMap, Subscription, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService, CurrentUser } from '@core/auth/auth.service';
 import { ProfileService, ProfileState } from '@core/services/profile.service';
 import { AnalyticsService } from '@core/services/analytics.service';
@@ -65,12 +66,23 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.updateDate();
     this.updateModuleName(this.router.url);
 
-    // Polling cada 60s + inmediato al arrancar
+    // Polling cada 60s + inmediato al arrancar.
+    // Carga alertas y estado de leídas en paralelo, luego las mergea.
     this.subs.add(
       interval(60_000)
-        .pipe(startWith(0), switchMap(() => this.analyticsService.getAlertasActivas()))
+        .pipe(
+          startWith(0),
+          switchMap(() => forkJoin({
+            alerts: this.analyticsService.getAlertasActivas(),
+            leidas: this.analyticsService.getAlertasLeidas().pipe(catchError(() => of([] as string[]))),
+          }))
+        )
         .subscribe({
-          next: alerts => this.onAlertasLoaded(alerts),
+          next: ({ alerts, leidas }) => {
+            const leidasSet = new Set(leidas);
+            alerts.forEach(a => { a.leida = leidasSet.has(a.id); });
+            this.onAlertasLoaded(alerts);
+          },
           error: () => (this.alertas = []),
         })
     );
@@ -132,8 +144,15 @@ export class TopBarComponent implements OnInit, OnDestroy {
   }
 
   private refreshAlertas(): void {
-    this.analyticsService.getAlertasActivas().subscribe({
-      next: alerts => this.onAlertasLoaded(alerts),
+    forkJoin({
+      alerts: this.analyticsService.getAlertasActivas(),
+      leidas: this.analyticsService.getAlertasLeidas().pipe(catchError(() => of([] as string[]))),
+    }).subscribe({
+      next: ({ alerts, leidas }) => {
+        const leidasSet = new Set(leidas);
+        alerts.forEach(a => { a.leida = leidasSet.has(a.id); });
+        this.onAlertasLoaded(alerts);
+      },
       error: () => {},
     });
   }

@@ -228,6 +228,18 @@ Sin Gateway, el frontend necesitaría conocer las URLs internas de cada microser
 
 JWT permite autenticación sin estado en el servidor, eliminando la necesidad de una sesión centralizada o un store de tokens. Esto es fundamental para escalar el Core Service horizontalmente (múltiples instancias) sin compartir estado de sesión. El token incluye `userId`, `email` y `rol`, suficiente para tomar decisiones de autorización sin consultar la BD en cada request.
 
+### ¿Por qué no hay refresh token en v1.0?
+
+El mecanismo de refresh token fue evaluado y descartado deliberadamente para esta versión por tres razones:
+
+1. **Complejidad vs. dominio:** El dominio del taller opera en turnos de 6–8 h. Un JWT con expiración de 24 h cubre el caso de uso principal sin exponer la sesión más allá de un día. La ventana de riesgo es acotada.
+
+2. **Riesgo de regresión:** Un interceptor que retoma 401s y reintenta requests paralelos introduce una race condition en `jwt.interceptor.ts`: si diez requests vuelan simultáneamente y el token expiró, las diez disparan el refresh a la vez. Resolver esto requiere una cola de requests pendientes y un semáforo de renovación — lógica de concurrencia no trivial para el alcance v1.0.
+
+3. **Costo de infraestructura:** Almacenar refresh tokens implica una tabla con TTL, invalidación en logout, y rotación de tokens (refresh token rotation) para mitigar el robo. Ese trabajo es equivalente a construir un pequeño sistema de sesiones, que es lo que JWT pretendía evitar.
+
+**Mitigación v1.0:** expiración de 24 h en `JWT_EXPIRATION=86400000`. Queda documentado como TD-01 en `TESTING.md` para la siguiente versión del producto.
+
 ---
 
 ## Consideraciones de Escalabilidad y Limitaciones
@@ -237,7 +249,7 @@ JWT permite autenticación sin estado en el servidor, eliminando la necesidad de
 | Core Service | Una instancia | Escala horizontal (sin estado) |
 | Analytics Service | Una instancia | Escala horizontal (solo lectura) |
 | Base de datos | Una instancia PostgreSQL | PostgreSQL HA, read replicas |
-| JWT | Sin refresh token | Implementar refresh token |
+| JWT | Expiración 24 h (sin refresh token) | Implementar refresh token (ver TD-01 en TESTING.md) — mitigación actual: expiración larga aceptable para turnos del taller |
 | Analytics (Groq) | API call por request | Cache de respuestas frecuentes |
 | Rate limiting | No implementado | Añadir en el Gateway |
 

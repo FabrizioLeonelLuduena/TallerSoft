@@ -6,6 +6,7 @@ import com.tallersoft.mapper.OrdenTrabajoMapper;
 import com.tallersoft.mapper.OrdenRepuestoMapper;
 import com.tallersoft.model.*;
 import com.tallersoft.repository.*;
+import com.tallersoft.service.KanbanNotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +30,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrdenTrabajoServiceTest {
     
+    @Mock
+    private Authentication adminAuth;
+
     @Mock
     private OrdenTrabajoRepository ordenTrabajoRepository;
     
@@ -48,7 +56,10 @@ class OrdenTrabajoServiceTest {
     
     @Mock
     private OrdenRepuestoMapper ordenRepuestoMapper;
-    
+
+    @Mock
+    private KanbanNotificationService kanbanNotificationService;
+
     @InjectMocks
     private OrdenTrabajoService ordenTrabajoService;
     
@@ -60,6 +71,8 @@ class OrdenTrabajoServiceTest {
     
     @BeforeEach
     void setUp() {
+        when(adminAuth.getAuthorities()).thenAnswer(inv ->
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
         cliente = Cliente.builder().id(1L).nombre("Cliente Test").activo(true).build();
         equipo = Equipo.builder().id(1L).cliente(cliente).tipo("Equipo Test").build();
         tecnico = Usuario.builder().id(1L).nombre("Tecnico Test").build();
@@ -114,7 +127,7 @@ class OrdenTrabajoServiceTest {
         
         // Act & Assert
         assertThrows(InvalidStateTransitionException.class, () ->
-                ordenTrabajoService.cambiarEstado(1L, EstadoOrden.PENDIENTE)
+                ordenTrabajoService.cambiarEstado(1L, EstadoOrden.PENDIENTE, adminAuth)
         );
     }
     
@@ -127,7 +140,7 @@ class OrdenTrabajoServiceTest {
         
         // Act & Assert
         assertThrows(MissingDiagnosticException.class, () ->
-                ordenTrabajoService.cambiarEstado(1L, EstadoOrden.LISTO)
+                ordenTrabajoService.cambiarEstado(1L, EstadoOrden.LISTO, adminAuth)
         );
     }
     
@@ -141,7 +154,7 @@ class OrdenTrabajoServiceTest {
         when(ordenTrabajoMapper.toResponse(orden)).thenReturn(new OrdenTrabajoResponse());
         
         // Act
-        OrdenTrabajoResponse resultado = ordenTrabajoService.cambiarEstado(1L, EstadoOrden.LISTO);
+        OrdenTrabajoResponse resultado = ordenTrabajoService.cambiarEstado(1L, EstadoOrden.LISTO, adminAuth);
         
         // Assert
         verify(ordenTrabajoRepository, times(1)).save(argThat(o -> o.getEstado() == EstadoOrden.LISTO));
@@ -152,7 +165,7 @@ class OrdenTrabajoServiceTest {
     void agregarRepuesto_conStockSuficiente_debeDecrementarStock() {
         // Arrange
         when(ordenTrabajoRepository.findById(1L)).thenReturn(Optional.of(orden));
-        when(repuestoRepository.findById(1L)).thenReturn(Optional.of(repuesto));
+        when(repuestoRepository.findByIdWithLock(1L)).thenReturn(Optional.of(repuesto));
         when(ordenRepuestoRepository.findByOrdenId(1L)).thenReturn(List.of());
         when(ordenRepuestoRepository.save(any(OrdenRepuesto.class))).thenReturn(new OrdenRepuesto());
         when(ordenTrabajoRepository.save(any(OrdenTrabajo.class))).thenReturn(orden);
@@ -174,7 +187,7 @@ class OrdenTrabajoServiceTest {
         // Arrange
         repuesto.setStockActual(2);
         when(ordenTrabajoRepository.findById(1L)).thenReturn(Optional.of(orden));
-        when(repuestoRepository.findById(1L)).thenReturn(Optional.of(repuesto));
+        when(repuestoRepository.findByIdWithLock(1L)).thenReturn(Optional.of(repuesto));
         
         AgregarRepuestoRequest request = new AgregarRepuestoRequest();
         request.setRepuestoId(1L);
@@ -190,7 +203,7 @@ class OrdenTrabajoServiceTest {
     void agregarRepuesto_debeRecalcularPresupuesto() {
         // Arrange
         when(ordenTrabajoRepository.findById(1L)).thenReturn(Optional.of(orden));
-        when(repuestoRepository.findById(1L)).thenReturn(Optional.of(repuesto));
+        when(repuestoRepository.findByIdWithLock(1L)).thenReturn(Optional.of(repuesto));
         
         OrdenRepuesto ordenRepuesto = OrdenRepuesto.builder()
                 .cantidad(5)

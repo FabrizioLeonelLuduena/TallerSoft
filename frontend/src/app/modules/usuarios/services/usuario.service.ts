@@ -27,6 +27,7 @@ export interface UsuarioResponse {
   rol: 'ADMIN' | 'TECNICO' | 'RECEPCION';
   activo: boolean;
   createdAt: string;
+  avatarImage?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -77,5 +78,9 @@ export class UsuarioService {
 
   activarUsuario(usuarioId: number): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${usuarioId}/activar`, {});
+  }
+
+  saveAvatar(usuarioId: number, avatarImage: string | null): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${usuarioId}/avatar`, { avatarImage });
   }
 }

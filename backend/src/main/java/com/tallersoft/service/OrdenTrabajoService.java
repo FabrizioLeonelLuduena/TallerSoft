@@ -8,6 +8,8 @@ import com.tallersoft.model.*;
 import com.tallersoft.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,15 +127,20 @@ public class OrdenTrabajoService {
     }
     
     @Transactional
-    public OrdenTrabajoResponse cambiarEstado(Long id, EstadoOrden nuevoEstado) {
+    public OrdenTrabajoResponse cambiarEstado(Long id, EstadoOrden nuevoEstado, Authentication authentication) {
+        boolean isRecepcion = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_RECEPCION"));
+        if (isRecepcion && nuevoEstado != EstadoOrden.CANCELADO) {
+            throw new AccessDeniedException("Recepción solo puede cancelar órdenes");
+        }
+
         log.info("Cambiando estado de orden {} a {}", id, nuevoEstado);
-        
+
         OrdenTrabajo orden = ordenTrabajoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Orden no encontrada"));
-        
+
         EstadoOrden estadoActual = orden.getEstado();
-        
-        // Validar transiciones válidas
+
         boolean transicionValida = false;
         if (estadoActual == EstadoOrden.PENDIENTE && nuevoEstado == EstadoOrden.EN_PROCESO) {
             transicionValida = true;
@@ -151,14 +158,12 @@ public class OrdenTrabajoService {
             );
         }
 
-        // Si el nuevo estado es LISTO, verificar que existe diagnóstico
         if (nuevoEstado == EstadoOrden.LISTO) {
             if (orden.getDiagnostico() == null || orden.getDiagnostico().isBlank()) {
                 throw new MissingDiagnosticException("No se puede cambiar a LISTO sin diagnóstico");
             }
         }
 
-        // Al cancelar, devolver al inventario el stock de repuestos reservados
         if (nuevoEstado == EstadoOrden.CANCELADO) {
             List<OrdenRepuesto> repuestosOrden = ordenRepuestoRepository.findByOrdenId(id);
             for (OrdenRepuesto or : repuestosOrden) {
@@ -169,7 +174,7 @@ public class OrdenTrabajoService {
             }
             log.info("Stock devuelto por cancelación de orden {}", id);
         }
-        
+
         orden.setEstado(nuevoEstado);
         OrdenTrabajo updated = ordenTrabajoRepository.save(orden);
         log.info("Estado de orden {} cambiado a {}", id, nuevoEstado);

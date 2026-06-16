@@ -93,12 +93,13 @@ public class OrdenTrabajoController {
     }
     
     @PutMapping("/{id}/estado")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'RECEPCION')")
     public ResponseEntity<OrdenTrabajoResponse> cambiarEstado(
             @PathVariable Long id,
-            @Valid @RequestBody CambiarEstadoRequest request) {
+            @Valid @RequestBody CambiarEstadoRequest request,
+            Authentication authentication) {
         log.info("Cambiando estado de orden {} a {}", id, request.getNuevoEstado());
-        OrdenTrabajoResponse orden = ordenTrabajoService.cambiarEstado(id, request.getNuevoEstado());
+        OrdenTrabajoResponse orden = ordenTrabajoService.cambiarEstado(id, request.getNuevoEstado(), authentication);
         return ResponseEntity.ok(orden);
     }
     

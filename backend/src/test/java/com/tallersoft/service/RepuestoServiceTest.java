@@ -12,6 +12,7 @@ import com.tallersoft.mapper.OrdenTrabajoMapper;
 import com.tallersoft.mapper.RepuestoMapper;
 import com.tallersoft.model.*;
 import com.tallersoft.repository.*;
+import com.tallersoft.service.KanbanNotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,6 +62,9 @@ class RepuestoServiceTest {
 
     @Mock
     private OrdenRepuestoMapper ordenRepuestoMapper;
+
+    @Mock
+    private KanbanNotificationService kanbanNotificationService;
 
     @InjectMocks
     private OrdenTrabajoService ordenTrabajoService;
@@ -172,7 +176,7 @@ class RepuestoServiceTest {
         request.setCantidad(3);
 
         when(ordenTrabajoRepository.findById(1L)).thenReturn(Optional.of(orden));
-        when(repuestoRepository.findById(1L)).thenReturn(Optional.of(repuesto));
+        when(repuestoRepository.findByIdWithLock(1L)).thenReturn(Optional.of(repuesto));
         when(ordenRepuestoRepository.save(any(OrdenRepuesto.class))).thenReturn(new OrdenRepuesto());
         when(ordenRepuestoRepository.findByOrdenId(1L)).thenReturn(List.of());
         when(ordenTrabajoRepository.save(any(OrdenTrabajo.class))).thenReturn(orden);
@@ -192,7 +196,7 @@ class RepuestoServiceTest {
         request.setCantidad(5);
 
         when(ordenTrabajoRepository.findById(1L)).thenReturn(Optional.of(orden));
-        when(repuestoRepository.findById(1L)).thenReturn(Optional.of(repuesto));
+        when(repuestoRepository.findByIdWithLock(1L)).thenReturn(Optional.of(repuesto));
 
         assertThrows(InsufficientStockException.class, () ->
                 ordenTrabajoService.agregarRepuesto(1L, request));

@@ -388,18 +388,29 @@ def conversion_presupuesto(db) -> dict:
 
 def recurrencia_clientes(db, meses: int = 6) -> list:
     desde = date.today() - timedelta(days=meses * _DIAS_POR_MES)
+    # Refactorizado de subquery correlacionada O(N²) a window function O(N log N).
+    # La versión anterior ejecutaba una subquery por cada fila del resultado.
+    # Con COUNT(*) OVER (PARTITION BY ... ORDER BY ... ROWS UNBOUNDED PRECEDING),
+    # PostgreSQL hace un único scan con agregación incremental por cliente.
     result = db.execute(text("""
+        WITH ordenes_con_historial AS (
+            SELECT
+                created_at,
+                cliente_id,
+                COUNT(*) OVER (
+                    PARTITION BY cliente_id
+                    ORDER BY created_at
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+                ) AS ordenes_previas
+            FROM ordenes_trabajo
+            WHERE created_at >= :desde
+        )
         SELECT
-            TO_CHAR(DATE_TRUNC('month', ot.created_at), 'YYYY-MM') AS mes,
+            TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') AS mes,
             COUNT(*) AS total_ordenes,
-            SUM(CASE WHEN (
-                SELECT COUNT(*) FROM ordenes_trabajo prev
-                WHERE prev.cliente_id = ot.cliente_id
-                  AND prev.created_at < ot.created_at
-            ) > 0 THEN 1 ELSE 0 END) AS clientes_recurrentes
-        FROM ordenes_trabajo ot
-        WHERE ot.created_at >= :desde
-        GROUP BY DATE_TRUNC('month', ot.created_at)
+            SUM(CASE WHEN ordenes_previas > 0 THEN 1 ELSE 0 END) AS clientes_recurrentes
+        FROM ordenes_con_historial
+        GROUP BY DATE_TRUNC('month', created_at)
         ORDER BY mes
     """), {"desde": desde})
     resultado = []

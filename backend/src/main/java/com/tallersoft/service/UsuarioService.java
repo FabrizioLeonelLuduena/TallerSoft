@@ -168,6 +168,14 @@ public class UsuarioService {
         log.info("Usuario desactivado: {}", usuario.getNombre());
     }
 
+    @Transactional
+    public void saveAvatar(Long id, String avatarImage) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+        usuario.setAvatarImage(avatarImage);
+        usuarioRepository.save(usuario);
+    }
+
     /**
      * Activate a user (sets activo=true)
      *

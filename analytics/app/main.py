@@ -7,12 +7,31 @@ for generating reports, KPIs, and powering the AI assistant.
 Runs on port 8082.
 """
 
-from fastapi import FastAPI
+import uuid
+import logging
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from app.routers import ordenes, stock, caja, asistente, clientes, alertas
 from app.config import settings
 
-# Create FastAPI app
+logger = logging.getLogger(__name__)
+
+CORRELATION_ID_HEADER = "X-Correlation-ID"
+
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    """Propaga o genera el header X-Correlation-ID en cada request/response."""
+
+    async def dispatch(self, request: Request, call_next):
+        correlation_id = request.headers.get(CORRELATION_ID_HEADER, str(uuid.uuid4()))
+        response = await call_next(request)
+        response.headers[CORRELATION_ID_HEADER] = correlation_id
+        logger.debug("correlation_id=%s path=%s status=%s",
+                     correlation_id, request.url.path, response.status_code)
+        return response
+
+# Create FastAPI app — el CorrelationIdMiddleware se agrega ANTES del CORS
 app = FastAPI(
     title="TallerSoft Analytics API",
     description="Analytics and reporting service for TallerSoft ERP",
@@ -21,6 +40,8 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json"
 )
+
+app.add_middleware(CorrelationIdMiddleware)
 
 # Configure CORS
 app.add_middleware(

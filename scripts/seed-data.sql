@@ -7,8 +7,8 @@ BEGIN;
 
 -- ─── USUARIOS ────────────────────────────────────────────────────
 INSERT INTO usuarios (nombre, email, password, rol, activo, created_at) VALUES
-('Carlos Mendez',      'carlos.mendez@tallersoft.com',  '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, true, NOW() - INTERVAL '180 days'),
-('Lucia Fernandez',    'lucia.fernandez@tallersoft.com','$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'RECEPCION', true, true, NOW() - INTERVAL '180 days'),
+('Carlos Mendez',      'carlos.mendez@tallersoft.com',  '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, NOW() - INTERVAL '180 days'),
+('Lucia Fernandez',    'lucia.fernandez@tallersoft.com','$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'RECEPCION', true, NOW() - INTERVAL '180 days'),
 ('Martin Alvarez',     'martin.alvarez@tallersoft.com', '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, NOW() - INTERVAL '150 days'),
 ('Sofia Gutierrez',    'sofia.gutierrez@tallersoft.com','$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'RECEPCION', true, NOW() - INTERVAL '120 days'),
 ('Diego Romero',       'diego.romero@tallersoft.com',   '$2b$10$xQrH9KN1k1E.ZrRr2eFYL.Dwdrqi8ckYPVByzTqCfUUfb4nTcQQ8y', 'TECNICO',   true, NOW() - INTERVAL '90 days')

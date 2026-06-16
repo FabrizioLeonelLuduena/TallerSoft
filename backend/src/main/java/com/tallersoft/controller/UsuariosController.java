@@ -141,6 +141,25 @@ public class UsuariosController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/avatar")
+    public ResponseEntity<?> updateAvatar(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body,
+            Authentication authentication) {
+        com.tallersoft.model.Usuario principal = (com.tallersoft.model.Usuario) authentication.getPrincipal();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isSelf = principal.getId().equals(id);
+        if (!isAdmin && !isSelf) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "No tenés permiso para modificar este usuario"));
+        }
+        Object val = body.get("avatarImage");
+        String avatarImage = (val instanceof String s) ? s : null;
+        usuarioService.saveAvatar(id, avatarImage);
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * Activate a user
      * PATCH /api/usuarios/{id}/activar

@@ -49,9 +49,9 @@
           <!-- Usuario Column -->
           <td class="cell-usuario">
             <div class="user-cell">
-              <div class="user-avatar" [class.has-photo]="usuario.id === currentUserId && currentUserAvatarImage">
-                <img *ngIf="usuario.id === currentUserId && currentUserAvatarImage; else initialsOnly"
-                     [src]="currentUserAvatarImage" alt="avatar" class="avatar-img" />
+              <div class="user-avatar" [class.has-photo]="usuario.avatarImage">
+                <img *ngIf="usuario.avatarImage; else initialsOnly"
+                     [src]="usuario.avatarImage" alt="avatar" class="avatar-img" />
                 <ng-template #initialsOnly>{{ getInitials(usuario.nombre) }}</ng-template>
               </div>
               <div class="user-info">

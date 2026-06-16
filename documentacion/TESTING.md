@@ -178,14 +178,16 @@ Verificar antes de cada deploy:
 
 | ID | Módulo | Descripción | Prioridad |
 |----|--------|-------------|-----------|
-| TD-01 | Backend | Refresh token: implementar endpoint `/auth/refresh` para renovar JWT sin re-login | Alta |
+| TD-01 | Backend + Frontend | **Refresh Token** — Sin refresh token, si el JWT expira durante un turno de 8 h, el usuario pierde contexto y debe volver a loguearse. **Decisión v1.0:** JWT con expiración de 24 h como mitigación práctica para el ciclo de trabajo del taller (los turnos no superan ese tiempo). Implementación completa requiere: (1) endpoint `POST /auth/refresh` en el Core que valide un refresh token de larga vida, (2) almacenamiento del refresh token en BD con TTL de 7 días e invalidación explícita en logout, (3) lógica de retry en `jwt.interceptor.ts` para interceptar 401s y reintentar con nuevo access token antes de desloguear, (4) manejo de concurrencia para múltiples requests paralelas que expiran simultáneamente (race condition en el interceptor). Estimación: 2–3 días de desarrollo más regresión completa en tests de autenticación. | Alta |
 | TD-02 | Backend | `@Lock(PESSIMISTIC_WRITE)` en repositorio de repuestos para prevenir race conditions en alta concurrencia | Media |
 | TD-03 | Frontend | Tests de componentes de creación de órdenes (`create.component.spec.ts`) | Media |
 | TD-04 | Frontend | Tests de `dashboard.component.spec.ts` (gráficos CSS personalizados) | Media |
 | TD-05 | Analytics | Rate limiting en `/analytics/asistente/consulta` para evitar costos excesivos de API | Alta |
 | TD-06 | Integración | Tests de integración con `@SpringBootTest` y base de datos H2 (requiere `application-test.yml`) | Media |
-| TD-07 | Backend | WebSockets para actualización en tiempo real del Kanban entre múltiples usuarios | Baja |
-| TD-08 | Deploy | Pipeline CI/CD con GitHub Actions (build, test, push a registry) | Alta |
+| ~~TD-07~~ | Backend + Frontend | WebSockets STOMP para sincronización en tiempo real del Kanban — **✅ Implementado en v1.1** (`WebSocketConfig.java`, `KanbanNotificationService.java`, `kanban-sync.service.ts`) | — |
+| ~~TD-08~~ | Deploy | Pipeline CI/CD con GitHub Actions — **✅ Implementado** (`.github/workflows/ci.yml` + `cd.yml`). CI corre JUnit, pytest y Karma en cada PR/push. CD publica imágenes Docker a GHCR en cada push a `main`. | — |
+
+> **Última revisión: 2026-06-15.** TD-07 implementado en v1.1 (WebSockets STOMP). TD-02 (lock pesimista) implementado; ver `RepuestoRepository.findByIdWithLock()`. TD-08 implementado: pipeline CI/CD en `.github/workflows/`.
 
 ---
 

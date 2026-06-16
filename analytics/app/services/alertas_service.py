@@ -1,25 +1,32 @@
 from datetime import datetime
+from sqlalchemy.orm import Session
 from app.services import analytics_service as svc
 from app.services.analytics_service import (
     UMBRAL_DIAS_SIN_MOVIMIENTO,
     UMBRAL_DIAS_ALTA_PRIORIDAD,
 )
+from app.db.models import AlertaLeida
 
 _UMBRAL_CONVERSION_PCT = 60
 _MIN_ORDENES_CON_PRESUPUESTO = 5
 
-_alertas_leidas: set[str] = set()
+
+def _esta_leida(db: Session, alerta_key: str, usuario_id: int | None) -> bool:
+    """Consulta la BD para saber si el usuario ya marcó esta alerta como leída."""
+    if usuario_id is None:
+        return False
+    return (
+        db.query(AlertaLeida)
+        .filter(
+            AlertaLeida.usuario_id == usuario_id,
+            AlertaLeida.alerta_key == alerta_key,
+        )
+        .first()
+        is not None
+    )
 
 
-def _leida(alerta_id: str) -> bool:
-    return alerta_id in _alertas_leidas
-
-
-def marcar_leida(alerta_id: str) -> None:
-    _alertas_leidas.add(alerta_id)
-
-
-def generar_alertas(db) -> list[dict]:
+def generar_alertas(db: Session, usuario_id: int | None = None) -> list[dict]:
     alertas: list[dict] = []
     now = datetime.now()
 
@@ -33,7 +40,7 @@ def generar_alertas(db) -> list[dict]:
             "descripcion": f"{o['equipo_tipo']} — {o['cliente_nombre']}",
             "modulo":      "ordenes",
             "created_at":  now.isoformat(),
-            "leida":       _leida(alerta_id),
+            "leida":       _esta_leida(db, alerta_id, usuario_id),
             "datos_extra": {"orden_id": o["id"]},
         })
 
@@ -47,7 +54,7 @@ def generar_alertas(db) -> list[dict]:
             "descripcion": f"{o['dias_sin_avanzar']} días parada — {o['cliente_nombre']}",
             "modulo":      "ordenes",
             "created_at":  now.isoformat(),
-            "leida":       _leida(alerta_id),
+            "leida":       _esta_leida(db, alerta_id, usuario_id),
             "datos_extra": {"orden_id": o["id"]},
         })
 
@@ -61,7 +68,7 @@ def generar_alertas(db) -> list[dict]:
             "descripcion": f"Quedan {r['stock_actual']} unidades (mínimo: {r['stock_minimo']})",
             "modulo":      "stock",
             "created_at":  now.isoformat(),
-            "leida":       _leida(alerta_id),
+            "leida":       _esta_leida(db, alerta_id, usuario_id),
             "datos_extra": {"repuesto_id": r["id"]},
         })
 
@@ -75,7 +82,7 @@ def generar_alertas(db) -> list[dict]:
             "descripcion": f"Quedan {r['stock_actual']} unidades (umbral de alerta: {r['stock_bajo']})",
             "modulo":      "stock",
             "created_at":  now.isoformat(),
-            "leida":       _leida(alerta_id),
+            "leida":       _esta_leida(db, alerta_id, usuario_id),
             "datos_extra": {"repuesto_id": r["id"]},
         })
 
@@ -90,7 +97,7 @@ def generar_alertas(db) -> list[dict]:
             "descripcion": f"Total: ${rechazos['total_rechazado']:,.0f} — Revisar en Caja",
             "modulo":      "caja",
             "created_at":  now.isoformat(),
-            "leida":       _leida(alerta_id),
+            "leida":       _esta_leida(db, alerta_id, usuario_id),
             "datos_extra": {},
         })
 
@@ -105,7 +112,7 @@ def generar_alertas(db) -> list[dict]:
             "descripcion": f"{conv['total_no_cobradas']} presupuestos sin cobrar este mes",
             "modulo":      "caja",
             "created_at":  now.isoformat(),
-            "leida":       _leida(alerta_id),
+            "leida":       _esta_leida(db, alerta_id, usuario_id),
             "datos_extra": {},
         })
 
@@ -114,8 +121,8 @@ def generar_alertas(db) -> list[dict]:
     return alertas
 
 
-def resumen_alertas(db) -> dict:
-    alertas  = generar_alertas(db)
+def resumen_alertas(db: Session, usuario_id: int | None = None) -> dict:
+    alertas  = generar_alertas(db, usuario_id)
     sin_leer = [a for a in alertas if not a["leida"]]
     por_tipo: dict = {}
     for a in sin_leer:

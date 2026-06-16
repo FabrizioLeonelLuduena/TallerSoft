@@ -68,7 +68,8 @@ export class PerfilComponent implements OnInit {
         this.formNombre = u.nombre;
         this.formEmail = u.email;
         this.formTelefono = u.telefono ?? '';
-        this.profileService.update({ nombre: u.nombre });
+        this.avatarImage = u.avatarImage ?? null;
+        this.profileService.update({ nombre: u.nombre, avatarImage: u.avatarImage ?? null });
         this.loading = false;
       },
       error: () => {
@@ -114,6 +115,9 @@ export class PerfilComponent implements OnInit {
     this.profileService.compressImage(file).then((base64) => {
       this.avatarImage = base64;
       this.profileService.update({ avatarImage: base64 });
+      this.usuarioService.saveAvatar(this.usuario!.id, base64).subscribe({
+        error: () => this.notifications.error('No se pudo guardar la foto en el servidor')
+      });
       this.notifications.success('Foto de perfil actualizada');
     }).catch(() => {
       this.notifications.error('No se pudo procesar la imagen');
@@ -125,6 +129,11 @@ export class PerfilComponent implements OnInit {
   removePhoto(): void {
     this.avatarImage = null;
     this.profileService.update({ avatarImage: null });
+    if (this.usuario) {
+      this.usuarioService.saveAvatar(this.usuario.id, null).subscribe({
+        error: () => this.notifications.error('No se pudo eliminar la foto en el servidor')
+      });
+    }
   }
 
   checkPasswordStrength(val: string): void {

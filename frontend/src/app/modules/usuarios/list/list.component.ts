@@ -7,7 +7,6 @@ import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/auth/auth.service';
 import { Rol } from '@core/models/rol.enum';
-import { ProfileService } from '@core/services/profile.service';
 import { UsuarioService, UsuarioResponse } from '../services/usuario.service';
 import { EditUserDialogComponent } from '../dialogs/edit-user-dialog/edit-user-dialog.component';
 
@@ -27,7 +26,6 @@ import { EditUserDialogComponent } from '../dialogs/edit-user-dialog/edit-user-d
 export class ListComponent implements OnInit {
   private authService = inject(AuthService);
   private usuarioService = inject(UsuarioService);
-  private profileService = inject(ProfileService);
   private notifications = inject(NotificationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -36,7 +34,6 @@ export class ListComponent implements OnInit {
   isLoading = true;
   currentRole: string | null = '';
   currentUserId: number | null = null;
-  currentUserAvatarImage: string | null = null;
   searchTerm = '';
 
   currentPage = 1;
@@ -85,10 +82,6 @@ export class ListComponent implements OnInit {
     }
     const user = this.authService.getCurrentUser();
     this.currentUserId = user?.userId ?? null;
-
-    this.profileService.profile$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(state => { this.currentUserAvatarImage = state.avatarImage; });
 
     this.loadUsuarios();
   }

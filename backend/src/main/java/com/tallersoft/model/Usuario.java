@@ -51,6 +51,9 @@ public class Usuario implements UserDetails {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "avatar_image", columnDefinition = "TEXT")
+    private String avatarImage;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

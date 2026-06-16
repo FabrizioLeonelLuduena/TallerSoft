@@ -94,6 +94,6 @@ public class AuthService {
         return new UsuarioResponse(savedUsuario.getId(), savedUsuario.getNombre(),
                 savedUsuario.getEmail(), savedUsuario.getTelefono(),
                 savedUsuario.getRol().getValue(),
-                savedUsuario.isActivo(), savedUsuario.getCreatedAt());
+                savedUsuario.isActivo(), savedUsuario.getCreatedAt(), savedUsuario.getAvatarImage());
     }
 }

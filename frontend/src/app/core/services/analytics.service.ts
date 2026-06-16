@@ -54,6 +54,7 @@ export interface EvolucionMensual {
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {
   private base = `${environment.analyticsUrl}/analytics`;
+  private apiBase = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) {}
 
@@ -137,7 +138,13 @@ export class AnalyticsService {
     return this.http.get<any>(`${this.base}/alertas/resumen`);
   }
 
-  marcarAlertaLeida(alertaId: string): Observable<any> {
-    return this.http.post<any>(`${this.base}/alertas/${alertaId}/marcar-leida`, {});
+  /** Retorna las alertaKeys que el usuario autenticado ya leyó (persiste en BD). */
+  getAlertasLeidas(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiBase}/alertas/leidas`);
+  }
+
+  /** Marca una alerta como leída para el usuario autenticado (persiste en BD). */
+  marcarAlertaLeida(alertaKey: string): Observable<any> {
+    return this.http.post<any>(`${this.apiBase}/alertas/${alertaKey}/leer`, {});
   }
 }

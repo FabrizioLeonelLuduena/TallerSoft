@@ -170,6 +170,20 @@ CREATE INDEX idx_cobros_created_at ON cobros(created_at);
 CREATE INDEX idx_cobros_mp_payment_id ON cobros(mp_payment_id) WHERE mp_payment_id IS NOT NULL;
 
 -- ================================================================
+-- TABLE: alertas_leidas (Persisted read state for analytics alerts)
+-- ================================================================
+CREATE TABLE alertas_leidas (
+    id           BIGSERIAL PRIMARY KEY,
+    usuario_id   BIGINT       NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    alerta_key   VARCHAR(255) NOT NULL,
+    leida_en     TIMESTAMP    NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_alertas_leidas_usuario_key UNIQUE (usuario_id, alerta_key)
+);
+
+CREATE INDEX idx_alertas_leidas_usuario ON alertas_leidas(usuario_id);
+
+-- ================================================================
 -- INITIAL DATA (Optional: seed with test user)
 -- ================================================================
 -- INSERT INTO usuarios (nombre, email, password, rol, activo)

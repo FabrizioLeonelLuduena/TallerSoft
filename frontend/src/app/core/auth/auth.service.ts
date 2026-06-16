@@ -5,6 +5,9 @@ import { map } from 'rxjs/operators';
 import { environment } from '@environments/environment';
 import { ProfileService } from '@core/services/profile.service';
 import { ChatHistoryService } from '@core/services/chat-history.service';
+import { UsuarioResponse } from '@app/modules/usuarios/services/usuario.service';
+
+const log = (...args: any[]) => { if (!environment.production) console.log(...args); };
 
 export interface LoginResponse {
   token: string;
@@ -37,12 +40,12 @@ export class AuthService {
     private profileService: ProfileService,
     private chatHistoryService: ChatHistoryService,
   ) {
-    // Si ya hay sesión activa (recarga de página), inicializar los servicios
-    // con el userId del token existente para que usen la clave correcta de localStorage.
     const existing = this.getCurrentUser();
     if (existing) {
       this.profileService.init(existing.userId);
       this.chatHistoryService.init(existing.userId);
+      // Defer to avoid interceptor circular-init during construction
+      setTimeout(() => this.loadAvatarFromBackend(existing.userId), 0);
     }
   }
 
@@ -50,24 +53,29 @@ export class AuthService {
    * Login with email and password
    */
   login(email: string, password: string): Observable<LoginResponse> {
-    console.log('[AuthService] Starting login process for:', email);
+    log('[AuthService] Starting login process for:', email);
     return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, {
       email,
       password
     }).pipe(
       map(response => {
-        console.log('[AuthService] Login response received:', response);
-        console.log('[AuthService] Token from response:', response.token?.substring(0, 50) + '...');
+        log('[AuthService] Login response received, userId:', response.userId);
         this.profileService.init(response.userId);
         this.chatHistoryService.init(response.userId);
         this.setToken(response.token);
-        console.log('[AuthService] Token saved to sessionStorage');
-        console.log('[AuthService] Token in storage:', sessionStorage.getItem('token')?.substring(0, 50) + '...');
+        this.loadAvatarFromBackend(response.userId);
         this.currentUserSubject.next(this.getCurrentUser());
-        console.log('[AuthService] Current user set:', this.getCurrentUser());
         return response;
       })
     );
+  }
+
+  private loadAvatarFromBackend(userId: number): void {
+    this.http.get<UsuarioResponse>(`${environment.apiUrl}/api/usuarios/${userId}`)
+      .subscribe({
+        next: (u) => this.profileService.update({ avatarImage: u.avatarImage ?? null }),
+        error: () => {}
+      });
   }
 
   /**
@@ -91,22 +99,14 @@ export class AuthService {
    * Get JWT token from sessionStorage
    */
   getToken(): string | null {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      console.log('[AuthService] Token retrieved from sessionStorage, length:', token.length);
-    } else {
-      console.log('[AuthService] No token found in sessionStorage');
-    }
-    return token;
+    return sessionStorage.getItem('token');
   }
 
   /**
    * Check if user is logged in
    */
   isLoggedIn(): boolean {
-    const loggedIn = this.getToken() !== null;
-    console.log('[AuthService] isLoggedIn:', loggedIn);
-    return loggedIn;
+    return this.getToken() !== null;
   }
 
   /**
@@ -120,7 +120,6 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      console.log('[AuthService] Decoded payload:', payload);
       return {
         userId: payload.userId,
         email: payload.email,

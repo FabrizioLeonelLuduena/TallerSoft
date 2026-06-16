@@ -4,6 +4,7 @@
 
 **ERP inteligente para talleres de servicio técnico**
 
+[![CI](https://github.com/412237-Luduena/TFI-TechSoft/actions/workflows/ci.yml/badge.svg)](https://github.com/412237-Luduena/TFI-TechSoft/actions/workflows/ci.yml)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Angular](https://img.shields.io/badge/Angular-18-DD0031?logo=angular&logoColor=white)](https://angular.io/)
