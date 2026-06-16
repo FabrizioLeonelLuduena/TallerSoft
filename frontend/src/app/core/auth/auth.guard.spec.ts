@@ -56,10 +56,7 @@ describe('RoleGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule, HttpClientTestingModule],
-      providers: [
-        { provide: 'RoleGuard', useClass: import('./role.guard').then(m => m.RoleGuard) },
-        AuthService,
-      ],
+      providers: [AuthService],
     });
 
     authService = TestBed.inject(AuthService);

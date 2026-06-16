@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { KanbanComponent } from './kanban.component';
 import { OrdenesService, OrdenTrabajoResponse } from '../services/ordenes.service';
-import { of, throwError } from 'rxjs';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { KanbanSyncService } from '../services/kanban-sync.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { of, throwError, EMPTY } from 'rxjs';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,11 +27,16 @@ const makeOrden = (id: number, estado: OrdenTrabajoResponse['estado']): OrdenTra
   repuestos: [],
 });
 
+const kanbanSyncStub = {
+  kanbanUpdates$: () => EMPTY,
+  disconnect: () => {},
+};
+
 describe('KanbanComponent', () => {
   let component: KanbanComponent;
   let fixture: ComponentFixture<KanbanComponent>;
   let ordenesService: jasmine.SpyObj<OrdenesService>;
-  let snackBar: MatSnackBar;
+  let notificationService: NotificationService;
 
   beforeEach(async () => {
     const serviceSpy = jasmine.createSpyObj('OrdenesService', [
@@ -43,7 +49,6 @@ describe('KanbanComponent', () => {
       imports: [
         KanbanComponent,
         DragDropModule,
-        MatSnackBarModule,
         RouterTestingModule,
         MatIconModule,
         MatButtonModule,
@@ -51,13 +56,14 @@ describe('KanbanComponent', () => {
       ],
       providers: [
         { provide: OrdenesService, useValue: serviceSpy },
+        { provide: KanbanSyncService, useValue: kanbanSyncStub },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(KanbanComponent);
     component = fixture.componentInstance;
     ordenesService = TestBed.inject(OrdenesService) as jasmine.SpyObj<OrdenesService>;
-    snackBar = TestBed.inject(MatSnackBar);
+    notificationService = TestBed.inject(NotificationService);
     fixture.detectChanges();
   });
 
@@ -110,12 +116,12 @@ describe('KanbanComponent', () => {
     expect(ordenesService.listarOrdenesActivas).toHaveBeenCalled();
   });
 
-  it('loadOrdenes: error del servidor → muestra snackbar de error', () => {
+  it('loadOrdenes: error del servidor → llama notifications.error', () => {
     ordenesService.listarOrdenesActivas.and.returnValue(throwError(() => new Error('Server error')));
-    const snackSpy = spyOn(snackBar, 'open');
+    const errorSpy = spyOn(notificationService, 'error');
 
     component.loadOrdenes();
 
-    expect(snackSpy).toHaveBeenCalledWith('Error al cargar órdenes', 'Cerrar', jasmine.any(Object));
+    expect(errorSpy).toHaveBeenCalledWith('Error al cargar órdenes');
   });
 });
