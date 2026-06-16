@@ -44,6 +44,9 @@ describe('AuthService', () => {
 
     req.flush({ token: mockToken, userId: 1, email: 'admin@test.com', rol: 'ADMIN' });
 
+    // login() dispara loadAvatarFromBackend() que hace GET /api/usuarios/{id}
+    httpMock.expectOne(`${environment.apiUrl}/api/usuarios/1`).flush({});
+
     expect(setItemSpy).toHaveBeenCalledWith('token', mockToken);
     expect(localStorageSpy).not.toHaveBeenCalled();
   });
@@ -56,6 +59,9 @@ describe('AuthService', () => {
     });
 
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(loginResp);
+
+    // login() dispara loadAvatarFromBackend() que hace GET /api/usuarios/{id}
+    httpMock.expectOne(`${environment.apiUrl}/api/usuarios/1`).flush({});
   });
 
   // ── logout ───────────────────────────────────────────────────────────────
