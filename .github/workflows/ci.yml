@@ -50,9 +50,6 @@ jobs:
           MP_WEBHOOK_SECRET: dummy-webhook-secret
           MP_SANDBOX: true
           WEBHOOK_BASE_URL: http://localhost:8080
-          ANTHROPIC_API_KEY: dummy-key
-          CLAUDE_MODEL: claude-haiku-4-5-20251001
-          CLAUDE_MAX_TOKENS: 1024
         run: mvn test --batch-mode
 
       - name: Upload test results
