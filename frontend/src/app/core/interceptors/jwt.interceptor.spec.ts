@@ -1,13 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  HttpClientTestingModule,
+  HttpClient,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
+import {
   HttpTestingController,
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { jwtInterceptor } from './jwt.interceptor';
 import { AuthService } from '../auth/auth.service';
-import { Router } from '@angular/router';
 
 describe('jwtInterceptor', () => {
   let http: HttpClient;
@@ -19,16 +23,11 @@ describe('jwtInterceptor', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, RouterTestingModule],
       providers: [
+        provideHttpClient(withInterceptors([jwtInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([]),
         AuthService,
-        {
-          provide: HTTP_INTERCEPTORS,
-          useValue: {
-            intercept: (req: any, next: any) => jwtInterceptor(req, next),
-          },
-          multi: true,
-        },
       ],
     });
 
@@ -69,9 +68,7 @@ describe('jwtInterceptor', () => {
     const logoutSpy = spyOn(authService, 'logout');
     const navigateSpy = spyOn(router, 'navigate');
 
-    http.get('/api/protected').subscribe({
-      error: () => {},
-    });
+    http.get('/api/protected').subscribe({ error: () => {} });
 
     const req = httpMock.expectOne('/api/protected');
     req.flush({ error: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
