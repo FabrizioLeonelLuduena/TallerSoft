@@ -4,7 +4,7 @@
 
 **ERP inteligente para talleres de servicio técnico**
 
-[![CI](https://github.com/412237-Luduena/TFI-TechSoft/actions/workflows/ci.yml/badge.svg)](https://github.com/412237-Luduena/TFI-TechSoft/actions/workflows/ci.yml)
+[![CI](https://github.com/FabrizioLeonelLuduena/TallerSoft/actions/workflows/ci.yml/badge.svg)](https://github.com/FabrizioLeonelLuduena/TallerSoft/actions/workflows/ci.yml)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Angular](https://img.shields.io/badge/Angular-18-DD0031?logo=angular&logoColor=white)](https://angular.io/)
@@ -240,10 +240,10 @@ push
 ### Imágenes publicadas (CD)
 
 ```
-ghcr.io/412237-Luduena/tallersoft-backend:latest   (+ :<sha>)
-ghcr.io/412237-Luduena/tallersoft-analytics:latest (+ :<sha>)
-ghcr.io/412237-Luduena/tallersoft-gateway:latest   (+ :<sha>)
-ghcr.io/412237-Luduena/tallersoft-frontend:latest  (+ :<sha>)
+ghcr.io/FabrizioLeonelLuduena/tallersoft-backend:latest   (+ :<sha>)
+ghcr.io/FabrizioLeonelLuduena/tallersoft-analytics:latest (+ :<sha>)
+ghcr.io/FabrizioLeonelLuduena/tallersoft-gateway:latest   (+ :<sha>)
+ghcr.io/FabrizioLeonelLuduena/tallersoft-frontend:latest  (+ :<sha>)
 ```
 
 ---
@@ -261,8 +261,8 @@ ghcr.io/412237-Luduena/tallersoft-frontend:latest  (+ :<sha>)
 
 ```bash
 # 1. Clonar
-git clone https://github.com/412237-Luduena/TFI-TechSoft.git
-cd TFI-TechSoft
+git clone https://github.com/FabrizioLeonelLuduena/TallerSoft.git
+cd TallerSoft
 
 # 2. Configurar variables de entorno
 cp .env.example .env
@@ -344,7 +344,7 @@ Ver la estrategia completa, casos de prueba manuales y deuda técnica en [docume
 **Fabrizio Ludueña**
 Trabajo Final Integrador — Tecnicatura Universitaria en Programación — UTN FRC — 2026
 
-[![GitHub](https://img.shields.io/badge/GitHub-412237--Luduena-181717?logo=github)](https://github.com/412237-Luduena)
+[![GitHub](https://img.shields.io/badge/GitHub-FabrizioLeonelLuduena-181717?logo=github)](https://github.com/FabrizioLeonelLuduena)
 
 ---
 
